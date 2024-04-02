@@ -4,7 +4,12 @@
 
 Project [SMART(PLD)](riccardotommasini.com/teaching/smart) is provided by [INSA Lyon](https://www.insa-lyon.fr/).
 
-Students: **[To be assigned]**
+Students:
+- **BIAUD Alexandre**
+- **EL MIR Raoul**
+- **HUTIER Ambre**
+- **KAROUIA Lilia**
+- **MAILLARD Swan**
 
 ### Abstract
 
