@@ -3,9 +3,13 @@ import express from 'express';
 import { createServer } from 'http';
 
 const app = express(); 
-const http_r = createServer();
-const io = new Server(http_r);
-const port = process.env.PORT || 3000;
+const http = createServer(app);
+const io = new Server(http);
+
+
+app.get("/", function(req, res) {
+    res.sendFile(process.cwd() + "/served_client_files/chat_client.html");
+});
 
 io.on("connection", function(socket) {
 
@@ -24,10 +28,8 @@ io.on("connection", function(socket) {
     });
 });
 
-app.get("/", function(req, res) {
-    res.sendFile(process.cwd() + "/served_client_files/chat_client.html");
-});
 
-http_r.listen(port, function() {
-    console.log("Listening on port " + port);
+
+http.listen(3000, '0.0.0.0',function() {
+    console.log("Listening on port " + 3000);
 });
