@@ -1,11 +1,19 @@
-export default class User {
+import AbstractDocument from './AbstractDocument';
+export default class User implements AbstractDocument {
   id?: string;
   name: string;
   password: string;
 
-  constructor(id: string, name: string, password: string) {
-    this.id = id;
+  constructor(name: string, password: string) {
     this.name = name;
     this.password = password;
+  }
+
+  toFirestore(id?: string) {
+    return {
+      id: id || this.id,
+      name: this.name,
+      password: this.password,
+    };
   }
 }

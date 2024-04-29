@@ -1,5 +1,16 @@
 import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, doc, getDoc, getDocs, addDoc, setDoc, deleteDoc } from 'firebase/firestore';
+import {
+  Timestamp,
+  getFirestore,
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  addDoc,
+  setDoc,
+  deleteDoc,
+} from 'firebase/firestore';
+import AbstractDocument from './models/AbstractDocument';
 
 const FIREBASE_CONFIG = {
   apiKey: 'AIzaSyAQpw9jEE5MriT1Pnf2L8roSCnxDfU7O8w',
@@ -14,27 +25,28 @@ const firebaseApp = initializeApp(FIREBASE_CONFIG);
 const db = getFirestore(firebaseApp);
 
 export default {
-  getAll: async <Type>(collectionName: string): Promise<Type[]> => {
+  getAll: async <T extends AbstractDocument>(collectionName: string): Promise<T[]> => {
     const querySnapshot = await getDocs(collection(db, collectionName));
-    return querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as Type[];
+    return querySnapshot.docs.map((doc) => doc.data()) as T[];
   },
 
-  getOne: async <Type>(collectionName: string, documentId: string): Promise<Type | null> => {
+  getOne: async <T extends AbstractDocument>(collectionName: string, documentId: string): Promise<T | null> => {
     const documentSnapshot = await getDoc(doc(db, collectionName, documentId));
     if (documentSnapshot.exists()) {
-      return { id: documentSnapshot.id, ...documentSnapshot.data() } as Type;
+      return documentSnapshot.data() as T;
     } else {
       return null;
     }
   },
 
-  create: async <Type extends { [x: string]: never }>(collectionName: string, data: Type) => {
-    const docRef = await addDoc(collection(db, collectionName), data);
-    return docRef.id;
+  create: async <T extends AbstractDocument>(collectionName: string, data: T) => {
+    const timestamp = Timestamp.now().seconds.toString();
+    await setDoc(doc(db, collectionName, timestamp), data.toFirestore(timestamp));
+    return timestamp;
   },
 
-  update: async <Type extends { [x: string]: never }>(collectionName: string, documentId: string, data: Type) => {
-    await setDoc(doc(db, collectionName, documentId), data, { merge: true });
+  update: async <T extends AbstractDocument>(collectionName: string, documentId: string, data: T) => {
+    await setDoc(doc(db, collectionName, documentId), data.toFirestore(), { merge: true });
   },
 
   delete: async (collectionName: string, documentId: string) => {

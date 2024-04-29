@@ -10,3 +10,7 @@ export const getAllUsers = async () => {
 export const getUserById = async (id: string) => {
   return await db.getOne<User>('users', id);
 };
+
+export const createUser = async (user: User) => {
+  return await db.create<User>('users', user);
+};
