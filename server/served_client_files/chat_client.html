@@ -66,6 +66,11 @@
         Show Chat
     </button>
 
+    <select id="sessionID">
+        <option value="dh3snbn2" selected>Session ID 1</option>
+        <option value="f902mdfn3">Session ID 2</option>
+    </select>
+
     <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasChat" aria-labelledby="offcanvasChatLabel">
         <div class="offcanvas-header">
             <h5 class="offcanvas-title" id="offcanvasChatLabel">Chat</h5>
@@ -96,8 +101,14 @@
         const form = document.querySelector("form");
         const input = document.querySelector(".input");
         const messages = document.querySelector(".messages");
-        const username = "RANDOM_USER" + Math.random();
+        const username = "USER_" + Math.round(Math.random() * 100);
+        let sessionID = document.querySelector("#sessionID").value
         const socket = io();
+
+        document.querySelector("#sessionID").addEventListener("change", () => {
+            sessionID = document.querySelector("#sessionID").value
+            socket.emit("user_join", { user: username, session_id: sessionID });
+        })
 
         form.addEventListener("submit", function (event) {
             event.preventDefault();
@@ -105,7 +116,8 @@
             addMessage(username + ": " + input.value);
 
             socket.emit("chat_message", {
-                message: input.value
+                message: input.value,
+                session_id: sessionID
             });
 
             input.value = "";
@@ -125,7 +137,7 @@
         });
 
         addMessage("You have joined the chat as '" + username + "'.");
-        socket.emit("user_join", username);
+        socket.emit("user_join", { user: username, session_id: sessionID });
 
         function addMessage(message) {
             const li = document.createElement("li");
