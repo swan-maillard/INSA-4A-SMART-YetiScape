@@ -1,3 +1,4 @@
 export default interface AbstractDocument {
-  toFirestore(id?: string): { [key: string]: unknown };
+  id: string;
+  toFirestore(): { [key: string]: unknown };
 }

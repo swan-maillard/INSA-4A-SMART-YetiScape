@@ -1,19 +1,36 @@
 import AbstractDocument from './AbstractDocument';
-export default class User implements AbstractDocument {
-  id?: string;
-  name: string;
-  password: string;
 
-  constructor(name: string, password: string) {
-    this.name = name;
-    this.password = password;
+export type UserAttributes = {
+  id: string;
+  name: string;
+  salle: number | null;
+};
+
+export default class User implements AbstractDocument {
+  id: UserAttributes['id'];
+  name: UserAttributes['name'];
+  salle: UserAttributes['salle'];
+
+  constructor(name?: string) {
+    this.id = '-1';
+    this.name = name || 'Anonymous';
+    this.salle = null;
   }
 
-  toFirestore(id?: string) {
+  toFirestore(): UserAttributes {
     return {
-      id: id || this.id,
+      id: this.id,
       name: this.name,
-      password: this.password,
+      salle: this.salle,
     };
+  }
+
+  static fromFirestore(attributes: UserAttributes) {
+    const user = new User();
+    user.id = attributes.id;
+    user.name = attributes.name;
+    user.salle = attributes.salle;
+
+    return user;
   }
 }
