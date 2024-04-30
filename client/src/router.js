@@ -4,8 +4,8 @@ import HomeView from './views/HomeView.vue'
 import WaitingView from './views/WaitingView.vue'
 
 const routes = [
-  { path: '/', component: WaitingView },
-  { path: '/waiting', component: HomeView },
+  { path: '/', component: HomeView },
+  { path: '/waiting', component: WaitingView },
 ]
 
 const router = createRouter({
