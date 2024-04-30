@@ -1,4 +1,4 @@
-import express, { Application } from 'express';
+import express, { Application, Request, Response } from 'express';
 import bodyParser from 'body-parser';
 import usersRoutes from './routes/usersRoutes';
 import gamesRoutes from './routes/gamesRoutes';
@@ -6,9 +6,10 @@ import gamesRoutes from './routes/gamesRoutes';
 // Boot express
 const app: Application = express();
 
-// Application routing
+app.use(express.static(__dirname + '/public'));
 app.use(bodyParser.json());
 
+// Application routing
 app.use('/users', usersRoutes);
 app.use('/games', gamesRoutes);
 
