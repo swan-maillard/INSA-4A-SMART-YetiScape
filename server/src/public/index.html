@@ -13,48 +13,56 @@
   <div class="section">
     <h2>[FOR DEV ONLY] Users</h2>
 
-    <div class="endpoint get" onclick='document.location.href = "/users"'>
-      <h3><span class="method">GET</span> /users</h3>
-      <p>Send all users.</p>
-      <h4>Server Response:</h4>
-      <ul>
-        <li><span class='param'>200 OK</span> Returns an array of user objects.</li>
-      </ul>
-    </div>
+    <a href='/users' target='_blank'>
+      <div class="endpoint get">
+        <h3><span class="method">GET</span> /users</h3>
+        <p>Send all users.</p>
+        <h4>Server Response:</h4>
+        <ul>
+          <li><span class='param'>200 OK</span> Returns an array of user objects.</li>
+        </ul>
+      </div>
+    </a>
 
-    <div class="endpoint get" onclick='document.location.href = "/users/1"'>
-      <h3><span class="method">GET</span> /users/:id</h3>
-      <p>Send user with given ID.</p>
-      <h4>Server Response:</h4>
-      <ul>
-        <li><span class='param'>200 OK</span> Returns the user object with the given ID.</li>
-        <li><span class='param'>404 Not Found</span> If the user with the given ID does not exist.</li>
-      </ul>
-    </div>
+    <a href='/users/1' target='_blank'>
+      <div class="endpoint get">
+        <h3><span class="method">GET</span> /users/:id</h3>
+        <p>Send user with given ID.</p>
+        <h4>Server Response:</h4>
+        <ul>
+          <li><span class='param'>200 OK</span> Returns the user object with the given ID.</li>
+          <li><span class='param'>404 Not Found</span> If the user with the given ID does not exist.</li>
+        </ul>
+      </div>
+    </a>
   </div>
 
   <div class="section">
     <h2>Games</h2>
 
-    <div class="endpoint get" onclick='document.location.href = "/games"'>
-      <h3><span class="method">GET</span> /games</h3>
-      <p>[FOR DEV ONLY] Send all game sessions.</p>
-      <h4>Server Response:</h4>
-      <ul>
-        <li><span class='param'>200 OK</span> Returns an array of game objects.</li>
-      </ul>
-    </div>
+    <a href='/games' target='_blank'>
+      <div class="endpoint get">
+        <h3><span class="method">GET</span> /games</h3>
+        <p>[FOR DEV ONLY] Send all game sessions.</p>
+        <h4>Server Response:</h4>
+        <ul>
+          <li><span class='param'>200 OK</span> Returns an array of game objects.</li>
+        </ul>
+      </div>
+    </a>
 
-    <div class="endpoint get" onclick='document.location.href = "/games/1"'>
-      <h3><span class="method">GET</span> /games/:id</h3>
-      <p>Send game session with given ID.</p>
-      <h4>Server Response:</h4>
-      <ul>
-        <li><span class='param'>200 OK</span> Returns the game object with the given ID.</li>
-        <li><span class='param'>401 Unauthorized</span> You are not authorized because you don't play in this game.</li>
-        <li><span class='param'>404 Not Found</span> If the game with the given ID does not exist.</li>
-      </ul>
-    </div>
+    <a href='/games/1' target='_blank'>
+      <div class="endpoint get">
+        <h3><span class="method">GET</span> /games/:id</h3>
+        <p>Send game session with given ID.</p>
+        <h4>Server Response:</h4>
+        <ul>
+          <li><span class='param'>200 OK</span> Returns the game object with the given ID.</li>
+          <li><span class='param'>401 Unauthorized</span> You are not authorized because you don't play in this game.</li>
+          <li><span class='param'>404 Not Found</span> If the game with the given ID does not exist.</li>
+        </ul>
+      </div>
+    </a>
 
     <div class="endpoint post">
       <h3><span class="method">POST</span> /games/create</h3>
@@ -67,6 +75,7 @@
       <ul>
         <li><span class='param'>200 OK</span> Returns the created game object and the <strong>Authorization Token</strong> (token).</li>
         <li><span class='param'>400 Bad Request</span> If the request parameters are invalid.</li>
+        <li><span class='param'>409 Conflict</span> If the username is already taken.</li>
       </ul>
     </div>
 
@@ -82,7 +91,9 @@
       <ul>
         <li><span class='param'>200 OK</span> Returns the updated game object and the <strong>Authorization Token</strong> (token).</li>
         <li><span class='param'>400 Bad Request</span> If the request parameters are invalid.</li>
+        <li><span class='param'>403 Forbidden</span> If the game has already started.</li>
         <li><span class='param'>404 Not Found</span> If the game with the given ID does not exist.</li>
+        <li><span class='param'>409 Conflict</span> If the username is already taken.</li>
       </ul>
     </div>
 

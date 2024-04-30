@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import User from '../models/user';
 import { createGame, deleteGame, getAllGames, getGameById, updateGame } from '../services/gamesServices';
-import { createUser, deleteUserById, updateUser } from '../services/usersServices';
+import { createUser, deleteUserById, getUserByName, updateUser } from '../services/usersServices';
 import Game from '../models/game';
 import { signUserData } from '../JWT';
 
@@ -47,7 +47,10 @@ export default {
 
     let user = null;
     try {
-      // TODO : Handle already existing username
+      if (await getUserByName(username)) {
+        return res.status(409).send({ message: 'Username already taken' });
+      }
+
       user = await createUser(new User(username));
       const game = await createGame(new Game(user));
       user.game = game;
@@ -73,7 +76,10 @@ export default {
 
     let user = null;
     try {
-      // TODO : Handle already existing username
+      if (await getUserByName(username)) {
+        return res.status(409).send({ message: 'Username already taken' });
+      }
+
       user = await createUser(new User(username));
       const game = await getGameById(gameId);
       if (game) {
@@ -85,7 +91,7 @@ export default {
           res.status(200).send({ game, token: signUserData({ userId: user.id, gameId: game.id }) });
         } else {
           await deleteUserById(user.id);
-          res.status(400).send({ message: 'The game with id ' + gameId + ' has already started' });
+          res.status(403).send({ message: 'Game session ' + gameId + ' has already started' });
         }
       } else {
         await deleteUserById(user.id);

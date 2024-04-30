@@ -58,8 +58,12 @@ h3 {
     color: #4bcb8c;
 }
 
+a {
+    color: inherit;
+    text-decoration: inherit;
+}
+
 .endpoint.get {
-    cursor: pointer;
     background-color: #edf1fa;
     border: 1px solid #61aefe;
 }
