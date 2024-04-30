@@ -1,22 +1,28 @@
 import FirestoreDatabase from '../FirestoreDatabase';
-import User, { UserAttributes } from '../models/user';
+import User, { userConverter, UserFirestore } from '../models/user';
+import { gameConverter, GameFirestore } from '../models/game';
 
 const db = FirestoreDatabase;
 
 export const getAllUsers = async () => {
-  const usersAttributes = await db.getAll<UserAttributes>('users');
-  return usersAttributes.map((attributes: UserAttributes) => User.fromFirestore(attributes));
+  const usersFirestore = await db.getAll<UserFirestore>('users');
+  return await Promise.all(usersFirestore.map(async (user: UserFirestore) => await userConverter.fromFirestore(user)));
 };
 
 export const getUserById = async (id: string) => {
-  const userAttributes = await db.getOne<UserAttributes>('users', id);
-  return userAttributes ? User.fromFirestore(userAttributes) : null;
+  const usersFirestore = await db.getOne<UserFirestore>('users', id);
+  return usersFirestore ? userConverter.fromFirestore(usersFirestore) : null;
 };
 
 export const createUser = async (user: User) => {
-  return await db.create<User>('users', user);
+  user.id = await db.create<UserFirestore>('users', userConverter.toFirestore(user));
+  return user;
+};
+
+export const updateUser = async (user: User) => {
+  await db.update<UserFirestore>('users', userConverter.toFirestore(user));
 };
 
 export const deleteUserById = async (id: string) => {
-  return await db.delete('users', id);
+  await db.delete('users', id);
 };

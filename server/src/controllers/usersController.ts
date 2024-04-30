@@ -8,7 +8,7 @@ export default {
       res.status(200).send(users);
     } catch (error) {
       console.error('Error getting users:', error);
-      res.status(500).send('Internal server error');
+      res.status(500).send({ message: 'Internal server error' });
     }
   },
 
@@ -18,11 +18,11 @@ export default {
       if (user) {
         res.status(200).send(user);
       } else {
-        res.status(404).send();
+        res.status(404).send({ message: 'No user with id ' + req.params.id + ' was found' });
       }
     } catch (error) {
       console.error('Error getting user "' + req.params.id + '":', error);
-      res.status(500).send('Internal server error');
+      res.status(500).send({ message: 'Internal server error' });
     }
   },
 };

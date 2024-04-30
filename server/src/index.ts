@@ -1,4 +1,4 @@
-import express, { Application, Request, Response } from 'express';
+import express, { Application } from 'express';
 import bodyParser from 'body-parser';
 import usersRoutes from './routes/usersRoutes';
 import gamesRoutes from './routes/gamesRoutes';

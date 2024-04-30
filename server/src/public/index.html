@@ -11,7 +11,7 @@
   <h1>API Documentation</h1>
 
   <div class="section">
-    <h2>Users</h2>
+    <h2>[FOR DEV ONLY] Users</h2>
 
     <div class="endpoint get" onclick='document.location.href = "/users"'>
       <h3><span class="method">GET</span> /users</h3>
@@ -19,7 +19,6 @@
       <h4>Server Response:</h4>
       <ul>
         <li><span class='param'>200 OK</span> Returns an array of user objects.</li>
-        <li><span class='param'>500 Internal Server Error</span> If there is a server error.</li>
       </ul>
     </div>
 
@@ -30,7 +29,6 @@
       <ul>
         <li><span class='param'>200 OK</span> Returns the user object with the given ID.</li>
         <li><span class='param'>404 Not Found</span> If the user with the given ID does not exist.</li>
-        <li><span class='param'>500 Internal Server Error</span> If there is a server error.</li>
       </ul>
     </div>
   </div>
@@ -40,11 +38,10 @@
 
     <div class="endpoint get" onclick='document.location.href = "/games"'>
       <h3><span class="method">GET</span> /games</h3>
-      <p>Send all game sessions.</p>
+      <p>[FOR DEV ONLY] Send all game sessions.</p>
       <h4>Server Response:</h4>
       <ul>
         <li><span class='param'>200 OK</span> Returns an array of game objects.</li>
-        <li><span class='param'>500 Internal Server Error</span> If there is a server error.</li>
       </ul>
     </div>
 
@@ -54,8 +51,8 @@
       <h4>Server Response:</h4>
       <ul>
         <li><span class='param'>200 OK</span> Returns the game object with the given ID.</li>
+        <li><span class='param'>401 Unauthorized</span> You are not authorized because you don't play in this game.</li>
         <li><span class='param'>404 Not Found</span> If the game with the given ID does not exist.</li>
-        <li><span class='param'>500 Internal Server Error</span> If there is a server error.</li>
       </ul>
     </div>
 
@@ -68,9 +65,8 @@
       </ul>
       <h4>Server Response:</h4>
       <ul>
-        <li><span class='param'>200 OK</span> Returns the created game object.</li>
+        <li><span class='param'>200 OK</span> Returns the created game object and the <strong>Authorization Token</strong> (token).</li>
         <li><span class='param'>400 Bad Request</span> If the request parameters are invalid.</li>
-        <li><span class='param'>500 Internal Server Error</span> If there is a server error.</li>
       </ul>
     </div>
 
@@ -84,10 +80,9 @@
       </ul>
       <h4>Server Response:</h4>
       <ul>
-        <li><span class='param'>200 OK</span> Returns the updated game object.</li>
+        <li><span class='param'>200 OK</span> Returns the updated game object and the <strong>Authorization Token</strong> (token).</li>
         <li><span class='param'>400 Bad Request</span> If the request parameters are invalid.</li>
         <li><span class='param'>404 Not Found</span> If the game with the given ID does not exist.</li>
-        <li><span class='param'>500 Internal Server Error</span> If there is a server error.</li>
       </ul>
     </div>
 
@@ -103,7 +98,6 @@
         <li><span class='param'>200 OK</span> Returns a success message.</li>
         <li><span class='param'>400 Bad Request</span> If the request parameters are invalid.</li>
         <li><span class='param'>404 Not Found</span> If the game with the given ID does not exist.</li>
-        <li><span class='param'>500 Internal Server Error</span> If there is a server error.</li>
       </ul>
     </div>
   </div>

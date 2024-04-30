@@ -1,8 +1,9 @@
 import { Request, Response } from 'express';
 import User from '../models/user';
 import { createGame, deleteGame, getAllGames, getGameById, updateGame } from '../services/gamesServices';
-import { createUser, deleteUserById } from '../services/usersServices';
+import { createUser, deleteUserById, updateUser } from '../services/usersServices';
 import Game from '../models/game';
+import { signUserData } from '../JWT';
 
 export default {
   getGames: async (req: Request, res: Response) => {
@@ -11,21 +12,29 @@ export default {
       res.status(200).send(games);
     } catch (error) {
       console.error('Error getting games:', error);
-      res.status(500).send('Internal server error');
+      res.status(500).send({ message: 'Internal server error' });
     }
   },
 
   getGameById: async (req: Request, res: Response) => {
+    const { user } = req.body;
+    const gameId = req.params.id;
+
+    if (!user || gameId !== user.gameId) {
+      return res.status(401).send({ message: "You don't have the authorization to see this game" });
+    }
+
     try {
-      const game = await getGameById(req.params.id);
+      const game = await getGameById(gameId);
+
       if (game) {
         res.status(200).send(game);
       } else {
-        res.status(404).send();
+        res.status(404).send({ message: 'No game with id ' + gameId + ' was found' });
       }
     } catch (error) {
       console.error('Error getting game "' + req.params.id + '":', error);
-      res.status(500).send('Internal server error');
+      res.status(500).send({ message: 'Internal server error' });
     }
   },
 
@@ -33,7 +42,7 @@ export default {
     const { username } = req.body;
 
     if (!username) {
-      return res.status(400).send('"username" is required');
+      return res.status(400).send({ message: '"username" is required' });
     }
 
     let user = null;
@@ -41,11 +50,13 @@ export default {
       // TODO : Handle already existing username
       user = await createUser(new User(username));
       const game = await createGame(new Game(user));
-      res.status(200).send(game);
+      user.game = game;
+      await updateUser(user);
+      res.status(200).send({ game, token: signUserData({ userId: user.id, gameId: game.id }) });
     } catch (error) {
       // Rollback user creation if game creation fails
       console.error('Error creating game:', error);
-      res.status(500).send('Internal server error');
+      res.status(500).send({ message: 'Internal server error' });
 
       if (user) {
         await deleteUserById(user.id);
@@ -57,7 +68,7 @@ export default {
     const { username, gameId } = req.body;
 
     if (!username || !gameId) {
-      return res.status(400).send('"username" and "gameId" are required');
+      return res.status(400).send({ message: '"username" and "gameId" are required' });
     }
 
     let user = null;
@@ -68,19 +79,21 @@ export default {
       if (game) {
         if (game.users.length < 3) {
           game.users.push(user.id);
+          user.game = game;
           await updateGame(game);
-          res.status(200).send(game);
+          await updateUser(user);
+          res.status(200).send({ game, token: signUserData({ userId: user.id, gameId: game.id }) });
         } else {
           await deleteUserById(user.id);
-          res.status(400).send('The game with id "' + gameId + '" has already started');
+          res.status(400).send({ message: 'The game with id ' + gameId + ' has already started' });
         }
       } else {
         await deleteUserById(user.id);
-        res.status(404).send('No game with id "' + gameId + '" was found');
+        res.status(404).send({ message: 'No game with id ' + gameId + ' was found' });
       }
     } catch (error) {
       console.error('Error joining game:', error);
-      res.status(500).send('Internal server error');
+      res.status(500).send({ message: 'Internal server error' });
 
       if (user) {
         await deleteUserById(user.id);
@@ -92,24 +105,23 @@ export default {
     const { gameId } = req.body;
 
     if (!gameId) {
-      return res.status(400).send('"gameId" is required');
+      return res.status(400).send({ message: '"gameId" is required' });
     }
 
     try {
       const game = await getGameById(gameId);
 
       if (game) {
-        const usersId = game.users;
-        usersId.forEach((userId: string) => deleteUserById(userId));
+        game.users.forEach((userId: string) => deleteUserById(userId));
         await deleteGame(gameId);
-        res.status(200).send('Game ' + gameId + ' deleted');
+        res.status(200).send({ message: 'Game with id ' + gameId + ' successfully deleted' });
       } else {
-        res.status(404).send('No game with id "' + gameId + '" was found');
+        res.status(404).send({ message: 'No game with id ' + gameId + ' was found' });
       }
     } catch (error) {
       // Rollback user creation if game creation fails
       console.error('Error deleting game:', error);
-      res.status(500).send('Internal server error');
+      res.status(500).send({ message: 'Internal server error' });
     }
   },
 };

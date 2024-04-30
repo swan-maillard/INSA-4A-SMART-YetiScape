@@ -1,36 +1,45 @@
 import AbstractDocument from './AbstractDocument';
+import Game from './game';
+import { getGameById } from '../services/gamesServices';
 
-export type UserAttributes = {
+export interface UserFirestore extends AbstractDocument {
   id: string;
   name: string;
   salle: number | null;
-};
+  game: string | null;
+}
 
-export default class User implements AbstractDocument {
-  id: UserAttributes['id'];
-  name: UserAttributes['name'];
-  salle: UserAttributes['salle'];
+export default class User {
+  id: string;
+  name: string;
+  salle: number | null;
+  game: Game | null;
 
   constructor(name?: string) {
     this.id = '-1';
     this.name = name || 'Anonymous';
     this.salle = null;
-  }
-
-  toFirestore(): UserAttributes {
-    return {
-      id: this.id,
-      name: this.name,
-      salle: this.salle,
-    };
-  }
-
-  static fromFirestore(attributes: UserAttributes) {
-    const user = new User();
-    user.id = attributes.id;
-    user.name = attributes.name;
-    user.salle = attributes.salle;
-
-    return user;
+    this.game = null;
   }
 }
+
+export const userConverter = {
+  toFirestore: (user: User): UserFirestore => {
+    return {
+      id: user.id,
+      name: user.name,
+      salle: user.salle,
+      game: user.game?.id || null,
+    };
+  },
+
+  fromFirestore: async (userFirestore: UserFirestore) => {
+    const user = new User();
+    user.id = userFirestore.id;
+    user.name = userFirestore.name;
+    user.salle = userFirestore.salle;
+    user.game = userFirestore.game ? await getGameById(userFirestore.game) : null;
+
+    return user;
+  },
+};

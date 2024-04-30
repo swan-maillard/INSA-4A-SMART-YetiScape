@@ -1,7 +1,7 @@
-import AbstractDocument from './AbstractDocument';
 import User from './user';
+import AbstractDocument from './AbstractDocument';
 
-export type GameAttributes = {
+export interface GameFirestore extends AbstractDocument {
   id: string;
   users: string[];
   trappe: boolean;
@@ -10,17 +10,17 @@ export type GameAttributes = {
   rouages: number;
   portes: boolean;
   itemsDispo: string[];
-};
+}
 
-export default class Game implements AbstractDocument {
-  id: GameAttributes['id'];
-  users: GameAttributes['users'];
-  trappe: GameAttributes['trappe'];
-  tuyau: GameAttributes['tuyau'];
-  coffre: GameAttributes['coffre'];
-  rouages: GameAttributes['rouages'];
-  portes: GameAttributes['portes'];
-  itemsDispo: GameAttributes['itemsDispo'];
+export default class Game {
+  id: string;
+  users: string[];
+  trappe: boolean;
+  tuyau: boolean;
+  coffre: boolean;
+  rouages: number;
+  portes: boolean;
+  itemsDispo: string[];
 
   constructor(user?: User) {
     this.id = '-1';
@@ -32,31 +32,33 @@ export default class Game implements AbstractDocument {
     this.portes = false;
     this.itemsDispo = [];
   }
+}
 
-  toFirestore(): GameAttributes {
+export const gameConverter = {
+  toFirestore: (game: Game): GameFirestore => {
     return {
-      id: this.id,
-      users: this.users,
-      trappe: this.trappe,
-      tuyau: this.tuyau,
-      coffre: this.coffre,
-      rouages: this.rouages,
-      portes: this.portes,
-      itemsDispo: this.itemsDispo,
+      id: game.id,
+      users: game.users,
+      trappe: game.trappe,
+      tuyau: game.tuyau,
+      coffre: game.coffre,
+      rouages: game.rouages,
+      portes: game.portes,
+      itemsDispo: game.itemsDispo,
     };
-  }
+  },
 
-  static fromFirestore(attributes: GameAttributes) {
+  fromFirestore: (gameFirestore: GameFirestore) => {
     const game = new Game();
-    game.id = attributes.id;
-    game.users = attributes.users;
-    game.trappe = attributes.trappe;
-    game.tuyau = attributes.tuyau;
-    game.coffre = attributes.coffre;
-    game.rouages = attributes.rouages;
-    game.portes = attributes.portes;
-    game.itemsDispo = attributes.itemsDispo;
+    game.id = gameFirestore.id;
+    game.users = gameFirestore.users;
+    game.trappe = gameFirestore.trappe;
+    game.tuyau = gameFirestore.tuyau;
+    game.coffre = gameFirestore.coffre;
+    game.rouages = gameFirestore.rouages;
+    game.portes = gameFirestore.portes;
+    game.itemsDispo = gameFirestore.itemsDispo;
 
     return game;
-  }
-}
+  },
+};

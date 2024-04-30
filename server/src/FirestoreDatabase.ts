@@ -1,14 +1,14 @@
 import { initializeApp } from 'firebase/app';
 import {
-  Query,
-  Timestamp,
-  getFirestore,
   collection,
+  deleteDoc,
   doc,
   getDoc,
   getDocs,
+  getFirestore,
+  Query,
   setDoc,
-  deleteDoc,
+  Timestamp,
 } from 'firebase/firestore';
 import AbstractDocument from './models/AbstractDocument';
 
@@ -29,17 +29,17 @@ export default {
     return collection(db, collectionName);
   },
 
-  getFromQuery: async <T>(query: Query): Promise<T[]> => {
+  getFromQuery: async <T extends AbstractDocument>(query: Query): Promise<T[]> => {
     const querySnapshot = await getDocs(query);
     return querySnapshot.docs.map((doc) => doc.data()) as T[];
   },
 
-  getAll: async <T>(collectionName: string): Promise<T[]> => {
+  getAll: async <T extends AbstractDocument>(collectionName: string): Promise<T[]> => {
     const querySnapshot = await getDocs(collection(db, collectionName));
     return querySnapshot.docs.map((doc) => doc.data()) as T[];
   },
 
-  getOne: async <T>(collectionName: string, documentId: string): Promise<T | null> => {
+  getOne: async <T extends AbstractDocument>(collectionName: string, documentId: string): Promise<T | null> => {
     const documentSnapshot = await getDoc(doc(db, collectionName, documentId.toString()));
     if (documentSnapshot.exists()) {
       return documentSnapshot.data() as T;
@@ -49,14 +49,13 @@ export default {
   },
 
   create: async <T extends AbstractDocument>(collectionName: string, data: T) => {
-    data.id = Timestamp.now().seconds.toString();
-    await setDoc(doc(db, collectionName, data.id), data.toFirestore());
-    return data;
+    data.id = Timestamp.now().toMillis().toString();
+    await setDoc(doc(db, collectionName, data.id), data);
+    return data.id;
   },
 
   update: async <T extends AbstractDocument>(collectionName: string, data: T) => {
-    await setDoc(doc(db, collectionName, data.id), data.toFirestore(), { merge: true });
-    return data;
+    await setDoc(doc(db, collectionName, data.id), data, { merge: true });
   },
 
   delete: async (collectionName: string, documentId: string) => {
