@@ -3,6 +3,8 @@ import bodyParser from 'body-parser';
 import usersRoutes from './routes/usersRoutes';
 import gamesRoutes from './routes/gamesRoutes';
 import cors from 'cors';
+import gameRoutes from './routes/gameRoutes';
+import { checkAuthAccessGame } from './JWT';
 
 // Boot express
 const app: Application = express();
@@ -23,5 +25,6 @@ app.use(bodyParser.json());
 // Application routing
 app.use('/users', usersRoutes);
 app.use('/games', gamesRoutes);
+app.use('/game', checkAuthAccessGame, gameRoutes);
 
 app.listen(port, () => console.log(`Server is listening on port ${port}`));

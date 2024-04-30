@@ -16,28 +16,6 @@ export default {
     }
   },
 
-  getGameById: async (req: Request, res: Response) => {
-    const { user } = req.body;
-    const gameId = req.params.id;
-
-    if (!user || gameId !== user.gameId) {
-      return res.status(401).send({ message: "You don't have the authorization to see this game" });
-    }
-
-    try {
-      const game = await getGameById(gameId);
-
-      if (game) {
-        res.status(200).send(game);
-      } else {
-        res.status(404).send({ message: 'No game with id ' + gameId + ' was found' });
-      }
-    } catch (error) {
-      console.error('Error getting game "' + req.params.id + '":', error);
-      res.status(500).send({ message: 'Internal server error' });
-    }
-  },
-
   createGame: async (req: Request, res: Response) => {
     const { username } = req.body;
 

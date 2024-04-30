@@ -1,6 +1,5 @@
 import { Router } from 'express';
 import gamesController from '../controllers/gamesController';
-import { verifyToken } from '../JWT';
 
 const router = Router();
 
@@ -8,9 +7,6 @@ const router = Router();
 
 // GET /games/ displays all game sessions
 router.get('/', gamesController.getGames);
-
-// GET /games/:id displays the game session with the given id
-router.get('/:id', verifyToken, gamesController.getGameById);
 
 // POST /games/create allows a user to create a game session
 // Params : 'username'
