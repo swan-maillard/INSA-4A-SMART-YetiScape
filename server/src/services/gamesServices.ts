@@ -20,3 +20,7 @@ export const createGame = async (game: Game) => {
 export const updateGame = async (game: Game) => {
   return await db.update<Game>('games', game);
 };
+
+export const deleteGame = async (id: string) => {
+  return await db.delete('games', id);
+};
