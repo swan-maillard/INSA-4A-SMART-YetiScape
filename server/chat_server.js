@@ -8,9 +8,11 @@ const io = new Server(http);
 
 const sessionsMap = {};
 
-app.get("/", function(req, res) {
-    res.sendFile(process.cwd() + "/served_client_files/chat_client.html");
-});
+app.use(express.static("served_client_files"))
+// app.get("/", function(req, res) {
+//     res.sendFile(process.cwd() + "/served_client_files/chat_client.html");
+// });
+
 
 io.on("connection", function(socket) {
 
@@ -52,3 +54,5 @@ io.on("connection", function(socket) {
 http.listen(3000, '0.0.0.0',function() {
     console.log("Listening on port " + 3000);
 });
+
+
