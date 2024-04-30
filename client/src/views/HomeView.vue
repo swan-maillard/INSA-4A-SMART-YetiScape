@@ -50,9 +50,6 @@ import { reactive } from 'vue';
         flex-direction: column;
         align-items: center;
     }
-    div {
-        border: 2px solid black;
-    }
     .divOptions {
         display : flex;
         flex-direction: row;
