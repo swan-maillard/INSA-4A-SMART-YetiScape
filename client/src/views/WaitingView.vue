@@ -46,7 +46,6 @@ import axios from "axios";
 let gameId = 0;
 let gamerId = 0;
 let token = localStorage.getItem("token");
-console.log(token);
 
 const gamers = ref([]);
 
@@ -57,23 +56,24 @@ const config = {
     "Access-Control-Allow-Origin": "*", // CORS header to allow requests from any origin
   },
 };
+infosGame();
+setInterval(infosGame,1000);
 
-axios
+function infosGame(){
+  axios
   .get("http://localhost:3000/game", config)
-  .then((response) => infosGame(response))
+  .then((response) => respGame(response))
   .catch(console.log);
+}
 
-function infosGame(response) {
+function respGame(response) {
   if (response.status == 200) {
-    gameId = response.data;
-    console.log(gameId);
-    // let users = response.data.filter((game) => game.id == gameId)
-    // console.log(response.data)
-    // console.log(users)
-    // game.users.forEach((user) => {
-    //     gamers.value.push({id: gamerId++, name: user})
-    // });
-    // console.log(gamers)
+    gameId = response.data.id;
+    if(response.data.users.length > gamerId){
+      for(let i = gamerId; i<response.data.users.length; i++){
+        gamers.value.push({id: gamerId++, name: response.data.users[i].name})
+      }
+    }
   }
 }
 </script>
@@ -82,6 +82,7 @@ function infosGame(response) {
 .card {
   width: 15rem;
 }
+
 .testimonial-card .card-up {
   height: 90px;
   overflow: hidden;
@@ -95,12 +96,6 @@ function infosGame(response) {
   overflow: hidden;
   border: 3px solid #fff;
   border-radius: 50%;
-}
-
-.width-100 {
-  width: 100%;
-  justify-content: center;
-  text-align: center;
 }
 
 .testimonial-card .card-up {

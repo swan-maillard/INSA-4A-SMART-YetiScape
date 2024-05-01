@@ -11,7 +11,7 @@ const app: Application = express();
 
 // Specify allowed origins
 const corsOptions = {
-  origin: ['http://localhost:8080'], // Add other origins as needed
+  origin: ['http://localhost:8080', 'http://localhost:8081', 'http://localhost:8082'],  // Add other origins as needed
 };
 
 // Use the CORS middleware with options
