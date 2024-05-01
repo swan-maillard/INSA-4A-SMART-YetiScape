@@ -6,11 +6,17 @@ import { getGameById } from './services/gamesServices';
 const secretKey = 'hexagoose';
 
 export const checkAuthAccessGame = async (req: Request, res: Response, next: NextFunction) => {
-  const token = req.headers['authorization'];
+  const authorization = req.headers['authorization'];
 
-  if (!token) {
+  if (!authorization) {
     return res.status(401).json({ message: 'Unauthorized' });
   }
+
+  if (!authorization.toLowerCase().startsWith('bearer')) {
+    return res.status(401).json({ message: 'Invalid token' });
+  }
+
+  const token = authorization.substring(7);
 
   verify(token, secretKey, async (err, decoded) => {
     if (err) {
