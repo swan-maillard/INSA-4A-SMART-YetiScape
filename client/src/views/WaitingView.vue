@@ -1,8 +1,8 @@
 <template>
 <div class="m-3">
     <div class="d-flex flex-row justify-content-between">
-        <p class="m-1">id de la partie : {{ idGame }}</p>
-        <p class="m-1">{{ idGamer }}/3</p>
+        <p class="m-1">id de la partie : {{ gameId }}</p>
+        <p class="m-1">{{ gamerId }}/3</p>
     </div>
         
     <div class="d-flex flex-row text-center justify-content-center">
@@ -23,7 +23,7 @@
         </div>
         </div>
     </div>
-    <div v-if="idGamer == 3" class="flex justify-content-end mt-4">
+    <div v-if="gamerId == 3" class="flex justify-content-end mt-4">
         <button type="button" class="btn btn-primary" data-toggle="button" aria-pressed="false" autocomplete="off">
             Démarrer la partie
         </button>
@@ -33,14 +33,38 @@
 
 <script setup>
 import { ref } from 'vue'
+import axios from 'axios';
 
-let idGame = 0;
-let idGamer = 0;
+
+let gameId = 0;
+let gamerId = 0;
+let token = 'Bearer '+ localStorage.getItem("token");
+console.log(token)
 
 const gamers = ref([
-    {id: idGamer++, name:'Jean'},
-    {id: idGamer++, name:'Marc'},
 ]);
+
+axios.get("http://localhost:3000/game",{
+    headers:{
+        'Autorization': token,
+    }
+})
+        .then(response => infosGame(response))
+        .catch(console.log)
+
+function infosGame(response){
+    if(response.status == 200){
+        gameId = response.data;
+        console.log(gameId)
+        // let users = response.data.filter((game) => game.id == gameId)
+        // console.log(response.data)
+        // console.log(users)
+        // game.users.forEach((user) => {
+        //     gamers.value.push({id: gamerId++, name: user})
+        // });
+        // console.log(gamers)
+    }
+}
 </script>
 
 <style>

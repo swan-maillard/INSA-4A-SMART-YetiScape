@@ -35,6 +35,7 @@ import router from '../router';
     function recupCreate(response){
         if (response.status == 200){
             console.log(response.data.token);
+            localStorage.clear();
             localStorage.setItem("token", response.data.token);
             localStorage.setItem("gameId", response.data.game.id)
             router.push('/waiting');
