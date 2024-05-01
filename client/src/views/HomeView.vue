@@ -1,37 +1,51 @@
 <script setup>
 import { reactive } from 'vue';
 import axios from 'axios';
+import router from '../router';
 
     var form = reactive({
         nomuser:'',
-        option:0,
+        option:1,
         idSession:''
     });
+
+    let url = 'http://localhost:3000/games/';
+    let data;
 
     function sendForm(){
         console.log(form.nomuser)
         console.log(form.option)
         console.log(form.idSession)
-        /*axios.post('http://localhost:3000/games/create', {
-            username: form.nomuser,
-        }, {
-            headers: {
-                "content-type": "text/json",
-                "access-control-allow-origin": "*"
-            }
-        })
-        .then(console.log)
-        .catch(console.log)*/
-        axios.get("http://localhost:3000/games")
-            .then(console.log)
-        .catch(console.log)
+        if(form.option == 1){
+            url += 'create';
+            data = {username: form.nomuser,}
+        } else if(form.option == 2){
+            url += 'join';
+            data = {username: form.nomuser, gameId: form.idSession}
+        } else {
+            return;
+        }
+        
+        axios.post(url, data)
+            .then(response => recupCreate(response))
+            .catch(console.log)
     }
+
+    function recupCreate(response){
+        if (response.status == 200){
+            console.log(response.data.token);
+            document.cookie = "token=" + response.data.token;
+            router.push('/waiting');
+        }
+    }
+
+
 </script>
 
 <template>
     <h1>Welcome to YetiScape</h1>
     <form @submit.prevent="sendForm" class="divForm">
-        <input v-model="form.nomuser" placeholder="Entrez votre nom">
+        <input v-model="form.nomuser" required="optional" placeholder="Entrez votre nom">
         <div class="divOptions">
             <input type="radio" id="op1" name="option" value="1" v-model="form.option" checked/>
             <label for="op1" class="option">
