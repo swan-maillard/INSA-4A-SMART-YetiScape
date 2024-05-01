@@ -41,6 +41,17 @@ import router from '../router';
         }
     }
 
+    function addRequired(){
+        document.getElementById('inputId').setAttribute('required', 'true');
+    }
+
+    function removeRequired(){
+        let elinput = document.getElementById('inputId');
+        if (elinput.hasAttribute('required')){
+            elinput.removeAttribute('required');
+        }
+    }
+
 
 </script>
 
@@ -49,16 +60,16 @@ import router from '../router';
     <form @submit.prevent="sendForm" class="divForm">
         <input v-model="form.nomuser" required="optional" placeholder="Entrez votre nom">
         <div class="divOptions">
-            <input type="radio" id="op1" name="option" value="1" v-model="form.option" checked/>
+            <input type="radio" id="op1" name="option" value="1" v-model="form.option" checked @change="removeRequired"/>
             <label for="op1" class="option">
                 <span>Créer une partie privée</span>
             </label>
-            <input type="radio" id="op2" name="option" value="2" v-model="form.option"/>
+            <input type="radio" id="op2" name="option" value="2" v-model="form.option" @change="addRequired"/>
             <label for="op2" class="option">
                 <span>Rejoindre une partie privée</span>
-                <input v-model="form.idSession" placeholder="Entrez l'id de session" @click="(evt) => evt.currentTarget.parentElement.click()">
+                <input id="inputId" v-model="form.idSession" placeholder="Entrez l'id de session" @click="(evt) => evt.currentTarget.parentElement.click()">
             </label>
-            <input type="radio" id="op3" name="option" value="3" v-model="form.option"/>
+            <input type="radio" id="op3" name="option" value="3" v-model="form.option" @change="removeRequired"/>
             <label for="op3" class="option">
                 <span>Rejoindre une partie public<br/>(non fonctionnel)</span>
             </label>
@@ -69,7 +80,7 @@ import router from '../router';
     </form>
 </template>
 
-<style scopped>
+<style scoped>
     .divForm {
         display: flex;
         align-self: center;
