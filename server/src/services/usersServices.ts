@@ -6,7 +6,7 @@ const db = FirestoreDatabase;
 
 export const getAllUsers = async () => {
   const usersFirestore = await db.getAll<UserFirestore>('users');
-  return usersFirestoreToUsers(usersFirestore);
+  return usersFirestore.map((user) => userConverter.fromFirestore(user));
 };
 
 export const getUserById = async (id: string) => {
@@ -32,8 +32,4 @@ export const updateUser = async (user: User) => {
 
 export const deleteUserById = async (id: string) => {
   await db.delete('users', id);
-};
-
-const usersFirestoreToUsers = async (usersFirestore: UserFirestore[]) => {
-  return await Promise.all(usersFirestore.map(async (user: UserFirestore) => await userConverter.fromFirestore(user)));
 };

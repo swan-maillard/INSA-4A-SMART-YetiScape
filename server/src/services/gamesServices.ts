@@ -5,7 +5,7 @@ const db = FirestoreDatabase;
 
 export const getAllGames = async () => {
   const gamesFirestore = await db.getAll<GameFirestore>('games');
-  return gamesFirestore.map((game) => gameConverter.fromFirestore(game));
+  return gamesFirestoreToGames(gamesFirestore);
 };
 
 export const getGameById = async (id: string) => {
@@ -24,4 +24,8 @@ export const updateGame = async (game: Game) => {
 
 export const deleteGame = async (id: string) => {
   await db.delete('games', id);
+};
+
+const gamesFirestoreToGames = async (gamesFirestore: GameFirestore[]) => {
+  return await Promise.all(gamesFirestore.map(async (game: GameFirestore) => await gameConverter.fromFirestore(game)));
 };

@@ -13,7 +13,7 @@ export default class User {
   id: string;
   name: string;
   salle: number | null;
-  game: Game | null;
+  game: string | null;
 
   constructor(name?: string) {
     this.id = '-1';
@@ -29,16 +29,16 @@ export const userConverter = {
       id: user.id,
       name: user.name,
       salle: user.salle,
-      game: user.game?.id || null,
+      game: user.game,
     };
   },
 
-  fromFirestore: async (userFirestore: UserFirestore) => {
+  fromFirestore: (userFirestore: UserFirestore) => {
     const user = new User();
     user.id = userFirestore.id;
     user.name = userFirestore.name;
     user.salle = userFirestore.salle;
-    user.game = userFirestore.game ? await getGameById(userFirestore.game) : null;
+    user.game = userFirestore.game;
 
     return user;
   },

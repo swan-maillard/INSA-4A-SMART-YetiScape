@@ -31,7 +31,7 @@ export default {
 
       user = await createUser(new User(username));
       const game = await createGame(new Game(user));
-      user.game = game;
+      user.game = game.id;
       await updateUser(user);
       res.status(200).send({ game, token: signUserData({ userId: user.id, gameId: game.id }) });
     } catch (error) {
@@ -62,8 +62,8 @@ export default {
       const game = await getGameById(gameId);
       if (game) {
         if (game.users.length < 3) {
-          game.users.push(user.id);
-          user.game = game;
+          game.users.push(user);
+          user.game = game.id;
           await updateGame(game);
           await updateUser(user);
           res.status(200).send({ game, token: signUserData({ userId: user.id, gameId: game.id }) });
@@ -96,7 +96,7 @@ export default {
       const game = await getGameById(gameId);
 
       if (game) {
-        game.users.forEach((userId: string) => deleteUserById(userId));
+        game.users.forEach((user: User) => deleteUserById(user.id));
         await deleteGame(gameId);
         res.status(200).send({ message: 'Game with id ' + gameId + ' successfully deleted' });
       } else {

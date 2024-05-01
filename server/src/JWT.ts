@@ -5,37 +5,33 @@ import { getGameById } from './services/gamesServices';
 
 const secretKey = 'hexagoose';
 
-// Middleware to verify JWT token
-export const verifyToken = (req: Request, res: Response) => {
+export const checkAuthAccessGame = async (req: Request, res: Response, next: NextFunction) => {
   const token = req.headers['authorization'];
 
   if (!token) {
     return res.status(401).json({ message: 'Unauthorized' });
   }
 
-  verify(token, secretKey, (err, decoded) => {
+  verify(token, secretKey, async (err, decoded) => {
     if (err) {
       return res.status(401).json({ message: 'Invalid token' });
     }
+
     req.body.jwt = decoded as string; // Save decoded user information to request object
+    const { gameId, userId } = req.body.jwt;
+
+    if (!gameId || !userId) {
+      return res.status(401).json({ message: 'Invalid token' });
+    }
+
+    const game = await getGameById(gameId);
+    const user = await getUserById(userId);
+    if (!user || user.game !== gameId || !game || !game.users.map((gameUser) => gameUser.id).includes(userId)) {
+      return res.status(401).json({ message: 'Access to this game session unauthorized' });
+    }
+
+    next();
   });
-};
-
-export const checkAuthAccessGame = async (req: Request, res: Response, next: NextFunction) => {
-  verifyToken(req, res);
-  const { userId, gameId } = req.body.jwt;
-
-  if (!gameId || !userId) {
-    return res.status(401).json({ message: 'Invalid token' });
-  }
-
-  const game = await getGameById(gameId);
-  const user = await getUserById(userId);
-  if (!user || user.game?.id !== gameId || !game || !game.users.includes(userId)) {
-    return res.status(401).json({ message: 'Access to this game session unauthorized' });
-  }
-
-  next();
 };
 
 export const signUserData = (userData: { [key: string]: string }) => {
