@@ -10,6 +10,7 @@ import router from '../router';
     });
 
     let url = 'http://localhost:3000/games/';
+    let pass = ""
     let data;
 
     function sendForm(){
@@ -17,24 +18,25 @@ import router from '../router';
         console.log(form.option)
         console.log(form.idSession)
         if(form.option == 1){
-            url += 'create';
+            pass = 'create';
             data = {username: form.nomuser,}
         } else if(form.option == 2){
-            url += 'join';
+            pass = 'join';
             data = {username: form.nomuser, gameId: form.idSession}
         } else {
             return;
         }
         
-        axios.post(url, data)
-            .then(response => recupCreate(response))
-            .catch(console.log)
+    axios.post(url + pass, data)
+        .then(response => recupCreate(response))
+        .catch(console.log)
     }
 
     function recupCreate(response){
         if (response.status == 200){
             console.log(response.data.token);
-            document.cookie = "token=" + response.data.token;
+            localStorage.setItem("token", response.data.token);
+            localStorage.setItem("gameId", response.data.game.id)
             router.push('/waiting');
         }
     }
