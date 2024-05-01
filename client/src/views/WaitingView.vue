@@ -32,6 +32,7 @@
         data-toggle="button"
         aria-pressed="false"
         autocomplete="off"
+        @click="lancerSalle"
       >
         Démarrer la partie
       </button>
@@ -69,11 +70,23 @@ function infosGame(){
 function respGame(response) {
   if (response.status == 200) {
     gameId = response.data.id;
-    if(response.data.users.length > gamerId){
+
+    if(response.data.users.length > gamerId && gamerId < 4){
       for(let i = gamerId; i<response.data.users.length; i++){
         gamers.value.push({id: gamerId++, name: response.data.users[i].name})
       }
     }
+  }
+}
+
+function lancerSalle() {
+  let userName = localStorage.getItem("nom")
+  if(userName == gamers.value[0].name){
+    console.log("Salle 1")
+  }else if(userName == gamers.value[1].name){
+    console.log("Salle 2")
+  }else{
+    console.log("Salle 3")
   }
 }
 </script>
