@@ -11,15 +11,24 @@ const createScene = (canvas) => {
 
   new HemisphericLight("light", Vector3.Up(), scene);
 
-  const box = MeshBuilder.CreateBox("box", { size: 2 }, scene);
-  const material = new StandardMaterial("box-material", scene);
-  material.diffuseColor = Color3.Blue();
-  box.material = material;
+  const materialFond = new StandardMaterial("fondMat");
+  materialFond.diffuseColor = Color3.Red();
 
   const murFond = MeshBuilder.CreateBox("murFond", {width: 10, height:5, depth: 1}, scene);
   murFond.position.x = 0;
   murFond.position.y = 2.5;
   murFond.position.z = 5;
+  murFond.material = materialFond;
+
+  const murGauche = MeshBuilder.CreateBox("murFond", {width: 1, height:5, depth: 10}, scene);
+  murGauche.position.x = -5;
+  murGauche.position.y = 2.5;
+  murGauche.position.z = 0;
+
+  const murDroite = MeshBuilder.CreateBox("murFond", {width: 1, height:5, depth: 10}, scene);
+  murDroite.position.x = 5;
+  murDroite.position.y = 2.5;
+  murDroite.position.z = 0;
 
   const ground = MeshBuilder.CreateGround("ground", {width: 10, height: 10}, scene);
 
