@@ -1,5 +1,4 @@
 import FirestoreDatabase from '../FirestoreDatabase';
-import Game, { gameConverter, GameFirestore } from '../models/game';
 import Enigme, { enigmeConverter, EnigmeFirestore } from '../models/enigme';
 
 const db = FirestoreDatabase;

@@ -32,6 +32,7 @@ export default {
       user = await createUser(new User(username));
       const game = await createGame(new Game(user));
       user.game = game.id;
+      user.salle = 1;
       await updateUser(user);
       res.status(200).send({ game, token: signUserData({ userId: user.id, gameId: game.id }) });
     } catch (error) {
@@ -64,6 +65,7 @@ export default {
         if (game.users.length < 3) {
           game.users.push(user);
           user.game = game.id;
+          user.salle = game.users.length;
           await updateGame(game);
           await updateUser(user);
           res.status(200).send({ game, token: signUserData({ userId: user.id, gameId: game.id }) });
