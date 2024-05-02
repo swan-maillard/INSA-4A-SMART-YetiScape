@@ -1,8 +1,3 @@
-
-<script setup>
-</script>
-
-
 <template>
     <body id="allScreen">
         <div id="GameScreen" class="d-flex flex-raw">
@@ -18,8 +13,8 @@
 <script>
 /* eslint-disable */
 
-var urlLink = URL.createObjectURL('../assets/gears.obj');
-console.log(urlLink);
+// var urlLink = URL.createObjectURL('../assets/gears.obj');
+// console.log(urlLink);
 import { ref, onMounted } from "@vue/runtime-core";
 import { createScene } from "../scenes/room1";
 
