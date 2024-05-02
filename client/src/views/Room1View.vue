@@ -1,3 +1,4 @@
+
 <script setup>
 </script>
 
@@ -15,6 +16,10 @@
 </template>
 
 <script>
+/* eslint-disable */
+
+var urlLink = URL.createObjectURL('../assets/gears.obj');
+console.log(urlLink);
 import { ref, onMounted } from "@vue/runtime-core";
 import { createScene } from "../scenes/room1";
 
@@ -25,8 +30,13 @@ export default {
 
     onMounted(() => {
       if (bjsCanvas.value) {
-        createScene(bjsCanvas.value);
+        function affiche(x) {
+            console.log('LOG:' + x);
+        }
+        createScene(bjsCanvas.value, affiche);
       }
+
+      
     });
 
     return {
