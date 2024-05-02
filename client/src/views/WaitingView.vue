@@ -8,7 +8,7 @@
     <div class="d-flex flex-row text-center justify-content-center">
       <div class="mb-4 mb-md-0 m-4" v-for="gamer in gamers" :key="gamer.id">
         <div class="card testimonial-card">
-          <div class="card-up" style="background-color: #9d789b"></div>
+          <div class="card-up"></div>
           <div class="avatar mx-auto bg-white">
             <img
               src="../assets/avatar_yeti.png"
@@ -101,6 +101,17 @@ function lancerSalle() {
   overflow: hidden;
   border-top-left-radius: 0.25rem;
   border-top-right-radius: 0.25rem;
+}
+
+.card-up{
+  background: #667eea;
+  
+    /* Chrome 10-25, Safari 5.1-6 */
+    background: -webkit-linear-gradient(to top, rgba(97,154,239,0.5), rgba(94,113,145,0.5));
+  
+    /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+    background: linear-gradient(to top, rgba(97,154,239,0.5), rgba(94,113,145,0.5))
+  
 }
 
 .testimonial-card .avatar {

@@ -26,6 +26,8 @@
 body, html{
   height: 100%;
   margin: 0;
+  background: url("./assets/background_init.jpg");
+  background-size: contain;
 }
 
 .flex

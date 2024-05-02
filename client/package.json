@@ -8,6 +8,7 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "@babylonjs/core": "^7.4.0",
     "axios": "^1.6.8",
     "bootstrap": "^5.3.3",
     "core-js": "^3.8.3",
@@ -19,11 +20,13 @@
   "devDependencies": {
     "@babel/core": "^7.12.16",
     "@babel/eslint-parser": "^7.12.16",
+    "@eslint/js": "^9.1.1",
     "@vue/cli-plugin-babel": "~5.0.0",
     "@vue/cli-plugin-eslint": "~5.0.0",
     "@vue/cli-service": "~5.0.0",
     "eslint": "^7.32.0",
-    "eslint-plugin-vue": "^8.0.3"
+    "eslint-plugin-vue": "^8.7.1",
+    "globals": "^15.1.0"
   },
   "eslintConfig": {
     "root": true,
