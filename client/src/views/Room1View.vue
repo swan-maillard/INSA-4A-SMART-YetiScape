@@ -1,13 +1,35 @@
 <template>
-    <body id="allScreen">
         <div id="GameScreen" class="d-flex flex-raw">
-            <div id="inventaire">
+            <div id="inventaire" class="d-flex flex-col">
+                <table class="table table-striped table-dark">
+                    <thead class="height">
+                        <tr>
+                        <th scope="col">Inventaire du joueur</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                        <th scope="row">1</th>
+                        </tr>
+                        <tr>
+                        <th scope="row">1</th>
+                        </tr>
+                        <tr>
+                        <th scope="row">1</th>
+                        </tr>
+                        <tr>
+                        <th scope="row">1</th>
+                        </tr>
+                        <tr>
+                        <th scope="row">1</th>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
             <div id="jeu">
                 <canvas id="GameCanva" ref="bjsCanvas"/>
             </div>
         </div>
-    </body>
 </template>
 
 <script>
@@ -48,8 +70,8 @@ export default {
         width: 100%;
     }
     #GameScreen {
-        width: 1280px;
-        height: 720px;
+        width: 100%;
+        height: 100%;
     }
     #inventaire {
         width:10%;
@@ -58,8 +80,5 @@ export default {
     #jeu {
         width:90%;
         height:100%;
-    }
-    div {
-        border: 2px solid red;
     }
 </style>
