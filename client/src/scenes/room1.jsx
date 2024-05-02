@@ -1,5 +1,4 @@
 /* eslint-disable */
-
 import { Texture, Engine, Scene, SceneLoader, FreeCamera, Vector3, MeshBuilder, StandardMaterial, Color3, HemisphericLight, PointerEventTypes } from "@babylonjs/core";
 import "@babylonjs/loaders";
 
@@ -73,6 +72,8 @@ const createScene = (canvas, verif) => {
             gear.position.y = 0.15;
             gear.position.x = 3;
         })
+    
+    var tuyaux = getTuyaux(scene);
 
   engine.runRenderLoop(() => {
     scene.render();
@@ -124,6 +125,43 @@ const createScene = (canvas, verif) => {
     
 };
 
+function getTuyaux(scene) {
+    var tuyau1 = [];
+    var mats = [Color3.Black(), Color3.Green(), Color3.Red(), Color3.Blue(), Color3.Purple(), Color3.Gray(), Color3.Yellow(), Color3.White()]
+    SceneLoader.ImportMeshAsync("tuyau","./models/", "tuyau.glb", scene, (meshes)=>{
+        console.log("infos meshes: "+meshes);
+        })
+      .then((resultat)=>{
+            tuyau1[0] = resultat.meshes[1];
+            tuyau1[0].scalingDeterminant = 0.3;
+            tuyau1[0].rotation = new Vector3(Math.PI / 2, Math.PI / 2, 0);
+            tuyau1[0].position.z = -1;
+            tuyau1[0].position.y = 1.7;
+            tuyau1[0].position.x = 3;
+            var mat = new StandardMaterial();
+            mat.diffuseColor = mats[0];
+            mat.backFaceCulling = false;
+            tuyau1[0].material = mat;
+            for (let i = 1; i < 8; i++){
+                tuyau1[i] = tuyau1[0].clone('tuyau' + i);
+                tuyau1[i].position.z = -1 + 0.25*i;
+                tuyau1[i].position.y = (i%2 == 0) ? 1.7 : 1.4
+                let mat = new StandardMaterial();
+                mat.diffuseColor = mats[i];
+                mat.backFaceCulling = false;
+                tuyau1[i].material = mat;
+            }
+
+        })
+
+        return tuyau1;    
+}
+
+const makeEngrenageVisible = (canvas) => {
+    console.log("dans le canvas : " + canvas)
+
+};
+
 // deplacement du pointer : https://playground.babylonjs.com/#7CBW04
 
-export { createScene };
+export { createScene, makeEngrenageVisible };
