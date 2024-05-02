@@ -1,37 +1,48 @@
 /* eslint-disable */
 
-import { Engine, Scene, SceneLoader, FreeCamera, Vector3, MeshBuilder, StandardMaterial, Color3, HemisphericLight, PointerEventTypes } from "@babylonjs/core";
+import { Texture, Engine, Scene, SceneLoader, FreeCamera, Vector3, MeshBuilder, StandardMaterial, Color3, HemisphericLight, PointerEventTypes } from "@babylonjs/core";
 import "@babylonjs/loaders";
 
 const createScene = (canvas, affiche) => {
   const engine = new Engine(canvas);
   const scene = new Scene(engine);
 
-  const camera = new FreeCamera("camera1", new Vector3(0, 1.6, -4), scene);
+  const camera = new FreeCamera("camera1", new Vector3(0, 1.6, -3), scene);
   camera.setTarget(new Vector3(0, 2, 5));
   camera.attachControl(canvas, true); // permet de faire bouger la caméra
 
   new HemisphericLight("light", Vector3.Up(), scene);
 
-  const materialFond = new StandardMaterial("fondMat");
-  materialFond.diffuseColor = Color3.Red();
+  const texture = new Texture("./textures/mur.jpg",scene);
+  const materialMur = new StandardMaterial("matMur");
+  materialMur.diffuseTexture = texture;
+
+  const textureDoor = new Texture("./textures/door.jpg",scene);
+  const materialDoor = new StandardMaterial("matDoor");
+  materialDoor.diffuseTexture = textureDoor;
 
   const murFond = MeshBuilder.CreateBox("murFond", {width: 10, height:4, depth: 1}, scene);
   var posFond = new Vector3(0,2,5);
   murFond.position = posFond;
-  murFond.material = materialFond;
+  murFond.material = materialMur;
+
+  const murDos = MeshBuilder.CreateBox("murDos", {width: 10, height:4, depth: 1}, scene);
+  var posDos = new Vector3(0,2,-5);
+  murDos.position = posDos;
+  murDos.material = materialMur;
 
   const murGauche = MeshBuilder.CreateBox("murGauche", {width: 1, height:4, depth: 10}, scene);
   var posGauche = new Vector3(-5,2,0);
   murGauche.position = posGauche;
+  murGauche.material = materialMur;
 
   const murDroite = MeshBuilder.CreateBox("murDroite", {width: 1, height:4, depth: 10}, scene);
   var posDroite = new Vector3(5,2,0);
   murDroite.position = posDroite;
+  murDroite.material = materialMur;
 
   const ground = MeshBuilder.CreateGround("ground", {width: 10, height: 10}, scene);
-  const roof = MeshBuilder.CreateGround("roof", {width: 10, height: 10}, scene);
-  roof.position.y = 10
+  ground.material = materialMur;
 
   const result = SceneLoader.ImportMeshAsync("","./models/", "porte.glb", scene, (meshes)=>{
     console.log("infos meshes: "+meshes);
@@ -40,6 +51,7 @@ const createScene = (canvas, affiche) => {
         for(var i=1; i<resultat.meshes.length; i++)
         {
             resultat.meshes[i].position.z = 4;
+            resultat.meshes[i].material = materialDoor;
         }    
     })
 
