@@ -1,6 +1,8 @@
 /* eslint-disable */
 
-import { Engine, Scene, FreeCamera, Vector3, MeshBuilder, StandardMaterial, Color3, HemisphericLight } from "@babylonjs/core";
+import { Engine, Scene, SceneLoader, FreeCamera, Vector3, MeshBuilder, StandardMaterial, Color3, HemisphericLight } from "@babylonjs/core";
+import "@babylonjs/loaders/OBJ/objFileLoader";
+
 const createScene = (canvas) => {
   const engine = new Engine(canvas);
   const scene = new Scene(engine);
@@ -31,6 +33,11 @@ const createScene = (canvas) => {
   murDroite.position.z = 0;
 
   const ground = MeshBuilder.CreateGround("ground", {width: 10, height: 10}, scene);
+
+  // const porte = SceneLoader.Load("../assets/", "Porte.obj", engine, function (scene){
+  //   //Todo
+  // });
+  
 
   engine.runRenderLoop(() => {
     scene.render();
