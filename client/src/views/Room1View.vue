@@ -9,7 +9,8 @@
                     </thead>
                     <tbody>
                         <tr>
-                        <th scope="row">1</th>
+                        <th id="inv1" scope="row"><img src="../../public/img/engrenageMoyen.png"/></th>
+                            
                         </tr>
                         <tr>
                         <th scope="row">1</th>
@@ -40,6 +41,16 @@
 import { ref, onMounted } from "@vue/runtime-core";
 import { createScene } from "../scenes/room1";
 
+
+function verif(x) {
+    console.log('LOG:' + x);
+    if (x === "engrenageMoyen"){
+        return true;
+    } else {
+        return false;
+    }
+}
+
 export default {
   name: "BabylonScene",
   setup() {
@@ -47,10 +58,7 @@ export default {
 
     onMounted(() => {
       if (bjsCanvas.value) {
-        function affiche(x) {
-            console.log('LOG:' + x);
-        }
-        createScene(bjsCanvas.value, affiche);
+        createScene(bjsCanvas.value, verif);
       }
 
       
@@ -79,6 +87,10 @@ export default {
     }
     #jeu {
         width:90%;
+        height:100%;
+    }
+    img {
+        width:100%;
         height:100%;
     }
 </style>

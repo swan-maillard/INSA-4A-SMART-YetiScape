@@ -3,7 +3,7 @@
 import { Texture, Engine, Scene, SceneLoader, FreeCamera, Vector3, MeshBuilder, StandardMaterial, Color3, HemisphericLight, PointerEventTypes } from "@babylonjs/core";
 import "@babylonjs/loaders";
 
-const createScene = (canvas, affiche) => {
+const createScene = (canvas, verif) => {
   const engine = new Engine(canvas);
   const scene = new Scene(engine);
 
@@ -16,6 +16,10 @@ const createScene = (canvas, affiche) => {
   const texture = new Texture("./textures/mur.jpg",scene);
   const materialMur = new StandardMaterial("matMur");
   materialMur.diffuseTexture = texture;
+  
+  const textureRouille = new Texture("./textures/rouille.jpg",scene);
+  const matRouille = new StandardMaterial("matRouille");
+  matRouille.diffuseTexture = textureRouille;
 
   const textureDoor = new Texture("./textures/door.jpg",scene);
   const materialDoor = new StandardMaterial("matDoor");
@@ -48,12 +52,27 @@ const createScene = (canvas, affiche) => {
     console.log("infos meshes: "+meshes);
     });
   result.then((resultat)=>{
+        console.log('dabord : ' + resultat.meshes.length)
         for(var i=1; i<resultat.meshes.length; i++)
         {
             resultat.meshes[i].position.z = 4;
             resultat.meshes[i].material = materialDoor;
         }    
     })
+
+    var gear;
+    SceneLoader.ImportMeshAsync("engrenageMoyen","./models/", "engrenageMoyen.glb", scene, (meshes)=>{
+        console.log("infos meshes: "+meshes);
+        })
+      .then((resultat)=>{
+        console.log('ici : ' + resultat.meshes.length)
+            gear = resultat.meshes[1];
+            gear.material = matRouille;
+            gear.scalingDeterminant = 0.15;
+            gear.position.z = 3.6;
+            gear.position.y = 0.15;
+            gear.position.x = 3;
+        })
 
   engine.runRenderLoop(() => {
     scene.render();
@@ -72,9 +91,15 @@ const createScene = (canvas, affiche) => {
     }
 
     var pointerDown = function (mesh) {
+        
         currentMesh = mesh;
-        affiche('je touche un objet');
-        affiche(currentMesh.name)
+        let bon = verif(currentMesh.name);
+        if (bon == true){
+            console.log('OK');
+            currentMesh.setEnabled(false);
+            
+        }
+        console.log('bon : ' + bon)
         startingPoint = getGroundPosition();
     }
 
