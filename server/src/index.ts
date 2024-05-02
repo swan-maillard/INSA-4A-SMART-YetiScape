@@ -12,7 +12,12 @@ import { Server, Socket } from 'socket.io';
 const app: Application = express();
 
 const http = createServer(app);
-const io = new Server(http);
+const io = new Server(http, {
+  cors: {
+    origin: 'http://localhost:8080',
+    methods: ['GET', 'POST']
+  }
+});
 
 const sessionsMap: { [key: string]: string } = {};
 
@@ -22,7 +27,7 @@ const corsOptions = {
 };
 
 // Use the CORS middleware with options
-app.use(cors(corsOptions));
+app.use(cors());
 
 const port = 3000;
 
@@ -38,7 +43,9 @@ interface CustomSocket extends Socket {
   username?: string;
 }
 io.on('connection', function (socket: CustomSocket) {
+  console.log('Socket connected')
   socket.on('user_join', function (data: { [key: string]: unknown }) {
+    console.log(data)
     socket.username = data.user as string;
     sessionsMap[socket.id] = data.session_id as string;
     for (const [socketId, sessionId] of Object.entries(sessionsMap)) {
