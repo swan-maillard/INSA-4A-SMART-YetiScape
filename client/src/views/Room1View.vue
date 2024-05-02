@@ -7,23 +7,8 @@
                         <th scope="col">Inventaire du joueur</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <tr>
-                        <th id="inv1" scope="row"><img src="../../public/img/engrenageMoyen.png"/></th>
-                            
-                        </tr>
-                        <tr>
-                        <th scope="row">1</th>
-                        </tr>
-                        <tr>
-                        <th scope="row">1</th>
-                        </tr>
-                        <tr>
-                        <th scope="row">1</th>
-                        </tr>
-                        <tr>
-                        <th scope="row">1</th>
-                        </tr>
+                    <tbody id="ajoutInventaire">
+                        
                     </tbody>
                 </table>
             </div>
@@ -41,10 +26,24 @@
 import { ref, onMounted } from "@vue/runtime-core";
 import { createScene } from "../scenes/room1";
 
-
+const ajoutInventaire = ref(null);
 function verif(x) {
     console.log('LOG:' + x);
     if (x === "engrenageMoyen"){
+        var imgEngrenage = document.createElement('img')
+        imgEngrenage.src = "/img/engrenageMoyen.png";
+        imgEngrenage.style.width = '100%';
+
+        var newTh = document.createElement('th');
+        newTh.id = "engrenage";
+        newTh.scope = "row";
+        newTh.appendChild(imgEngrenage);
+
+        var newTr = document.createElement('tr');
+        newTr.appendChild(newTh);
+
+        document.getElementById("ajoutInventaire").appendChild(newTr);
+
         return true;
     } else {
         return false;
