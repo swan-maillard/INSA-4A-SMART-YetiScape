@@ -1,12 +1,14 @@
 import AbstractDocument from './AbstractDocument';
 import Game from './game';
 import { getGameById } from '../services/gamesServices';
+import { Item } from './item';
 
 export interface UserFirestore extends AbstractDocument {
   id: string;
   name: string;
   salle: number | null;
   game: string | null;
+  items: Item[];
 }
 
 export default class User {
@@ -14,12 +16,14 @@ export default class User {
   name: string;
   salle: number | null;
   game: string | null;
+  items: Item[];
 
-  constructor(name?: string) {
+  constructor(name: string = 'Anonymous') {
     this.id = '-1';
-    this.name = name || 'Anonymous';
+    this.name = name;
     this.salle = null;
     this.game = null;
+    this.items = [];
   }
 }
 
@@ -30,6 +34,7 @@ export const userConverter = {
       name: user.name,
       salle: user.salle,
       game: user.game,
+      items: user.items,
     };
   },
 
@@ -39,6 +44,7 @@ export const userConverter = {
     user.name = userFirestore.name;
     user.salle = userFirestore.salle;
     user.game = userFirestore.game;
+    user.items = userFirestore.items;
 
     return user;
   },

@@ -33,7 +33,7 @@ export const checkAuthAccessGame = async (req: Request, res: Response, next: Nex
     const game = await getGameById(gameId);
     const user = await getUserById(userId);
     if (!user || user.game !== gameId || !game || !game.users.map((gameUser) => gameUser.id).includes(userId)) {
-      return res.status(401).json({ message: 'Access to this game session unauthorized' });
+      return res.status(401).json({ message: 'Unauthorized' });
     }
 
     next();

@@ -93,15 +93,8 @@ export default {
     }
 
     try {
-      const game = await getGameById(gameId);
-
-      if (game) {
-        game.users.forEach((user: User) => deleteUserById(user.id));
-        await deleteGame(gameId);
-        res.status(200).send({ message: 'Game with id ' + gameId + ' successfully deleted' });
-      } else {
-        res.status(404).send({ message: 'No game with id ' + gameId + ' was found' });
-      }
+      await deleteGame(gameId);
+      res.status(200).send({ message: 'Game with id ' + gameId + ' successfully deleted' });
     } catch (error) {
       // Rollback user creation if game creation fails
       console.error('Error deleting game:', error);
