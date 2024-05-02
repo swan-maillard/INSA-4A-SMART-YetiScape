@@ -47,3 +47,32 @@ ul {
 .messages li:nth-child(odd) {
     background: #eee;
 }
+
+
+.controller{
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+}
+
+.enable-btn{
+    background-color: rgb(26, 184, 26);
+    margin: 10px;
+    border: none;
+    color: #fff;
+}
+
+.enable-btn:hover{
+    background-color: rgba(26, 184, 26, 0.75);
+}
+.disable-btn{
+    background-color: rgb(185, 0, 0);
+    margin: 10px;
+    border: none;
+    color: #fff;
+}
+.disable-btn:hover{
+    background-color: rgb(185, 0, 0, 0.75);
+}

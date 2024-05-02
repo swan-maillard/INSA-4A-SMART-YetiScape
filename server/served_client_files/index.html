@@ -32,6 +32,10 @@
                     <ul class="messages"></ul>
                 </div>
                 <div class="container">
+                    <div class="controller">
+                        <button id="micBtn" class="btn btn-secondary" onclick="toggleMicrophone(this)">Mute</button>
+                        <button id="deafenBtn" class="btn btn-secondary" onclick="toggleMute(this)">Deafen</button>
+                    </div>
                     <form>
                         <input type="text" class="input" autocomplete="off" autofocus />
                         <button class="btn btn-primary">Send</button>

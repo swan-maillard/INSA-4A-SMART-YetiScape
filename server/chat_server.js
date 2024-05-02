@@ -7,6 +7,9 @@ const http = createServer(app);
 const io = new Server(http);
 
 const sessionsMap = {};
+//voice
+const socketsStatus = {};
+
 
 app.use(express.static("served_client_files"))
 // app.get("/", function(req, res) {
@@ -15,6 +18,30 @@ app.use(express.static("served_client_files"))
 
 
 io.on("connection", function(socket) {
+
+    //voice
+    const socketId = socket.id;
+    socketsStatus[socket.id] = {};
+
+    //voice
+    socket.on("voice", function (data) {
+        // var newData = data.split(";");
+        // newData[0] = "data:audio/ogg;";
+        // newData = newData[0] + newData[1];
+        console.log("Incoming voice")
+        for (const id in socketsStatus) {
+          if (id != socketId && !socketsStatus[id].mute)
+            socket.broadcast.to(id).emit("send", data);
+        }
+    });
+
+
+
+    //voice
+    socket.on("userInformation", function (data) {
+        socketsStatus[socketId] = data;
+    });
+
 
     socket.on("user_join", function(data) {
         this.username = data.user;
@@ -39,7 +66,11 @@ io.on("connection", function(socket) {
 
     socket.on("disconnect", function(data) {
         const disconnectedSession = sessionsMap[socket.id]
-        delete sessionsMap[socket.id]        
+        delete sessionsMap[socket.id]  
+        
+        //voice
+        delete socketsStatus[socketId];
+
         for (const [socketId, sessionId] of Object.entries(sessionsMap)) {
             if (sessionId == disconnectedSession)
             {
