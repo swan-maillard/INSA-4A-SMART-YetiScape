@@ -192,6 +192,7 @@ function moveCameraInit(camera){
     position.value = "centre";
 
     camera.position = new Vector3(0, 1.6, -3);
+    camera.setTarget(new Vector3(0,1.6,0))
     camera.lockedTarget = null;
 }
 
