@@ -5,7 +5,7 @@ import {ref} from "@vue/runtime-core";
 import {getPorte, getTuyaux, getSalle, getTrappe, getImportedMesh, getNavette} from "./roomsElements";
 
 //SAlle 1 : 
-// position possible : centre, gauche (tuyau), droite (trappe)
+// position possible : centre, tuyau (gauche), trappe (gauche)
 const position = ref("centre");
 
 const createScene = (canvas, verif) => {
@@ -29,6 +29,7 @@ const createScene = (canvas, verif) => {
         .then(() => {
             scene.getMeshByName('engrenageMoyen').position = new Vector3(3, 0.15, 3.6);
             scene.getMeshByName('engrenageMoyen').scalingDeterminant = 0.15;
+            scene.getMeshByName('engrenageMoyen').name = 'item:engrenageMoyen';
         });
 
     var tuyaux = getTuyaux(scene);
@@ -70,41 +71,48 @@ const createScene = (canvas, verif) => {
             var pickinfo = scene.pick(scene.pointerX, scene.pointerY, function (mesh) { return mesh == tuyauPick; });
             console.log(pickinfo.hit);
             if(pickinfo.hit){
-                console.log("Hit !!!!!!")
+                console.log("Hit !!!!!!" + i);
+                verif('trappe', i);
                 break;
             }
             tuyauPick.isPickable = false;
         }
         pickPlane.isPickable = true;
+        //si rien de touché : on remet le tube a sa place
+        //si qqch de touché, on lance la vérif =>
+            // verif OK : rien
+            // verif non OK : remettre le tube vide a sa place
     }
 
     var pointerDown = function (mesh) {
         currentMesh = mesh;
+        if(currentMesh.name.startsWith('item')){
+            verif('item', currentMesh.name.substring(5))
+            .then(() => {
+                console.log("promesse tenue : on supprime l'engrenage")
+                currentMesh.dispose();
+            })
+            .catch(() => {
+                console.log('promesse non tenue, on garde l engrenage')
+            });
+        }
         if (position.value === "centre"){
-            let bon = verif(currentMesh.name);
-            if (bon == true) {
-                console.log('Engrenage retiré');
-                currentMesh.setEnabled(false);
-                currentMesh.position = new Vector3(4, 1.4, 1.3);
-                currentMesh.rotation = new Vector3(0, 0, Math.PI/4);
-                currentMesh.scalingDeterminant = 0.1;
-            } else if(currentMesh.name.startsWith("tuyau")){
+             if(currentMesh.name.startsWith("tuyau")){
                 moveCamera(camera, currentMesh,-1,1.6,0.125, -1);
             } else if(currentMesh.name === "trappe"){
                 moveCamera(camera, currentMesh,2,0.2,1.5, 1);
             }
-            console.log('bon : ' + bon)
         }
-        else if (position.value === "gauche" ){
+        else if(position.value === "tuyau" ){
             if(currentMesh.name === "allWalls"){
                 moveCameraInit(camera)
-            }else if(currentMesh.name === "navettePleine"){
+            } else if(currentMesh.name === "navettePleine"){
                 currentMesh.position.addInPlace(new Vector3(0.5, 0, 0));
                 drag.value = getWallPosition();
-                console.log("Click sur navette pleine"+ drag.value)
+                console.log("Click sur navette pleine "+ drag.value)
             }
 
-        }else if(position.value === "droite"){
+        } else if(position.value === "droite"){
             if(currentMesh.name === "allWalls"){
                 moveCameraInit(camera)
             }
@@ -158,9 +166,9 @@ const createScene = (canvas, verif) => {
 
 function moveCamera(camera, mesh, x, y, z, pos){
     if(pos === -1)
-        position.value = "gauche";
+        position.value = "tuyau";
     else
-        position.value = "droite";
+        position.value = "trappe";
 
     var target = new Vector3(x,y,z);
     camera.position = target;
@@ -176,23 +184,26 @@ function moveCameraInit(camera){
     camera.lockedTarget = null;
 }
 
-const makeEngrenageVisible = (scene, item) => {
-    if (position.value === "gauche") {
+const placeItem = (scene, item) => {
+    if (position.value === "tuyau") {
         if (item === 'engrenageMoyen'){
-            let gear = scene.getMeshByName('engrenageMoyen');
-            gear.setEnabled(true);
-            scene.getMeshByName('engrenageMoyen').setEnabled(true);
-            let tubeVide = scene.getMeshByName('navetteVide');
-            let couvercle = scene.getMeshByName('navetteCouvercle');
-            couvercle.position = new Vector3(4.35, 1.4, 1.3);
-            let navettePleine = Mesh.MergeMeshes([gear, tubeVide, couvercle], true, false, null, false, true);
-            navettePleine.name = 'navettePleine';
-            return true
+            getImportedMesh(scene, 'engrenageMoyen', 'rouille.jpg').then(() => {
+                let gear = scene.getMeshByName('engrenageMoyen')
+                gear.position = new Vector3(4, 1.4, 1.3);
+                gear.rotation = new Vector3(0, 0, Math.PI/4);
+                gear.scalingDeterminant = 0.1;
+                let tubeVide = scene.getMeshByName('navetteVide');
+                let couvercle = scene.getMeshByName('navetteCouvercle');
+                couvercle.position = new Vector3(4.35, 1.4, 1.3);
+                let navettePleine = Mesh.MergeMeshes([gear, tubeVide, couvercle], true, false, null, false, true);
+                navettePleine.name = 'navettePleine';
+            });
+            return position.value;
         }
     }
-    return false
+    return 'erreur';
 };
 
 // deplacement du pointer : https://playground.babylonjs.com/#7CBW04
 
-export { createScene, makeEngrenageVisible };
+export { createScene, placeItem };
