@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API Documentation</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+  <h1>API Documentation</h1>
+
+  <div class="section">
+    <h2>Games</h2>
+
+    <a href='/games' target='_blank'>
+      <div class="endpoint get">
+        <h3><span class="method">GET</span> /games</h3>
+        <p><b>[DEV]</b> Send all game sessions.</p>
+        <h4>Server Response:</h4>
+        <ul>
+          <li><span class='param'>200 OK</span> Returns an array of game objects.</li>
+        </ul>
+      </div>
+    </a>
+
+    <div class="endpoint post">
+      <h3><span class="method">POST</span> /games/create</h3>
+      <p>Create a game session.</p>
+      <h4>Parameters:</h4>
+      <ul>
+        <li><span class='param'>username</span> The username of the creator.</li>
+      </ul>
+      <h4>Server Response:</h4>
+      <ul>
+        <li><span class='param'>200 OK</span> Returns the created game object and the <strong>Authorization Token</strong> (token).</li>
+        <li><span class='param'>400 Bad Request</span> If the request parameters are invalid.</li>
+        <li><span class='param'>409 Conflict</span> If the username is already taken.</li>
+      </ul>
+    </div>
+
+    <div class="endpoint post">
+      <h3><span class="method">POST</span> /games/join</h3>
+      <p>Join a game session.</p>
+      <h4>Parameters:</h4>
+      <ul>
+        <li><span class='param'>username</span> The username of the player.</li>
+        <li><span class='param'>gameId</span> The ID of the game session to join.</li>
+      </ul>
+      <h4>Server Response:</h4>
+      <ul>
+        <li><span class='param'>200 OK</span> Returns the updated game object and the <strong>Authorization Token</strong> (token).</li>
+        <li><span class='param'>400 Bad Request</span> If the request parameters are invalid.</li>
+        <li><span class='param'>403 Forbidden</span> If the game has already started.</li>
+        <li><span class='param'>404 Not Found</span> If the game with the given ID does not exist.</li>
+        <li><span class='param'>409 Conflict</span> If the username is already taken.</li>
+      </ul>
+    </div>
+
+    <div class="endpoint post">
+      <h3><span class="method">POST</span> /games/delete</h3>
+      <p><b>[DEV]</b> Delete a game session.</p>
+      <h4>Parameters:</h4>
+      <ul>
+        <li><span class='param'>gameId</span> The ID of the game session to delete.</li>
+      </ul>
+      <h4>Server Response:</h4>
+      <ul>
+        <li><span class='param'>200 OK</span> Returns a success message.</li>
+        <li><span class='param'>400 Bad Request</span> If the request parameters are invalid.</li>
+        <li><span class='param'>404 Not Found</span> If the game with the given ID does not exist.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2><img src='lock.svg' width='25'> Current Game</h2>
+
+    <a href='/game' target='_blank'>
+      <div class="endpoint get">
+        <h3><img src='lock.svg' width='20'><span class="method">GET</span> /game</h3>
+        <p>Send current game session of the user.</p>
+        <h4>Server Response:</h4>
+        <ul>
+          <li><span class='param'>200 OK</span> Returns the game object.</li>
+          <li><span class='param'>401 Unauthorized</span> You are not authorized to access the game.</li>
+        </ul>
+      </div>
+    </a>
+  </div>
+
+
+  <div class="section">
+    <h2><b>[DEV]</b> Users</h2>
+
+    <a href='/users' target='_blank'>
+      <div class="endpoint get">
+        <h3><span class="method">GET</span> /users</h3>
+        <p><b>[DEV]</b> Send all users.</p>
+        <h4>Server Response:</h4>
+        <ul>
+          <li><span class='param'>200 OK</span> Returns an array of user objects.</li>
+        </ul>
+      </div>
+    </a>
+
+    <a href='/users/1' target='_blank'>
+      <div class="endpoint get">
+        <h3><span class="method">GET</span> /users/:id</h3>
+        <p><b>[DEV]</b> Send user with given ID.</p>
+        <h4>Server Response:</h4>
+        <ul>
+          <li><span class='param'>200 OK</span> Returns the user object with the given ID.</li>
+          <li><span class='param'>404 Not Found</span> If the user with the given ID does not exist.</li>
+        </ul>
+      </div>
+    </a>
+  </div>
+
+</div>
+</body>
+</html>
