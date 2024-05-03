@@ -26,8 +26,9 @@
 import { ref, onMounted } from "@vue/runtime-core";
 import { createScene, makeEngrenageVisible } from "../scenes/room1";
 
-function imgClick() {
-    console.log('Prout');
+function imgClick(evt) {
+    var parent = evt.currentTarget.parentElement;
+    parent.removeChild(evt.currentTarget);
     makeEngrenageVisible(scene);
 }
 
@@ -39,8 +40,6 @@ function verif(x) {
         imgEngrenage.src = "/img/engrenageMoyen.png";
         imgEngrenage.style.width = '100%';
 
-        imgEngrenage.addEventListener('click', imgClick);
-
         var newTh = document.createElement('th');
         newTh.id = "engrenage";
         newTh.scope = "row";
@@ -48,6 +47,8 @@ function verif(x) {
 
         var newTr = document.createElement('tr');
         newTr.appendChild(newTh);
+
+        newTr.addEventListener('click', imgClick);
 
         document.getElementById("ajoutInventaire").appendChild(newTr);
 

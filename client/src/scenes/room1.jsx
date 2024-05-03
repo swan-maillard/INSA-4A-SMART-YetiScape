@@ -1,6 +1,10 @@
 /* eslint-disable */
 import { Texture, Mesh, Engine, Scene, SceneLoader, FreeCamera, Vector3, MeshBuilder, StandardMaterial, Color3, HemisphericLight, PointerEventTypes } from "@babylonjs/core";
 import "@babylonjs/loaders";
+import {ref} from "@vue/runtime-core";
+
+
+const position = ref("centre");
 
 const createScene = (canvas, verif) => {
     //base pour creer la scene
@@ -11,6 +15,7 @@ const createScene = (canvas, verif) => {
     const camera = new FreeCamera("camera1", new Vector3(0, 1.6, -3), scene);
     camera.setTarget(new Vector3(0, 2, 5));
     camera.attachControl(canvas, true); ///TODO : blocker pour diminuer l'amplitude de mvt
+    console.log(camera.position)
 
     new HemisphericLight("light", Vector3.Up(), scene);
 
@@ -60,12 +65,24 @@ const createScene = (canvas, verif) => {
 
     var pointerDown = function (mesh) {
         currentMesh = mesh;
-        let bon = verif(currentMesh.name);
-        if (bon == true) {
-            console.log('OK');
-            currentMesh.setEnabled(false);
+        console.log("Click")
+        if (position.value === "centre"){
+            let bon = verif(currentMesh.name);
+            if (bon == true) {
+                console.log('Engrenage retiré');
+                currentMesh.setEnabled(false);
+            } else if(currentMesh.name.startsWith("tuyau")){
+                console.log('Un tuyau a été cliqué !!!!!')
+                moveCamera(camera, currentMesh);
+            }
+            console.log('bon : ' + bon)
         }
-        console.log('bon : ' + bon)
+        else if (position.value === "gauche"){
+            if(currentMesh.name === "allWalls"){
+                console.log("Retour position départ")
+                moveCameraInit(camera)
+            }
+        }
     }
 
     var pointerUp = function () {
@@ -77,7 +94,7 @@ const createScene = (canvas, verif) => {
     scene.onPointerObservable.add((pointerInfo) => {
         switch (pointerInfo.type) {
             case PointerEventTypes.POINTERDOWN:
-                if (pointerInfo.pickInfo.hit && pointerInfo.pickInfo.pickedMesh != mursSalle) {
+                if (pointerInfo.pickInfo.hit) {
                     pointerDown(pointerInfo.pickInfo.pickedMesh)
                 }
                 break;
@@ -160,6 +177,22 @@ function getSalle(scene){
     allWalls.name = 'allWalls';
 
     return allWalls;
+}
+
+function moveCamera(camera, mesh){
+    position.value = "gauche";
+
+    camera.position = new Vector3(-0.5,1.6,0);
+    var target = new Vector3(-mesh.position.x, 1.6, mesh.position.z);
+    camera.setTarget(target);
+    camera.lockedTarget = mesh;
+}
+
+function moveCameraInit(camera){
+    position.value = "centre";
+
+    camera.position = new Vector3(0, 1.6, -3);
+    camera.lockedTarget = null;
 }
 
 const makeEngrenageVisible = (scene) => {
