@@ -127,10 +127,11 @@ const createScene = (canvas, verif) => {
         if (!current) {
             return;
         }
-
+        console.log("Current:" +current)
         var diff = current.subtract(drag.value);
         diff.x = 0;
         currentMesh.position.addInPlace(diff);
+        console.log("Current Mesh: "+currentMesh.position)
 
         drag.value = current;
 
