@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 import { Texture, Mesh, SceneLoader, Vector3, MeshBuilder, StandardMaterial, Color3 } from "@babylonjs/core";
 import "@babylonjs/loaders";
 
@@ -117,18 +119,15 @@ function getTrappe(scene){
     return trappe;
 }
 
-function getEngrenage(scene, nomEngrenage) {
+async function getEngrenage(scene, nomEngrenage) {
     const textureRouille = new Texture("./textures/rouille.jpg", scene);
     const matRouille = new StandardMaterial("matRouille");
     matRouille.diffuseTexture = textureRouille;
-    var gear;
-    SceneLoader.ImportMeshAsync(nomEngrenage, "./models/", nomEngrenage + ".glb", scene)
+    return await SceneLoader.ImportMeshAsync(nomEngrenage, "./models/", nomEngrenage + ".glb", scene)
     .then(() => {
-        gear = scene.getMeshByName(nomEngrenage)
+        let gear = scene.getMeshByName(nomEngrenage)
         gear.material = matRouille;
         gear.scalingDeterminant = 0.15;
-        gear.position = new Vector3(3, 0.15, 3.6);
-        return gear;
     });
 }
 
