@@ -15,7 +15,7 @@ const createScene = (canvas, verif) => {
     //On ajoute une caméra et une lumière
     const camera = new FreeCamera("camera1", new Vector3(0, 1.6, -3), scene);
     camera.setTarget(new Vector3(0, 2, 5));
-    camera.attachControl(canvas, true); ///TODO : blocker pour diminuer l'amplitude de mvt
+    camera.attachControl(canvas, false); ///TODO : blocker pour diminuer l'amplitude de mvt
     console.log(camera.position)
 
     new HemisphericLight("light", Vector3.Up(), scene);
@@ -46,14 +46,14 @@ const createScene = (canvas, verif) => {
                 currentMesh.rotation = new Vector3(0, 0, Math.PI/4);
                 currentMesh.scalingDeterminant = 0.1;
             } else if(currentMesh.name.startsWith("tuyau")){
-                console.log('Un tuyau a été cliqué !!!!!')
-                moveCamera(camera, currentMesh);
+                moveCamera(camera, currentMesh,-1,1.6,0.125, -1);
+            } else if(currentMesh.name === "trappe"){
+                moveCamera(camera, currentMesh,2,0.2,1.5, 1);
             }
             console.log('bon : ' + bon)
         }
-        else if (position.value === "gauche"){
+        else if (position.value === "enigme"){
             if(currentMesh.name === "allWalls"){
-                console.log("Retour position départ")
                 moveCameraInit(camera)
             }
         }
@@ -74,13 +74,13 @@ const createScene = (canvas, verif) => {
     return scene;
 };
 
-function moveCamera(camera, mesh){
-    position.value = "gauche";
+function moveCamera(camera, mesh, x, y, z, pos){
+    position.value = "enigme";
 
-    camera.position = new Vector3(-0.5,1.6,0);
-    var target = new Vector3(-mesh.position.x, 1.6, mesh.position.z);
-    camera.setTarget(target);
-    camera.lockedTarget = mesh;
+    var target = new Vector3(x,y,z);
+    camera.position = target;
+    camera.setTarget(new Vector3(x+pos,y,z));
+    camera.lockedTarget = new Vector3(x+pos,y,z);
 }
 
 function moveCameraInit(camera){

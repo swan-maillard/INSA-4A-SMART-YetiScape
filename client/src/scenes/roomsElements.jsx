@@ -92,12 +92,13 @@ function getSalle(scene){
 }
 
 function getTrappe(scene){
+    let textureTrappe = new Texture("./img/trappe.PNG", scene);
     let matTrappe = new StandardMaterial("matTrappe");
-    matTrappe.diffuseColor = Color3.Red();
-    let trappe = MeshBuilder.CreateGround("trappe", {width:0.4, height:1}, scene);
+    matTrappe.diffuseTexture = textureTrappe;
+    let trappe = MeshBuilder.CreateGround("trappe", {width:1, height:0.4}, scene);
     trappe.position = new Vector3(4.75,0.2,1.5);
     trappe.material = matTrappe;
-    trappe.rotation = new Vector3(0,0,Math.PI/2)
+    trappe.rotation = new Vector3(-Math.PI/2,0,Math.PI/2)
 
     return trappe;
 }
