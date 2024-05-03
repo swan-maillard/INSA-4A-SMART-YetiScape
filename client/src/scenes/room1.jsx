@@ -1,5 +1,5 @@
 /* eslint-disable */
-import { Texture, Mesh, Engine, Scene, SceneLoader, FreeCamera, Vector3, MeshBuilder, StandardMaterial, Color3, HemisphericLight, PointerEventTypes } from "@babylonjs/core";
+import { Texture, Mesh, Engine, Scene, SceneLoader, FreeCamera, Vector3, MeshBuilder, StandardMaterial, Color3, HemisphericLight, PointerEventTypes, Color4 } from "@babylonjs/core";
 import "@babylonjs/loaders";
 import {ref} from "@vue/runtime-core";
 
@@ -20,47 +20,16 @@ const createScene = (canvas, verif) => {
     new HemisphericLight("light", Vector3.Up(), scene);
 
     var mursSalle = getSalle(scene);
-    const textureRouille = new Texture("./textures/rouille.jpg", scene);
-    const matRouille = new StandardMaterial("matRouille");
-    matRouille.diffuseTexture = textureRouille;
 
-    const textureDoor = new Texture("./textures/door.jpg", scene);
-    const materialDoor = new StandardMaterial("matDoor");
-    materialDoor.diffuseTexture = textureDoor;
-
-
-    const result = SceneLoader.ImportMeshAsync("", "./models/", "porte.glb", scene, (meshes) => {
-        console.log("infos meshes: " + meshes);
-    });
-    result.then((resultat) => {
-        console.log('dabord : ' + resultat.meshes.length)
-        for (var i = 1; i < resultat.meshes.length; i++) {
-            resultat.meshes[i].position.z = 4;
-            resultat.meshes[i].material = materialDoor;
-        }
-    })
-
-    var gear;
-    SceneLoader.ImportMeshAsync("engrenageMoyen", "./models/", "engrenageMoyen.glb", scene, (meshes) => {
-        console.log("infos meshes: " + meshes);
-    })
-        .then((resultat) => {
-            console.log('ici : ' + resultat.meshes.length)
-            gear = resultat.meshes[1];
-            gear.material = matRouille;
-            gear.scalingDeterminant = 0.15;
-            gear.position.z = 3.6;
-            gear.position.y = 0.15;
-            gear.position.x = 3;
-        })
-
+    var gear = getEngrenageMoyen(scene);
     var tuyaux = getTuyaux(scene);
+    getPorte(scene);
+    getNavette(scene);
 
     engine.runRenderLoop(() => {
         scene.render();
     });
 
-    var startingPoint;
     var currentMesh;
 
     var pointerDown = function (mesh) {
@@ -71,6 +40,9 @@ const createScene = (canvas, verif) => {
             if (bon == true) {
                 console.log('Engrenage retiré');
                 currentMesh.setEnabled(false);
+                currentMesh.position = new Vector3(4, 1.4, 1.3);
+                currentMesh.rotation = new Vector3(0, 0, Math.PI/4);
+                currentMesh.scalingDeterminant = 0.1;
             } else if(currentMesh.name.startsWith("tuyau")){
                 console.log('Un tuyau a été cliqué !!!!!')
                 moveCamera(camera, currentMesh);
@@ -85,12 +57,6 @@ const createScene = (canvas, verif) => {
         }
     }
 
-    var pointerUp = function () {
-        if (startingPoint) {
-            startingPoint = null;
-            return;
-        }
-    }
     scene.onPointerObservable.add((pointerInfo) => {
         switch (pointerInfo.type) {
             case PointerEventTypes.POINTERDOWN:
@@ -99,13 +65,29 @@ const createScene = (canvas, verif) => {
                 }
                 break;
             case PointerEventTypes.POINTERUP:
-                pointerUp();
                 break;
         }
     });
 
     return scene;
 };
+
+function getPorte(scene){
+    let textureDoor = new Texture("./textures/door.jpg", scene);
+    let matDoor = new StandardMaterial("matDoor");
+    matDoor.diffuseTexture = textureDoor;
+
+    const result = SceneLoader.ImportMeshAsync("", "./models/", "porte.glb", scene, (meshes) => {
+        console.log("infos meshes: " + meshes);
+    });
+    result.then((resultat) => {
+        console.log('dabord : ' + resultat.meshes.length)
+        for (var i = 1; i < resultat.meshes.length; i++) {
+            resultat.meshes[i].position.z = 4;
+            resultat.meshes[i].material = matDoor;
+        }
+    })
+}
 
 function getTuyaux(scene) {
     var tuyaux = [];
@@ -126,7 +108,7 @@ function getTuyaux(scene) {
             for (let i = 1; i < 8; i++) {
                 tuyaux[i] = tuyaux[0].clone('tuyau' + i);
                 tuyaux[i].position.z = -1 + 0.25 * i;
-                tuyaux[i].position.y = (i % 2 == 0) ? 1.7 : 1.4
+                tuyaux[i].position.y = (i % 2 == 0) ? 1.7 : 1.4;
                 let mat = new StandardMaterial();
                 mat.diffuseColor = mats[i];
                 mat.backFaceCulling = false;
@@ -194,6 +176,54 @@ function moveCameraInit(camera){
     camera.position = new Vector3(0, 1.6, -3);
     camera.setTarget(new Vector3(0,1.6,0))
     camera.lockedTarget = null;
+}
+
+function getEngrenageMoyen(scene) {
+    const textureRouille = new Texture("./textures/rouille.jpg", scene);
+    const matRouille = new StandardMaterial("matRouille");
+    matRouille.diffuseTexture = textureRouille;
+    var gear;
+    SceneLoader.ImportMeshAsync("engrenageMoyen", "./models/", "engrenageMoyen.glb", scene, (meshes) => {
+        console.log("infos meshes: " + meshes);
+    })
+    .then((resultat) => {
+        console.log('engrenage moyen load de taille : ' + resultat.meshes.length)
+        gear = scene.getMeshByName('engrenageMoyen')
+        gear.material = matRouille;
+        gear.scalingDeterminant = 0.15;
+        gear.position.z = 3.6;
+        gear.position.y = 0.15;
+        gear.position.x = 3;
+    })
+    return gear;
+}
+
+function getNavette(scene) {
+    SceneLoader.ImportMeshAsync("", "./models/", "navette.glb", scene, (meshes) => {
+        console.log("infos meshes: " + meshes);
+    })
+    .then((resultat) => {
+        console.log('navette : ' + resultat.meshes.length)
+        let base = scene.getMeshByName('navetteBase');
+        let mat = new StandardMaterial();
+        mat.diffuseColor = new Color3(1, 0, 0);
+        base.material = mat;
+
+        let couvercle = scene.getMeshByName('navetteCouvercle');
+        couvercle.material = mat;
+
+        let tube = scene.getMeshByName('navetteTube');
+        let matJaune = new StandardMaterial();
+        matJaune.diffuseColor = new Color3(1, 1, 0);
+        matJaune.alpha = .4;
+        tube.material = matJaune;
+
+        let navBase = Mesh.MergeMeshes([base, tube], true, false, null, false, true);
+        navBase.name = 'navetteVide';
+
+        navBase.position = new Vector3(-4.1, 1.4, 1.3);
+        couvercle.position = new Vector3(4.4, 1.4, 1.3);
+    })
 }
 
 const makeEngrenageVisible = (scene) => {

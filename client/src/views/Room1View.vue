@@ -37,8 +37,12 @@ function verif(x) {
     console.log('LOG:' + x);
     if (x === "engrenageMoyen"){
         var imgEngrenage = document.createElement('img')
+        imgEngrenage.setAttribute('draggable', 'true');
         imgEngrenage.src = "/img/engrenageMoyen.png";
         imgEngrenage.style.width = '100%';
+
+        //imgEngrenage.addEventListener('drop', () => console.log("dropping"));
+        imgEngrenage.addEventListener('dragstart', () => console.log('start dragging'))
 
         var newTh = document.createElement('th');
         newTh.id = "engrenage";
@@ -67,7 +71,9 @@ export default {
     onMounted(() => {
       if (bjsCanvas.value) {
         scene = createScene(bjsCanvas.value, verif);
+        document.getElementById('GameCanva').addEventListener('drop', ()=>console.log('onDropping'));
       }
+
 
       
     });
