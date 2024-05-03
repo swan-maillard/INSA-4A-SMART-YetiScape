@@ -20,6 +20,7 @@ const createScene = (canvas, verif) => {
     new HemisphericLight("light", Vector3.Up(), scene);
 
     var mursSalle = getSalle(scene);
+    var trappe = getTrappe(scene);
 
     var gear = getEngrenageMoyen(scene);
     var tuyaux = getTuyaux(scene);
@@ -159,6 +160,17 @@ function getSalle(scene){
     allWalls.name = 'allWalls';
 
     return allWalls;
+}
+
+function getTrappe(scene){
+    let matTrappe = new StandardMaterial("matTrappe");
+    matTrappe.diffuseColor = Color3.Red();
+    let trappe = MeshBuilder.CreateGround("trappe", {width:0.4, height:1}, scene);
+    trappe.position = new Vector3(4.75,0.2,1.5);
+    trappe.material = matTrappe;
+    trappe.rotation = new Vector3(0,0,Math.PI/2)
+
+    return trappe;
 }
 
 function moveCamera(camera, mesh){
