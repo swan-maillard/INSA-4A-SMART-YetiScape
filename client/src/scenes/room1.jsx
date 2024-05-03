@@ -2,7 +2,7 @@
 import { Texture, Mesh, Engine, Scene, SceneLoader, FreeCamera, Vector3, MeshBuilder, StandardMaterial, Color3, HemisphericLight, PointerEventTypes, Color4 } from "@babylonjs/core";
 import "@babylonjs/loaders";
 import {ref} from "@vue/runtime-core";
-import {getPorte, getTuyaux, getSalle, getTrappe, getEngrenage, getNavette} from "./roomsElements";
+import {getPorte, getTuyaux, getSalle, getTrappe, getImportedMesh, getNavette} from "./roomsElements";
 
 //SAlle 1 : 
 // position possible : centre, gauche (tuyau), droite (trappe)
@@ -25,10 +25,11 @@ const createScene = (canvas, verif) => {
     var mursSalle = getSalle(scene, 1);
     var trappe = getTrappe(scene);
 
-    getEngrenage(scene, 'engrenageMoyen')
-        .then(() => 
-            scene.getMeshByName('engrenageMoyen').position = new Vector3(3, 0.15, 3.6)
-        );
+    getImportedMesh(scene, 'engrenageMoyen', 'rouille.jpg')
+        .then(() => {
+            scene.getMeshByName('engrenageMoyen').position = new Vector3(3, 0.15, 3.6);
+            scene.getMeshByName('engrenageMoyen').scalingDeterminant = 0.15;
+        });
 
     var tuyaux = getTuyaux(scene);
     getPorte(scene);

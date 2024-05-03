@@ -21,7 +21,7 @@
 <script>
 /* eslint-disable */
 import { ref, onMounted } from "@vue/runtime-core";
-import { createScene, makeEngrenageVisible } from "../scenes/room1";
+import { createScene, makeEngrenageVisible } from "../scenes/room2";
 
 var dragElement;
 
@@ -38,18 +38,18 @@ function imgDrop(evt) {
 }
 
 const ajoutInventaire = ref(null);
-function verif(x) {
-    console.log('LOG:' + x);
-    if (x === "engrenageMoyen"){
+function verif(item) {
+    console.log('LOG:' + item);
+    if (item === "engrenageGrand"){
         var imgEngrenage = document.createElement('img')
         imgEngrenage.setAttribute('draggable', 'true');
-        imgEngrenage.src = "/img/engrenageMoyen.png";
+        imgEngrenage.src = "/img/engrenageGrand.png";
         imgEngrenage.style.width = '100%';
 
         imgEngrenage.addEventListener('dragstart', (evt) => dragElement = evt.currentTarget.parentElement)
 
         var newTh = document.createElement('th');
-        newTh.id = x;
+        newTh.id = item;
         newTh.scope = "row";
         newTh.appendChild(imgEngrenage);
 

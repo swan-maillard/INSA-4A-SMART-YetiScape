@@ -8,9 +8,7 @@ function getPorte(scene){
     let matDoor = new StandardMaterial("matDoor");
     matDoor.diffuseTexture = textureDoor;
 
-    const result = SceneLoader.ImportMeshAsync("", "./models/", "porte.glb", scene, (meshes) => {
-        console.log("infos meshes: " + meshes);
-    });
+    const result = SceneLoader.ImportMeshAsync("", "./models/", "porte.glb", scene);
     result.then((resultat) => {
         console.log('dabord : ' + resultat.meshes.length)
         for (var i = 1; i < resultat.meshes.length; i++) {
@@ -20,10 +18,26 @@ function getPorte(scene){
     })
 }
 
+function getTuyau(scene) {
+    return SceneLoader.ImportMeshAsync("tuyau", "./models/", "tuyau.glb", scene)
+    .then(() => {
+        let tuyau = scene.getMeshByName('tuyau');
+        tuyau.scalingDeterminant = 0.3;
+        //tuyau.position = new Vector3(1, 1, 1);
+        tuyau.rotation = new Vector3(Math.PI / 2, - Math.PI / 2, 0);
+        tuyau.position = new Vector3(-4, 1.7, -1);
+        tuyau.name = 'tuyauOut';
+        var mat = new StandardMaterial();
+        mat.diffuseColor = Color3.Yellow();
+        mat.backFaceCulling = false;
+        tuyau.material = mat;
+    });
+}
+
 function getTuyaux(scene) {
     var tuyaux = [];
-    var mats = [Color3.Black(), Color3.Green(), Color3.Red(), Color3.Blue(), Color3.Purple(), Color3.Gray(), Color3.Yellow(), Color3.White()]
-    SceneLoader.ImportMeshAsync("tuyau", "./models/", "tuyau.glb", scene)
+    var mats = [Color3.Red(), Color3.Purple(), Color3.Black(), Color3.Gray(), Color3.Green(),  Color3.Yellow(),Color3.Blue(), Color3.White()]
+    return SceneLoader.ImportMeshAsync("tuyau", "./models/", "tuyau.glb", scene)
     .then(() => {
         tuyaux[0] = scene.getMeshByName('tuyau');
         tuyaux[0].scalingDeterminant = 0.3;
@@ -43,7 +57,6 @@ function getTuyaux(scene) {
             mat.backFaceCulling = false;
             tuyaux[i].material = mat;
         }
-        return tuyaux;
     });
 }
 
@@ -119,22 +132,21 @@ function getTrappe(scene){
     return trappe;
 }
 
-async function getEngrenage(scene, nomEngrenage) {
-    const textureRouille = new Texture("./textures/rouille.jpg", scene);
-    const matRouille = new StandardMaterial("matRouille");
-    matRouille.diffuseTexture = textureRouille;
-    return await SceneLoader.ImportMeshAsync(nomEngrenage, "./models/", nomEngrenage + ".glb", scene)
+async function getImportedMesh(scene, nomModel, nomTexture) {
+    return await SceneLoader.ImportMeshAsync(nomModel, "./models/", nomModel + ".glb", scene)
     .then(() => {
-        let gear = scene.getMeshByName(nomEngrenage)
-        gear.material = matRouille;
-        gear.scalingDeterminant = 0.15;
+        let gear = scene.getMeshByName(nomModel)
+        //if (nomTexture !== undefined) {
+            const textureRouille = new Texture("./textures/" + nomTexture, scene);
+            const matRouille = new StandardMaterial("matRouille");
+            matRouille.diffuseTexture = textureRouille;
+            gear.material = matRouille;
+        //}
     });
 }
 
 function getNavette(scene) {
-    SceneLoader.ImportMeshAsync("", "./models/", "navette.glb", scene, (meshes) => {
-        console.log("infos meshes: " + meshes);
-    })
+    SceneLoader.ImportMeshAsync("", "./models/", "navette.glb", scene)
     .then((resultat) => {
         console.log('navette : ' + resultat.meshes.length)
         let base = scene.getMeshByName('navetteBase');
@@ -158,4 +170,4 @@ function getNavette(scene) {
         couvercle.position = new Vector3(4.4, 1.4, 1.3);
     })
 }
-export {getPorte, getTuyaux, getSalle, getTrappe, getEngrenage, getNavette};
+export {getPorte, getTuyaux, getSalle, getTuyau, getTrappe, getImportedMesh, getNavette};
