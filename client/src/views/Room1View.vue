@@ -26,10 +26,18 @@
 import { ref, onMounted } from "@vue/runtime-core";
 import { createScene, makeEngrenageVisible } from "../scenes/room1";
 
-function imgClick(evt) {
-    var parent = evt.currentTarget.parentElement;
-    parent.removeChild(evt.currentTarget);
-    makeEngrenageVisible(scene);
+var dragElement;
+
+function imgDrop(evt) {
+    console.log('Face de pet')
+    let bon = makeEngrenageVisible(scene, dragElement.id);
+    if (bon == true) {
+        var parent = dragElement.parentElement;
+        parent.removeChild(dragElement);
+    } else {
+        console.log('impossible de drop ici');
+    }
+    dragElement = null;
 }
 
 const ajoutInventaire = ref(null);
@@ -41,18 +49,15 @@ function verif(x) {
         imgEngrenage.src = "/img/engrenageMoyen.png";
         imgEngrenage.style.width = '100%';
 
-        //imgEngrenage.addEventListener('drop', () => console.log("dropping"));
-        imgEngrenage.addEventListener('dragstart', () => console.log('start dragging'))
+        imgEngrenage.addEventListener('dragstart', (evt) => dragElement = evt.currentTarget.parentElement)
 
         var newTh = document.createElement('th');
-        newTh.id = "engrenage";
+        newTh.id = x;
         newTh.scope = "row";
         newTh.appendChild(imgEngrenage);
 
         var newTr = document.createElement('tr');
         newTr.appendChild(newTh);
-
-        newTr.addEventListener('click', imgClick);
 
         document.getElementById("ajoutInventaire").appendChild(newTr);
 
@@ -71,7 +76,9 @@ export default {
     onMounted(() => {
       if (bjsCanvas.value) {
         scene = createScene(bjsCanvas.value, verif);
-        document.getElementById('GameCanva').addEventListener('drop', ()=>console.log('onDropping'));
+
+        document.getElementById('jeu').addEventListener('dragover', (evt) => evt.preventDefault());
+        document.getElementById('jeu').addEventListener('drop', imgDrop);
       }
 
 
