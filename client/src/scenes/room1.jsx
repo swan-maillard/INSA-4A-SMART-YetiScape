@@ -44,8 +44,8 @@ const createScene = (canvas, verif) => {
     mat.backFaceCulling = false;
     pickPlane.material = mat;
     pickPlane.rotation = new Vector3(0, Math.PI/2,0);
-    pickPlane.position.x = -4;
-    pickPlane.isVisible = false;
+    pickPlane.position.x = -4.6;
+    //pickPlane.isVisible = false;
     pickPlane.isPickable = true;
 
     var currentMesh;
@@ -58,6 +58,23 @@ const createScene = (canvas, verif) => {
         }
 
         return null;
+    }
+
+    var getTuyauxPicked = function() {
+        pickPlane.isPickable = false;
+        for(var i=0; i<8; i++){
+            var tuyauPick = scene.getMeshByName("tuyau"+i);
+            console.log(tuyauPick);
+            tuyauPick.isPickable = true;
+            var pickinfo = scene.pick(scene.pointerX, scene.pointerY, function (mesh) { return mesh == tuyauPick; });
+            console.log(pickinfo.hit);
+            if(pickinfo.hit){
+                console.log("Hit !!!!!!")
+                break;
+            }
+            tuyauPick.isPickable = false;
+        }
+        pickPlane.isPickable = true;
     }
 
     var pointerDown = function (mesh) {
@@ -81,6 +98,7 @@ const createScene = (canvas, verif) => {
             if(currentMesh.name === "allWalls"){
                 moveCameraInit(camera)
             }else if(currentMesh.name === "navettePleine"){
+                currentMesh.position.addInPlace(new Vector3(0.5, 0, 0));
                 drag.value = getWallPosition();
                 console.log("Click sur navette pleine"+ drag.value)
             }
@@ -96,6 +114,7 @@ const createScene = (canvas, verif) => {
         if(drag.value){
             drag.value = null;
             console.log("Navette lachee");
+            getTuyauxPicked();
         }
     }
 
@@ -109,6 +128,7 @@ const createScene = (canvas, verif) => {
         }
 
         var diff = current.subtract(drag.value);
+        diff.x = 0;
         currentMesh.position.addInPlace(diff);
 
         drag.value = current;
