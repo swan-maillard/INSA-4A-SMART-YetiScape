@@ -33,8 +33,18 @@ export default {
       const game = await createGame(new Game(user));
       user.game = game.id;
       user.salle = 1;
+
+      //Create the call for this room
+      var Call = require('../models/call.js');
+      var call = Call.create();
+
+      game.callId = call.id;
+      console.log(game);
+      await updateGame(game);
+
       await updateUser(user);
-      res.status(200).send({ game, token: signUserData({ userId: user.id, gameId: game.id }) });
+
+      res.status(200).send({ game, token: signUserData({ userId: user.id, gameId: game.id, callId : call.id }) });
     } catch (error) {
       // Rollback user creation if game creation fails
       console.error('Error creating game:', error);
@@ -68,7 +78,8 @@ export default {
           user.salle = game.users.length;
           await updateGame(game);
           await updateUser(user);
-          res.status(200).send({ game, token: signUserData({ userId: user.id, gameId: game.id }) });
+          let callId = game.callId ? game.callId : ""
+          res.status(200).send({ game, token: signUserData({ userId: user.id, gameId: game.id, callId }) });
         } else {
           await deleteUserById(user.id);
           res.status(403).send({ message: 'Game session ' + gameId + ' has already started' });

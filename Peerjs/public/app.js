@@ -50,11 +50,13 @@ path: '/chat/'});
 // Add our ID to the list of PeerJS IDs for this call
 function registerIdWithServer() {
   display('Registering ID with server...');
-  $.post('/' + call.id + '/addpeer/' + me.id);
+  // eslint-disable-next-line
+  $.post('/' +  + '/addpeer/' + me.id);
 } 
 
 // Remove our ID from the call's list of IDs
 function unregisterIdWithServer() {
+  // eslint-disable-next-line
   $.post('/' + call.id + '/removepeer/' + me.id);
 }
 

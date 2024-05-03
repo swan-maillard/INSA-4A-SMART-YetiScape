@@ -3,11 +3,9 @@ import { Router } from 'express';
 const router = Router();
 const Call = require('../models/call');
 
-// Create a new Call instance, and redirect
-router.get('/new', function (req, res) {
-  const call = Call.create();
-  res.redirect('/' + call.id);
-});
+
+//TODO: 
+
 
 // Add PeerJS ID to Call instance when someone opens the page
 router.post('/:id/addpeer/:peerid', function (req, res) {
@@ -32,6 +30,7 @@ router.get('/:id.json', function (req, res) {
   res.json(call.toJSON());
 });
 
+/*
 // Render call page
 router.get('/:id', function (req, res) {
   const call = Call.get(req.param('id'));
@@ -46,5 +45,6 @@ router.get('/:id', function (req, res) {
 router.get('/', function (req, res) {
   res.render('index');
 });
+*/
 
 export default router;

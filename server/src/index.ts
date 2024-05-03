@@ -29,14 +29,6 @@ const io = new Server(server, {
   },
 });
 
-//Inject the peerJS middleware on the /chat route
-const ExpressPeerServer = require('peer').ExpressPeerServer;
-const peerjs_options = {
-  debug: true,
-};
-const peerServer = ExpressPeerServer(server, peerjs_options);
-app.use('/chat/', peerServer);
-
 const sessionsMap: { [key: string]: string } = {};
 
 // Specify allowed origins
@@ -46,6 +38,9 @@ const corsOptions = {
 
 // Use the CORS middleware with options
 app.use(cors());
+
+// log requests
+app.use(logger('dev'));
 
 const port = 3000;
 
@@ -57,6 +52,17 @@ app.use('/users', usersRoutes);
 app.use('/games', gamesRoutes);
 app.use('/game', checkAuthAccessGame, gameRoutes);
 app.use('/chat', chatRoutes);
+
+
+//Inject the peerJS middleware on the /chat route
+const ExpressPeerServer = require('peer').ExpressPeerServer;
+const peerjs_options = {
+  debug: true,
+};
+const peerServer = ExpressPeerServer(server, peerjs_options);
+app.use('/peer', peerServer);
+
+
 
 interface CustomSocket extends Socket {
   username?: string;

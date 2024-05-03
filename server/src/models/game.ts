@@ -14,6 +14,7 @@ export interface GameFirestore extends AbstractDocument {
   rouages: string | null;
   portes: string | null;
   itemsDispo: Item[];
+  callId: string | null;
 }
 
 export default class Game {
@@ -25,6 +26,7 @@ export default class Game {
   rouages: Enigme | null = null;
   portes: Enigme | null = null;
   itemsDispo: Item[] = [];
+  callId: string | null = null;
 
   constructor(user?: User) {
     this.users = user ? [user] : [];
@@ -64,6 +66,7 @@ export const gameConverter = {
       rouages: game.rouages ? game.rouages.id : null,
       portes: game.portes ? game.portes.id : null,
       itemsDispo: game.itemsDispo,
+      callId: game.callId,
     };
   },
 
@@ -85,6 +88,7 @@ export const gameConverter = {
     game.rouages = gameFirestore.rouages ? await getEnigmeById(gameFirestore.rouages) : null;
     game.portes = gameFirestore.portes ? await getEnigmeById(gameFirestore.portes) : null;
     game.itemsDispo = gameFirestore.itemsDispo;
+    game.callId = gameFirestore.callId;
 
     return game;
   },
