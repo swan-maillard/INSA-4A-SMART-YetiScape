@@ -12,6 +12,7 @@ const createScene = (canvas, verif) => {
     //base pour creer la scene
     const engine = new Engine(canvas);
     const scene = new Scene(engine);
+    const drag = ref(null);
 
     //On ajoute une caméra et une lumière
     const camera = new FreeCamera("camera1", new Vector3(0, 1.6, -3), scene);
@@ -35,7 +36,27 @@ const createScene = (canvas, verif) => {
         scene.render();
     });
 
+    var pickPlane = MeshBuilder.CreatePlane("pickPlane", {size: 10});
+    var mat = new StandardMaterial("MatpickPlane");
+    mat.diffuseColor = Color3.Red();
+    mat.backFaceCulling = false;
+    pickPlane.material = mat;
+    pickPlane.rotation = new Vector3(0, Math.PI/2,0);
+    pickPlane.position.x = -4;
+    pickPlane.isVisible = false;
+    pickPlane.isPickable = true;
+
     var currentMesh;
+
+    var getWallPosition = function () {
+        var pickinfo = scene.pick(scene.pointerX, scene.pointerY, function (mesh) { return mesh == pickPlane; });
+        console.log(pickinfo.hit);
+        if (pickinfo.hit) {
+            return pickinfo.pickedPoint;
+        }
+
+        return null;
+    }
 
     var pointerDown = function (mesh) {
         currentMesh = mesh;
@@ -58,8 +79,8 @@ const createScene = (canvas, verif) => {
             if(currentMesh.name === "allWalls"){
                 moveCameraInit(camera)
             }else if(currentMesh.name === "navettePleine"){
-                console.log("Click sur navette pleine")
-
+                drag.value = getWallPosition();
+                console.log("Click sur navette pleine"+ drag.value)
             }
 
         }else if(position.value === "droite"){
@@ -67,6 +88,29 @@ const createScene = (canvas, verif) => {
                 moveCameraInit(camera)
             }
         }
+    }
+
+    var pointerUp = function(){
+        if(drag.value){
+            drag.value = null;
+            console.log("Navette lachee");
+        }
+    }
+
+    var pointerMove = function(){
+        if(!drag.value){
+            return;
+        }
+        var current = getWallPosition();
+        if (!current) {
+            return;
+        }
+
+        var diff = current.subtract(drag.value);
+        currentMesh.position.addInPlace(diff);
+
+        drag.value = current;
+
     }
 
     scene.onPointerObservable.add((pointerInfo) => {
@@ -77,6 +121,10 @@ const createScene = (canvas, verif) => {
                 }
                 break;
             case PointerEventTypes.POINTERUP:
+                pointerUp();
+                break;
+            case PointerEventTypes.POINTERMOVE:
+                pointerMove();
                 break;
         }
     });
