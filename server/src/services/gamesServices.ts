@@ -1,7 +1,7 @@
 import FirestoreDatabase from '../FirestoreDatabase';
 import Game, { gameConverter, GameFirestore } from '../models/game';
 import { deleteUserById } from './usersServices';
-import { deleteEnigme } from './enigmesServices';
+import { Item } from '../models/item';
 
 const db = FirestoreDatabase;
 
@@ -16,7 +16,6 @@ export const getGameById = async (id: string) => {
 };
 
 export const createGame = async (game: Game) => {
-  await game.initEnigmes();
   game.id = await db.create<GameFirestore>('games', gameConverter.toFirestore(game));
   return game;
 };
@@ -29,13 +28,23 @@ export const deleteGame = async (id: string) => {
   const game = await getGameById(id);
   if (game) {
     game.users.forEach((user) => deleteUserById(user.id));
-    game.getEnigmes().forEach((enigme) => {
-      if (!enigme) return;
-      deleteEnigme(enigme.id);
-    });
   }
 
   await db.delete('games', id);
+};
+
+export const removeItemFromRoom = async (gameId: string, room: number, item: Item) => {
+  const game = await getGameById(gameId);
+
+  if (game) {
+    const indexItem = game.itemsDispo[room].indexOf(item);
+    if (indexItem >= 0) {
+      game.itemsDispo[room].splice(indexItem, 1);
+      await updateGame(game);
+    }
+  }
+
+  return game;
 };
 
 const gamesFirestoreToGames = async (gamesFirestore: GameFirestore[]) => {

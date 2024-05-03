@@ -15,8 +15,8 @@ const http = createServer(app);
 const io = new Server(http, {
   cors: {
     origin: 'http://localhost:8080',
-    methods: ['GET', 'POST']
-  }
+    methods: ['GET', 'POST'],
+  },
 });
 
 const sessionsMap: { [key: string]: string } = {};
@@ -43,9 +43,10 @@ interface CustomSocket extends Socket {
   username?: string;
 }
 io.on('connection', function (socket: CustomSocket) {
-  console.log('Socket connected')
+  console.log('Socket connected');
+
   socket.on('user_join', function (data: { [key: string]: unknown }) {
-    console.log(data)
+    console.log(data);
     socket.username = data.user as string;
     sessionsMap[socket.id] = data.session_id as string;
     for (const [socketId, sessionId] of Object.entries(sessionsMap)) {
