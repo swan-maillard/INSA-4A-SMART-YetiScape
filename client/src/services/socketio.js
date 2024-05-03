@@ -5,7 +5,7 @@ class SocketIo {
   constructor() {}
 
   setupSocketConnection() {
-    this.socket = io("https://localhost:3000/chat");
+    this.socket = io("https://localhost:3000");
   }
 
   join(username, sessionID) {

@@ -4,9 +4,9 @@ import usersRoutes from './routes/usersRoutes';
 import gamesRoutes from './routes/gamesRoutes';
 import cors from 'cors';
 import gameRoutes from './routes/gameRoutes';
-import voiceRoutes from './routes/voiceRoutes';
+import chatRoutes from './routes/chatRoutes';
 import { checkAuthAccessGame } from './JWT';
-import createChatRoutes from './routes/chatRoutes';
+import { Server, Socket } from 'socket.io';
 
 const https = require('https');
 const fs = require('fs');
@@ -20,7 +20,14 @@ const options = {
 
 // Boot express
 const app: Application = express();
-let server = https.createServer(options, app);
+const server = https.createServer(options, app);
+
+const io = new Server(server, {
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST'],
+  },
+});
 
 //Inject the peerJS middleware on the /chat route
 const ExpressPeerServer = require('peer').ExpressPeerServer;
@@ -28,7 +35,9 @@ const peerjs_options = {
   debug: true,
 };
 const peerServer = ExpressPeerServer(server, peerjs_options);
-app.use('/voice/', peerServer);
+app.use('/chat/', peerServer);
+
+const sessionsMap: { [key: string]: string } = {};
 
 // Specify allowed origins
 const corsOptions = {
@@ -47,10 +56,43 @@ app.use(bodyParser.json());
 app.use('/users', usersRoutes);
 app.use('/games', gamesRoutes);
 app.use('/game', checkAuthAccessGame, gameRoutes);
-app.use('/voice', voiceRoutes);
-
-const { chatRoutes, chatServer } = createChatRoutes(server);
-server = chatServer;
 app.use('/chat', chatRoutes);
+
+interface CustomSocket extends Socket {
+  username?: string;
+}
+
+io.on('connection', function (socket: CustomSocket) {
+  console.log('Socket connected');
+  socket.on('user_join', function (data: { [key: string]: unknown }) {
+    console.log(data);
+    socket.username = data.user as string;
+    sessionsMap[socket.id] = data.session_id as string;
+    for (const [socketId, sessionId] of Object.entries(sessionsMap)) {
+      if (sessionId == data.session_id) {
+        socket.broadcast.to(socketId).emit('user_join', data.user);
+      }
+    }
+  });
+
+  socket.on('chat_message', function (data: { [key: string]: unknown }) {
+    data.username = socket.username;
+    for (const [socketId, sessionId] of Object.entries(sessionsMap)) {
+      if (sessionId == data.session_id) {
+        socket.broadcast.to(socketId).emit('chat_message', data);
+      }
+    }
+  });
+
+  socket.on('disconnect', function () {
+    const disconnectedSession = sessionsMap[socket.id];
+    delete sessionsMap[socket.id];
+    for (const [socketId, sessionId] of Object.entries(sessionsMap)) {
+      if (sessionId == disconnectedSession) {
+        socket.broadcast.to(socketId).emit('user_leave', socket.username);
+      }
+    }
+  });
+});
 
 server.listen(port, '0.0.0.0', () => console.log(`Server is listening on port ${port}`));

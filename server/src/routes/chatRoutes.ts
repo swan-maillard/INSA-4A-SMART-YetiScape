@@ -1,62 +1,50 @@
-// chatRoutes.ts
+import { Router } from 'express';
 
-import { Router, Request, Response } from 'express';
-import { Server, Socket } from 'socket.io';
+const router = Router();
+const Call = require('../models/call');
 
-// Define a function to create the router with the server instance
-export default function createChatRoutes(server: Server) {
-  const router = Router();
+// Create a new Call instance, and redirect
+router.get('/new', function (req, res) {
+  const call = Call.create();
+  res.redirect('/' + call.id);
+});
 
-  // @ts-ignore
-  const io = new Server(server, {
-    path: '/chat',
-    cors: {
-      origin: '*',
-      methods: ['GET', 'POST'],
-    },
+// Add PeerJS ID to Call instance when someone opens the page
+router.post('/:id/addpeer/:peerid', function (req, res) {
+  const call = Call.get(req.param('id'));
+  if (!call) return res.status(404).send('Call not found');
+  call.addPeer(req.param('peerid'));
+  res.json(call.toJSON());
+});
+
+// Remove PeerJS ID when someone leaves the page
+router.post('/:id/removepeer/:peerid', function (req, res) {
+  const call = Call.get(req.param('id'));
+  if (!call) return res.status(404).send('Call not found');
+  call.removePeer(req.param('peerid'));
+  res.json(call.toJSON());
+});
+
+// Return JSON representation of a Call
+router.get('/:id.json', function (req, res) {
+  const call = Call.get(req.param('id'));
+  if (!call) return res.status(404).send('Call not found');
+  res.json(call.toJSON());
+});
+
+// Render call page
+router.get('/:id', function (req, res) {
+  const call = Call.get(req.param('id'));
+  if (!call) return res.redirect('/new');
+
+  res.render('call', {
+    apiKey: '',
+    call: call.toJSON(),
   });
+});
 
-  const sessionsMap: { [key: string]: string } = {};
+router.get('/', function (req, res) {
+  res.render('index');
+});
 
-  interface CustomSocket extends Socket {
-    username?: string;
-  }
-
-  io.on('connection', function (socket: CustomSocket) {
-    console.log('Socket connected');
-    socket.on('user_join', function (data: { [key: string]: unknown }) {
-      console.log(data);
-
-      socket.username = data.user as string;
-      sessionsMap[socket.id] = data.session_id as string;
-      for (const [socketId, sessionId] of Object.entries(sessionsMap)) {
-        if (sessionId == data.session_id) {
-          socket.broadcast.to(socketId).emit('user_join', data.user);
-        }
-      }
-    });
-
-    socket.on('chat_message', function (data: { [key: string]: unknown }) {
-      data.username = socket.username;
-      console.log(data);
-      for (const [socketId, sessionId] of Object.entries(sessionsMap)) {
-        console.log(data, sessionId);
-        if (sessionId == data.session_id) {
-          socket.broadcast.to(socketId).emit('chat_message', data);
-        }
-      }
-    });
-
-    socket.on('disconnect', function () {
-      const disconnectedSession = sessionsMap[socket.id];
-      delete sessionsMap[socket.id];
-      for (const [socketId, sessionId] of Object.entries(sessionsMap)) {
-        if (sessionId == disconnectedSession) {
-          socket.broadcast.to(socketId).emit('user_leave', socket.username);
-        }
-      }
-    });
-  });
-
-  return { chatRoutes: router, chatServer: server };
-}
+export default router;
