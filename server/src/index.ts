@@ -4,20 +4,40 @@ import usersRoutes from './routes/usersRoutes';
 import gamesRoutes from './routes/gamesRoutes';
 import cors from 'cors';
 import gameRoutes from './routes/gameRoutes';
+import chatRoutes from './routes/chatRoutes';
 import { checkAuthAccessGame } from './JWT';
-import { createServer } from 'http';
 import { Server, Socket } from 'socket.io';
+
+const https = require('https');
+const fs = require('fs');
+var logger = require('morgan');
+var path = require('path');
+
+
+const options = {
+  key: fs.readFileSync(path.join(__dirname, './cert/key.pem')),
+  cert: fs.readFileSync(path.join(__dirname, './cert/cert.pem'))
+}
+
+
 
 // Boot express
 const app: Application = express();
 
-const http = createServer(app);
-const io = new Server(http, {
+const server = https.createServer(options, app);
+const io = new Server(server, {
   cors: {
     origin: 'http://localhost:8080',
     methods: ['GET', 'POST']
   }
 });
+
+var ExpressPeerServer = require('peer').ExpressPeerServer
+var peerjs_options = {
+  debug: true
+}
+var peerServer = ExpressPeerServer(server, peerjs_options)
+app.use('/chat', peerServer)
 
 const sessionsMap: { [key: string]: string } = {};
 
@@ -29,7 +49,7 @@ const corsOptions = {
 // Use the CORS middleware with options
 app.use(cors());
 
-const port = 3000;
+const port = 443;
 
 app.use(express.static(__dirname + '/public'));
 app.use(bodyParser.json());
@@ -38,10 +58,12 @@ app.use(bodyParser.json());
 app.use('/users', usersRoutes);
 app.use('/games', gamesRoutes);
 app.use('/game', checkAuthAccessGame, gameRoutes);
-
+app.use('/chat', chatRoutes);
 interface CustomSocket extends Socket {
   username?: string;
 }
+
+
 io.on('connection', function (socket: CustomSocket) {
   console.log('Socket connected')
   socket.on('user_join', function (data: { [key: string]: unknown }) {
@@ -75,4 +97,4 @@ io.on('connection', function (socket: CustomSocket) {
   });
 });
 
-http.listen(port, () => console.log(`Server is listening on port ${port}`));
+server.listen(port,"0.0.0.0", () => console.log(`Server is listening on port ${port}`));
