@@ -23,27 +23,30 @@ const options = {
 
 // Boot express
 const app: Application = express();
-
 const server = https.createServer(options, app);
+
+
 const io = new Server(server, {
   cors: {
-    origin: 'http://localhost:8080',
+    origin: '*',
     methods: ['GET', 'POST']
   }
 });
 
+
+//Inject the peerJS middleware on the /chat route
 var ExpressPeerServer = require('peer').ExpressPeerServer
 var peerjs_options = {
   debug: true
 }
 var peerServer = ExpressPeerServer(server, peerjs_options)
-app.use('/chat', peerServer)
+app.use('/chat/', peerServer)
 
 const sessionsMap: { [key: string]: string } = {};
 
 // Specify allowed origins
 const corsOptions = {
-  origin: ['http://localhost:8080', 'http://localhost:8081', 'http://localhost:8082'], // Add other origins as needed
+  origin: "*" // Add other origins as needed
 };
 
 // Use the CORS middleware with options
@@ -59,6 +62,8 @@ app.use('/users', usersRoutes);
 app.use('/games', gamesRoutes);
 app.use('/game', checkAuthAccessGame, gameRoutes);
 app.use('/chat', chatRoutes);
+
+
 interface CustomSocket extends Socket {
   username?: string;
 }
@@ -67,7 +72,6 @@ interface CustomSocket extends Socket {
 io.on('connection', function (socket: CustomSocket) {
   console.log('Socket connected')
   socket.on('user_join', function (data: { [key: string]: unknown }) {
-    console.log(data)
     socket.username = data.user as string;
     sessionsMap[socket.id] = data.session_id as string;
     for (const [socketId, sessionId] of Object.entries(sessionsMap)) {

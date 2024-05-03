@@ -31,7 +31,7 @@ function connectToPeerJS(cb) {
   me = new Peer({host:'/', 
   secure:true,
    port:443,
-path: '/'});
+path: '/chat/'});
 
   me.on('call', handleIncomingCall); // Quand on recoit un call
   

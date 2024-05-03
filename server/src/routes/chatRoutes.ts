@@ -1,8 +1,7 @@
 import { Router } from 'express';
 
 const router = Router();
-
-var Call = require('./call');
+var Call = require('../models/call');
 
 // Create a new Call instance, and redirect
 router.get('/new', function(req, res) {

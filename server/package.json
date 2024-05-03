@@ -31,7 +31,11 @@
     "express": "^4.19.2",
     "firebase": "^10.11.1",
     "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.0",
+    "peer": "^1.0.2",
+    "peerjs": "^1.5.2",
     "socket.io": "^4.7.5",
-    "socketio": "^1.0.0"
+    "socketio": "^1.0.0",
+    "uuid": "^9.0.1"
   }
 }
