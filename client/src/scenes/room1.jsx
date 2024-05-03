@@ -24,8 +24,10 @@ const createScene = (canvas, verif) => {
     var mursSalle = getSalle(scene, 1);
     var trappe = getTrappe(scene);
 
-    var gear = getEngrenage(scene, 'engrenageMoyen');
-    //gear.position = new Vector3(3, 0.15, 3.6);
+    getEngrenage(scene, 'engrenageMoyen')
+        .then(() => 
+            scene.getMeshByName('engrenageMoyen').position = new Vector3(3, 0.15, 3.6)
+        );
 
     var tuyaux = getTuyaux(scene);
     getPorte(scene);
@@ -103,6 +105,7 @@ function moveCameraInit(camera){
     camera.setTarget(new Vector3(0,1.6,0))
     camera.lockedTarget = null;
 }
+
 const makeEngrenageVisible = (scene, item) => {
     if (position.value === "gauche") {
         if (item === 'engrenageMoyen'){
