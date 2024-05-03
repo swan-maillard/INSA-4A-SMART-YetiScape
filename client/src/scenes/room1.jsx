@@ -93,10 +93,14 @@ function moveCameraInit(camera){
 
 
 
-const makeEngrenageVisible = (scene) => {
-    console.log("dans le canvas : " + scene);
-    scene.getMeshByName('engrenageMoyen').setEnabled(true);
-
+const makeEngrenageVisible = (scene, item) => {
+    if (position.value === "gauche") {
+        if (item === 'engrenageMoyen'){
+            scene.getMeshByName('engrenageMoyen').setEnabled(true);
+            return true
+        }
+    }
+    return false
 };
 
 // deplacement du pointer : https://playground.babylonjs.com/#7CBW04
