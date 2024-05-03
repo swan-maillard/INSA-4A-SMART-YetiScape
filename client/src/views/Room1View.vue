@@ -24,7 +24,12 @@
 // var urlLink = URL.createObjectURL('../assets/gears.obj');
 // console.log(urlLink);
 import { ref, onMounted } from "@vue/runtime-core";
-import { createScene } from "../scenes/room1";
+import { createScene, makeEngrenageVisible } from "../scenes/room1";
+
+function imgClick() {
+    console.log('Prout');
+    makeEngrenageVisible(scene);
+}
 
 const ajoutInventaire = ref(null);
 function verif(x) {
@@ -33,6 +38,8 @@ function verif(x) {
         var imgEngrenage = document.createElement('img')
         imgEngrenage.src = "/img/engrenageMoyen.png";
         imgEngrenage.style.width = '100%';
+
+        imgEngrenage.addEventListener('click', imgClick);
 
         var newTh = document.createElement('th');
         newTh.id = "engrenage";
@@ -50,6 +57,7 @@ function verif(x) {
     }
 }
 
+var scene;
 export default {
   name: "BabylonScene",
   setup() {
@@ -57,7 +65,7 @@ export default {
 
     onMounted(() => {
       if (bjsCanvas.value) {
-        createScene(bjsCanvas.value, verif);
+        scene = createScene(bjsCanvas.value, verif);
       }
 
       
