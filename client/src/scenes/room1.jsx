@@ -52,7 +52,15 @@ const createScene = (canvas, verif) => {
             }
             console.log('bon : ' + bon)
         }
-        else if (position.value === "enigme"){
+        else if (position.value === "gauche" ){
+            if(currentMesh.name === "allWalls"){
+                moveCameraInit(camera)
+            }else if(currentMesh.name === "navettePleine"){
+                console.log("Click sur navette pleine")
+
+            }
+
+        }else if(position.value === "droite"){
             if(currentMesh.name === "allWalls"){
                 moveCameraInit(camera)
             }
@@ -75,7 +83,10 @@ const createScene = (canvas, verif) => {
 };
 
 function moveCamera(camera, mesh, x, y, z, pos){
-    position.value = "enigme";
+    if(pos === -1)
+        position.value = "gauche";
+    else
+        position.value = "droite";
 
     var target = new Vector3(x,y,z);
     camera.position = target;
