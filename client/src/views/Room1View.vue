@@ -40,7 +40,7 @@
 // console.log(urlLink);
 import { ref, onMounted } from "@vue/runtime-core";
 import { createScene } from "../scenes/room1";
-import socketio from "../main"
+import socketio from "@/services/socketio";
 
 const ajoutInventaire = ref(null);
 function verif(x) {
@@ -95,16 +95,16 @@ function initChat() {
   //Get the sessionID
   let sessionID = 0;
   //Get the socket imported above
-  const socket = socketio
-  console.log(socket)
+  const socket = socketio;
+  console.log(socket);
   form.addEventListener(
     "submit",
     function (event) {
       event.preventDefault();
 
       addMessage(username + ": " + input.value);
-    
-      socket.send_message(input.value, sessionID) 
+
+      socket.send_message(input.value, sessionID);
 
       input.value = "";
       return false;
@@ -112,20 +112,20 @@ function initChat() {
     false
   );
 
-  socket.getSocket().on("chat_message", function (data) {
+  socket.socket.on("chat_message", function (data) {
     addMessage(data.username + ": " + data.message);
   });
 
-  socket.getSocket().on("user_join", function (data) {
+  socket.socket.on("user_join", function (data) {
     addMessage(data + " just joined the chat!");
   });
 
-  socket.getSocket().on("user_leave", function (data) {
+  socket.socket.on("user_leave", function (data) {
     addMessage(data + " has left the chat.");
   });
 
   addMessage("You have joined the chat as '" + username + "'.");
-  socket.join();
+  socket.join(username, sessionID);
 
   function addMessage(message) {
     const li = document.createElement("li");

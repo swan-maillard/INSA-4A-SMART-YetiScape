@@ -58,35 +58,35 @@ const config = {
   },
 };
 infosGame();
-setInterval(infosGame,1000);
+setInterval(infosGame, 1000);
 
-function infosGame(){
+function infosGame() {
   axios
-  .get("http://localhost:3000/game", config)
-  .then((response) => respGame(response))
-  .catch(console.log);
+    .get("https://localhost:3000/game", config)
+    .then((response) => respGame(response))
+    .catch(console.log);
 }
 
 function respGame(response) {
   if (response.status == 200) {
     gameId = response.data.id;
 
-    if(response.data.users.length > gamerId && gamerId < 4){
-      for(let i = gamerId; i<response.data.users.length; i++){
-        gamers.value.push({id: gamerId++, name: response.data.users[i].name})
+    if (response.data.users.length > gamerId && gamerId < 4) {
+      for (let i = gamerId; i < response.data.users.length; i++) {
+        gamers.value.push({ id: gamerId++, name: response.data.users[i].name });
       }
     }
   }
 }
 
 function lancerSalle() {
-  let userName = localStorage.getItem("nom")
-  if(userName == gamers.value[0].name){
-    console.log("Salle 1")
-  }else if(userName == gamers.value[1].name){
-    console.log("Salle 2")
-  }else{
-    console.log("Salle 3")
+  let userName = localStorage.getItem("nom");
+  if (userName == gamers.value[0].name) {
+    console.log("Salle 1");
+  } else if (userName == gamers.value[1].name) {
+    console.log("Salle 2");
+  } else {
+    console.log("Salle 3");
   }
 }
 </script>
@@ -103,15 +103,22 @@ function lancerSalle() {
   border-top-right-radius: 0.25rem;
 }
 
-.card-up{
+.card-up {
   background: #667eea;
-  
-    /* Chrome 10-25, Safari 5.1-6 */
-    background: -webkit-linear-gradient(to top, rgba(97,154,239,0.5), rgba(94,113,145,0.5));
-  
-    /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
-    background: linear-gradient(to top, rgba(97,154,239,0.5), rgba(94,113,145,0.5))
-  
+
+  /* Chrome 10-25, Safari 5.1-6 */
+  background: -webkit-linear-gradient(
+    to top,
+    rgba(97, 154, 239, 0.5),
+    rgba(94, 113, 145, 0.5)
+  );
+
+  /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  background: linear-gradient(
+    to top,
+    rgba(97, 154, 239, 0.5),
+    rgba(94, 113, 145, 0.5)
+  );
 }
 
 .testimonial-card .avatar {
