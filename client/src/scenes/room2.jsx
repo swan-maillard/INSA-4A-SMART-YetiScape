@@ -4,8 +4,8 @@ import "@babylonjs/loaders";
 import {ref} from "@vue/runtime-core";
 import {getPorte, getTuyaux, getSalle, getTrappe, getEngrenage, getNavette} from "./roomsElements";
 
-//SAlle 1 : 
-// position possible : centre, gauche (tuyau), droite (trappe)
+//Salle 2 : 
+//Position possible : centre, droite, gauche, coffre
 const position = ref("centre");
 
 const createScene = (canvas, verif) => {
@@ -16,20 +16,15 @@ const createScene = (canvas, verif) => {
     //On ajoute une caméra et une lumière
     const camera = new FreeCamera("camera1", new Vector3(0, 1.6, -3), scene);
     camera.setTarget(new Vector3(0, 2, 5));
-    camera.attachControl(canvas, false); ///TODO : blocker pour diminuer l'amplitude de mvt
+    camera.attachControl(canvas, true); ///TODO : blocker pour diminuer l'amplitude de mvt
     console.log(camera.position)
 
     new HemisphericLight("light", Vector3.Up(), scene);
 
-    var mursSalle = getSalle(scene, 1);
-    var trappe = getTrappe(scene);
-
-    var gear = getEngrenage(scene, 'engrenageMoyen');
-    //gear.position = new Vector3(3, 0.15, 3.6);
-
-    var tuyaux = getTuyaux(scene);
+    var mursSalle = getSalle(scene, 2);
+    var gear = getEngrenage(scene, 'engrenageGrand');
+    gear.position = new Vector3(-2.4, 0.15, 2.4);
     getPorte(scene);
-    getNavette(scene);
 
     engine.runRenderLoop(() => {
         scene.render();
@@ -48,22 +43,14 @@ const createScene = (canvas, verif) => {
                 currentMesh.rotation = new Vector3(0, 0, Math.PI/4);
                 currentMesh.scalingDeterminant = 0.1;
             } else if(currentMesh.name.startsWith("tuyau")){
-                moveCamera(camera, currentMesh,-1,1.6,0.125, -1);
-            } else if(currentMesh.name === "trappe"){
-                moveCamera(camera, currentMesh,2,0.2,1.5, 1);
+                console.log('Un tuyau a été cliqué !!!!!')
+                moveCamera(camera, currentMesh);
             }
             console.log('bon : ' + bon)
         }
-        else if (position.value === "gauche" ){
+        else if (position.value === "gauche"){
             if(currentMesh.name === "allWalls"){
-                moveCameraInit(camera)
-            }else if(currentMesh.name === "navettePleine"){
-                console.log("Click sur navette pleine")
-
-            }
-
-        }else if(position.value === "droite"){
-            if(currentMesh.name === "allWalls"){
+                console.log("Retour position départ")
                 moveCameraInit(camera)
             }
         }
@@ -84,16 +71,13 @@ const createScene = (canvas, verif) => {
     return scene;
 };
 
-function moveCamera(camera, mesh, x, y, z, pos){
-    if(pos === -1)
-        position.value = "gauche";
-    else
-        position.value = "droite";
+function moveCamera(camera, mesh){
+    position.value = "gauche";
 
-    var target = new Vector3(x,y,z);
-    camera.position = target;
-    camera.setTarget(new Vector3(x+pos,y,z));
-    camera.lockedTarget = new Vector3(x+pos,y,z);
+    camera.position = new Vector3(-0.5,1.6,0);
+    var target = new Vector3(-mesh.position.x, 1.6, mesh.position.z);
+    camera.setTarget(target);
+    camera.lockedTarget = mesh;
 }
 
 function moveCameraInit(camera){
@@ -106,14 +90,7 @@ function moveCameraInit(camera){
 const makeEngrenageVisible = (scene, item) => {
     if (position.value === "gauche") {
         if (item === 'engrenageMoyen'){
-            let gear = scene.getMeshByName('engrenageMoyen');
-            gear.setEnabled(true);
             scene.getMeshByName('engrenageMoyen').setEnabled(true);
-            let tubeVide = scene.getMeshByName('navetteVide');
-            let couvercle = scene.getMeshByName('navetteCouvercle');
-            couvercle.position = new Vector3(4.35, 1.4, 1.3);
-            let navettePleine = Mesh.MergeMeshes([gear, tubeVide, couvercle], true, false, null, false, true);
-            navettePleine.name = 'navettePleine';
             return true
         }
     }

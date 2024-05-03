@@ -26,7 +26,7 @@ import { createScene, makeEngrenageVisible } from "../scenes/room1";
 var dragElement;
 
 function imgDrop(evt) {
-    console.log('Face de pet')
+    console.log('dropping a element');
     let bon = makeEngrenageVisible(scene, dragElement.id);
     if (bon == true) {
         var parent = dragElement.parentElement;
@@ -73,13 +73,9 @@ export default {
     onMounted(() => {
       if (bjsCanvas.value) {
         scene = createScene(bjsCanvas.value, verif);
-
         document.getElementById('jeu').addEventListener('dragover', (evt) => evt.preventDefault());
         document.getElementById('jeu').addEventListener('drop', imgDrop);
       }
-
-
-      
     });
 
     return {

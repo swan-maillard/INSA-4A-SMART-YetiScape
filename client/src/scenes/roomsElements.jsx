@@ -18,39 +18,34 @@ function getPorte(scene){
     })
 }
 
-
 function getTuyaux(scene) {
     var tuyaux = [];
     var mats = [Color3.Black(), Color3.Green(), Color3.Red(), Color3.Blue(), Color3.Purple(), Color3.Gray(), Color3.Yellow(), Color3.White()]
-    SceneLoader.ImportMeshAsync("tuyau", "./models/", "tuyau.glb", scene, (meshes) => {
-        console.log("infos meshes: " + meshes);
-    })
-        .then((resultat) => {
-            tuyaux[0] = resultat.meshes[1];
-            tuyaux[0].scalingDeterminant = 0.3;
-            tuyaux[0].rotation = new Vector3(Math.PI / 2, Math.PI / 2, 0);
-            tuyaux[0].position = new Vector3(3.8, 1.7, -1);
-            tuyaux[0].name = 'tuyau0';
-            var mat = new StandardMaterial();
-            mat.diffuseColor = mats[0];
+    SceneLoader.ImportMeshAsync("tuyau", "./models/", "tuyau.glb", scene)
+    .then(() => {
+        tuyaux[0] = scene.getMeshByName('tuyau');
+        tuyaux[0].scalingDeterminant = 0.3;
+        tuyaux[0].rotation = new Vector3(Math.PI / 2, Math.PI / 2, 0);
+        tuyaux[0].position = new Vector3(3.8, 1.7, -1);
+        tuyaux[0].name = 'tuyau0';
+        var mat = new StandardMaterial();
+        mat.diffuseColor = mats[0];
+        mat.backFaceCulling = false;
+        tuyaux[0].material = mat;
+        for (let i = 1; i < 8; i++) {
+            tuyaux[i] = tuyaux[0].clone('tuyau' + i);
+            tuyaux[i].position.z = -1 + 0.25 * i;
+            tuyaux[i].position.y = (i % 2 == 0) ? 1.7 : 1.4;
+            let mat = new StandardMaterial();
+            mat.diffuseColor = mats[i];
             mat.backFaceCulling = false;
-            tuyaux[0].material = mat;
-            for (let i = 1; i < 8; i++) {
-                tuyaux[i] = tuyaux[0].clone('tuyau' + i);
-                tuyaux[i].position.z = -1 + 0.25 * i;
-                tuyaux[i].position.y = (i % 2 == 0) ? 1.7 : 1.4;
-                let mat = new StandardMaterial();
-                mat.diffuseColor = mats[i];
-                mat.backFaceCulling = false;
-                tuyaux[i].material = mat;
-            }
-
-        })
-
-    return tuyaux;
+            tuyaux[i].material = mat;
+        }
+        return tuyaux;
+    });
 }
 
-function getSalle(scene){
+function getSalle(scene, numSalle){
     let textureMur = new Texture("./textures/mur.jpg", scene);
     let matMur = new StandardMaterial("matMur");
     matMur.diffuseTexture = textureMur;
@@ -59,19 +54,24 @@ function getSalle(scene){
     let murDos = MeshBuilder.CreateBox("murDos", { width: 10, height: 4, depth: 1 }, scene);
     murDos.position = new Vector3(0, 2, -5);
 
-    let murGauche = MeshBuilder.CreateBox("murGauche", { width: 1, height: 4, depth: 10 }, scene);
-    murGauche.position = new Vector3(-5, 2, 0);
-
-    /*let murDroite = MeshBuilder.CreateBox("murDroite", { width: 1, height: 4, depth: 10 }, scene);
-    var posDroite = new Vector3(5, 2, 0);
-    murDroite.position = posDroite;*/
-    let murDroite1 = MeshBuilder.CreateBox("murDroite1", { width: 1, height: 4, depth: 3 }, scene);
-    murDroite1.position = new Vector3(5, 2, 3.5);
-    let murDroite2 = MeshBuilder.CreateBox("murDroite2", { width: 1, height: 3.6, depth: 1 }, scene);
-    murDroite2.position = new Vector3(5, 2.2, 1.5);
-    let murDroite3 = MeshBuilder.CreateBox("murDroite3", { width: 1, height: 4, depth: 6 }, scene);
-    murDroite3.position = new Vector3(5, 2, -2);
-    let murDroite = Mesh.MergeMeshes([murDroite1, murDroite2, murDroite3]);
+    let murGauche;
+    let murDroite;
+    if (numSalle == 3) {
+        murGauche = getMurTrappe(scene);
+        murDroite = MeshBuilder.CreateBox("murPlein", { width: 0.5, height: 4, depth: 10 }, scene);
+        murGauche.position = new Vector3(-5, 1, 0);
+        murDroite.position = new Vector3(5, 2, 0);
+    } else if (numSalle == 2){
+        murGauche = MeshBuilder.CreateBox("murPlein", { width: 0.5, height: 4, depth: 10 }, scene);
+        murDroite = MeshBuilder.CreateBox("murPlein", { width: 0.5, height: 4, depth: 10 }, scene);
+        murGauche.position = new Vector3(-5, 2, 0);
+        murDroite.position = new Vector3(5, 2, 0);
+    } else if (numSalle == 1) {
+        murGauche = MeshBuilder.CreateBox("murPlein", { width: 1, height: 4, depth: 10 }, scene);
+        murDroite = getMurTrappe(scene);
+        murGauche.position = new Vector3(-5, 2, 0);
+        murDroite.position = new Vector3(5, 0, 0);
+    }
 
     let murFond = MeshBuilder.CreateBox("murFond", { width: 10, height: 4, depth: 1 }, scene);
     murFond.position = new Vector3(0, 2, 5);
@@ -80,15 +80,29 @@ function getSalle(scene){
     let roof = MeshBuilder.CreateGround("roof", { width: 10, height: 10 }, scene);
     roof.position.y = 4;
 
-    let etagere = MeshBuilder.CreateBox("etagere", {width : 0.5, height:0.1, depth: 0.5}, scene);
-    etagere.position = new Vector3(-4.1, 1.3, 1.3);
+    let allWalls = Mesh.MergeMeshes([murDos, murDroite, murGauche, murFond, ground, roof]);
 
-
-    let allWalls = Mesh.MergeMeshes([murDos, murDroite, murGauche, murFond, ground, roof, etagere]);
+    if (numSalle == 1) {
+        let etagere = MeshBuilder.CreateBox("etagere", {width : 0.5, height:0.1, depth: 0.5}, scene);
+        etagere.position = new Vector3(-4.1, 1.3, 1.3);
+        allWalls = Mesh.MergeMeshes([allWalls, etagere]);
+    }
     allWalls.material = matMur;
     allWalls.name = 'allWalls';
 
     return allWalls;
+}
+
+function getMurTrappe(scene) {
+    let mur1 = MeshBuilder.CreateBox("mur1", { width: 0.5, height: 4, depth: 3 }, scene);
+    mur1.position = new Vector3(0, 2, 3.5);
+    let mur2 = MeshBuilder.CreateBox("mur2", { width: 0.5, height: 3.6, depth: 1 }, scene);
+    mur2.position = new Vector3(0, 2.2, 1.5);
+    let mur3 = MeshBuilder.CreateBox("mur3", { width: 0.5, height: 4, depth: 6 }, scene);
+    mur3.position = new Vector3(0, 2, -2);
+
+    let murTrou = Mesh.MergeMeshes([mur1, mur2, mur3]);
+    return murTrou;
 }
 
 function getTrappe(scene){
@@ -103,24 +117,19 @@ function getTrappe(scene){
     return trappe;
 }
 
-function getEngrenageMoyen(scene) {
+function getEngrenage(scene, nomEngrenage) {
     const textureRouille = new Texture("./textures/rouille.jpg", scene);
     const matRouille = new StandardMaterial("matRouille");
     matRouille.diffuseTexture = textureRouille;
     var gear;
-    SceneLoader.ImportMeshAsync("engrenageMoyen", "./models/", "engrenageMoyen.glb", scene, (meshes) => {
-        console.log("infos meshes: " + meshes);
-    })
-    .then((resultat) => {
-        console.log('engrenage moyen load de taille : ' + resultat.meshes.length)
-        gear = scene.getMeshByName('engrenageMoyen')
+    SceneLoader.ImportMeshAsync(nomEngrenage, "./models/", nomEngrenage + ".glb", scene)
+    .then(() => {
+        gear = scene.getMeshByName(nomEngrenage)
         gear.material = matRouille;
         gear.scalingDeterminant = 0.15;
-        gear.position.z = 3.6;
-        gear.position.y = 0.15;
-        gear.position.x = 3;
-    })
-    return gear;
+        gear.position = new Vector3(3, 0.15, 3.6);
+        return gear;
+    });
 }
 
 function getNavette(scene) {
@@ -150,4 +159,4 @@ function getNavette(scene) {
         couvercle.position = new Vector3(4.4, 1.4, 1.3);
     })
 }
-export {getPorte, getTuyaux, getSalle, getTrappe, getEngrenageMoyen, getNavette};
+export {getPorte, getTuyaux, getSalle, getTrappe, getEngrenage, getNavette};
