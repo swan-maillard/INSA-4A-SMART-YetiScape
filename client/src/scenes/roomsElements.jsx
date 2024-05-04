@@ -1,6 +1,6 @@
 /* eslint-disable */
 
-import { Texture, Mesh, SceneLoader, Vector3, MeshBuilder, StandardMaterial, Color3 } from "@babylonjs/core";
+import {DynamicTexture, Texture, Mesh, SceneLoader, Vector3, MeshBuilder, StandardMaterial, Color3 } from "@babylonjs/core";
 import "@babylonjs/loaders";
 
 function getPorte(scene){
@@ -231,4 +231,40 @@ function getCoffreGemmes(scene){
         }
     })
 }
-export {getPorte, getTuyaux, getSalle, getTuyau, getTrappe, getImportedMesh, getNavette, getCoffre, getCoffreGemmes};
+
+function getCodeCoffre(scene, number){
+    //Creation de l'élément avec le chiffre
+    var numberTexture = new DynamicTexture("textureCode:"+number,{ height: 100, width: 100 }, scene, false);
+    numberTexture.drawText("0",35,70,"bold 50px Arial","white", "black",true);
+    var numberMat = new StandardMaterial("matCode:"+number,scene);
+    numberMat.diffuseTexture = numberTexture;
+
+    var code = MeshBuilder.CreateBox("code:"+number, { width: 0.25, height: 0.25, depth: 0.001 }, scene);
+    code.material = numberMat;
+    code.position.y = 1.6;
+
+    // Create a dynamic texture
+    var textureAdd = new DynamicTexture('codeAdd:'+number, { height: 100, width: 100 }, scene, false);
+    textureAdd.drawText("+", 35,70,"bold 50px Arial", "white", "blue", true);
+
+    // Create a material with the dynamic texture
+    var matAdd = new StandardMaterial("matAdd:"+number, scene);
+    matAdd.diffuseTexture = textureAdd;
+    var add = MeshBuilder.CreateBox("add:"+number, { width: 0.15, height: 0.15, depth: 0.001 }, scene);
+    add.position.y = 1.85;
+    add.material = matAdd;
+
+    // Create a dynamic texture
+    var textureSub = new DynamicTexture('codeSub:'+number, { height: 100, width: 100 }, scene, false);
+    textureSub.drawText("-", 35,70,"bold 50px Arial", "white", "blue", true);
+
+    // Create a material with the dynamic texture
+    var matSub = new StandardMaterial("matSub:"+number, scene);
+    matSub.diffuseTexture = textureSub;
+    var sub = MeshBuilder.CreateBox("sub:"+number, { width: 0.15, height: 0.15, depth: 0.001 }, scene);
+    sub.position.y = 1.35;
+    sub.material = matSub;
+
+    return numberTexture;
+}
+export {getPorte, getTuyaux, getSalle, getTuyau, getTrappe, getImportedMesh, getNavette, getCoffre, getCoffreGemmes, getCodeCoffre};
