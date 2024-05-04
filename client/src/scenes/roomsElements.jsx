@@ -131,6 +131,30 @@ function getTrappe(scene){
     return trappe;
 }
 
+function getTrappeGauche(scene){
+    let matTrappe = new StandardMaterial("matTrappe");
+    matTrappe.diffuseColor = Color3.Gray();
+    let trappe = MeshBuilder.CreateGround("trappe", {width:1, height:0.4}, scene);
+    trappe.position = new Vector3(-4.75,0.2,1.5);
+    trappe.material = matTrappe;
+    trappe.rotation = new Vector3(Math.PI/2,0,-Math.PI/2);
+
+    for(var i=0; i<5; i++){
+        let haut = MeshBuilder.CreateCylinder("cercle:"+i,{diameter: 0.07, height:0.01}, scene)
+        haut.position = new Vector3(-4.75,0.3,1.1+i*0.2);
+        haut.rotation = new Vector3(Math.PI/2,0,-Math.PI/2);
+
+        let milieu = MeshBuilder.CreateCylinder("cercle:"+i+5,{diameter: 0.07, height:0.01}, scene)
+        milieu.position = new Vector3(-4.75,0.2,1.1+i*0.2);
+        milieu.rotation = new Vector3(Math.PI/2,0,-Math.PI/2);
+
+        let bas = MeshBuilder.CreateCylinder("cercle:"+i+10,{diameter: 0.07, height:0.01}, scene)
+        bas.position = new Vector3(-4.75,0.1,1.1+i*0.2);
+        bas.rotation = new Vector3(Math.PI/2,0,-Math.PI/2);
+    }
+    
+}
+
 async function getImportedMesh(scene, nomModel, nomTexture) {
     return await SceneLoader.ImportMeshAsync(nomModel, "./models/", nomModel + ".glb", scene)
     .then(() => {
@@ -289,4 +313,4 @@ function getButtonValdier(scene){
     button.rotation =  new Vector3(0, Math.PI/2,0);
 }
 
-export {getPorte, getTuyaux, getSalle, getTuyau, getTrappe, getImportedMesh, getNavette,getCoffreRouage, getCoffreGemmes, getCodeCoffre, getButtonValdier};
+export {getPorte, getTuyaux, getSalle, getTuyau, getTrappe, getImportedMesh, getNavette,getCoffreRouage, getCoffreGemmes, getCodeCoffre, getButtonValdier, getTrappeGauche};
