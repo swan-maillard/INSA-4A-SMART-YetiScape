@@ -1,45 +1,39 @@
-import { Socket } from 'socket.io';
+import { Server, Socket } from 'socket.io';
+import User from '../models/user';
+export const socketChat = (io: Server, socket: Socket, socketSessions: { [key: string]: User }) => {
+  socket.on('chat/user_join', function () {
+    const user = socketSessions[socket.id];
+    if (!user) return;
 
-interface ChatSocket extends Socket {
-  username: string;
-  session_id: string;
-}
-
-export const socketChat = (socket: Socket) => {
-  const sessionsMap: { [key: string]: string } = {};
-
-  const chatSocket = socket as ChatSocket;
-
-  chatSocket.on('chat/user_join', function (data: { [key: string]: unknown }) {
-    console.log('User joined chat : ', data);
-    chatSocket.username = data.user as string;
-    sessionsMap[chatSocket.id] = data.session_id as string;
-    for (const [socketId, sessionId] of Object.entries(sessionsMap)) {
-      if (sessionId == data.session_id) {
-        chatSocket.broadcast.to(socketId).emit('user_join', data.user);
+    console.log('User joined chat : ', user.name);
+    for (const [socketId, socketUser] of Object.entries(socketSessions)) {
+      if (socketUser.game === user.game) {
+        socket.broadcast.to(socketId).emit('chat/user_join', user.name);
       }
     }
   });
 
-  chatSocket.on('chat/chat_message', function (data: { [key: string]: unknown }) {
-    console.log('User sent text : ', data);
+  socket.on('chat/message', function (data: { message: string }) {
+    const user = socketSessions[socket.id];
+    if (!user) return;
 
-    data.username = chatSocket.username;
-    for (const [socketId, sessionId] of Object.entries(sessionsMap)) {
-      if (sessionId == data.session_id) {
-        chatSocket.broadcast.to(socketId).emit('chat_message', data);
+    console.log('User sent text in chat : ', user.name, data);
+    for (const [socketId, socketUser] of Object.entries(socketSessions)) {
+      if (socketUser.game === user.game) {
+        io.to(socketId).emit('chat/message', { username: user.name, ...data });
       }
     }
   });
 
-  chatSocket.on('chat/disconnect', function (data) {
-    console.log('User disconnected chat : ', data);
+  socket.on('disconnect', function () {
+    const user = socketSessions[socket.id];
+    if (!user) return;
 
-    const disconnectedSession = sessionsMap[chatSocket.id];
-    delete sessionsMap[chatSocket.id];
-    for (const [socketId, sessionId] of Object.entries(sessionsMap)) {
-      if (sessionId == disconnectedSession) {
-        chatSocket.broadcast.to(socketId).emit('user_leave', chatSocket.username);
+    console.log('User disconnected from chat: ', user.name);
+    delete socketSessions[socket.id];
+    for (const [socketId, socketUser] of Object.entries(socketSessions)) {
+      if (socketUser.game === user.game) {
+        socket.broadcast.to(socketId).emit('chat/user_leave', user.name);
       }
     }
   });

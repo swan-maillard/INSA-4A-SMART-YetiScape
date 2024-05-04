@@ -4,9 +4,9 @@ import { getUserById } from '../services/usersServices';
 import { Enigme } from './enigme';
 import { Item } from './item';
 
-export interface GameFirestore extends AbstractDocument {
+export interface GameDatabase extends AbstractDocument {
   id: string;
-  users: string[];
+  users: string;
   trappe: string;
   tuyau: string;
   coffre: string;
@@ -46,10 +46,10 @@ const initEnigme = (nbEtapes: number, etapeActuelle: number = 0, items: Item[] =
 };
 
 export const gameConverter = {
-  toFirestore: (game: Game): GameFirestore => {
+  toDatabase: (game: Game): GameDatabase => {
     return {
       id: game.id,
-      users: game.users.map((user) => user.id),
+      users: JSON.stringify(game.users.map((user) => user.id)),
       trappe: JSON.stringify(game.trappe),
       tuyau: JSON.stringify(game.tuyau),
       coffre: JSON.stringify(game.coffre),
@@ -59,24 +59,25 @@ export const gameConverter = {
     };
   },
 
-  fromFirestore: async (gameFirestore: GameFirestore) => {
+  fromDatabase: async (gameDatabase: GameDatabase) => {
     const game = new Game();
-    game.id = gameFirestore.id;
+    game.id = gameDatabase.id;
 
+    const users = JSON.parse(gameDatabase.users);
     game.users = (
       await Promise.all(
-        gameFirestore.users.map(async (userId) => {
+        users.map(async (userId: string) => {
           return await getUserById(userId);
         })
       )
     ).filter((user) => user) as User[];
 
-    game.trappe = JSON.parse(gameFirestore.trappe);
-    game.tuyau = JSON.parse(gameFirestore.tuyau);
-    game.coffre = JSON.parse(gameFirestore.coffre);
-    game.rouages = JSON.parse(gameFirestore.rouages);
-    game.portes = JSON.parse(gameFirestore.portes);
-    game.itemsDispo = JSON.parse(gameFirestore.itemsDispo);
+    game.trappe = JSON.parse(gameDatabase.trappe);
+    game.tuyau = JSON.parse(gameDatabase.tuyau);
+    game.coffre = JSON.parse(gameDatabase.coffre);
+    game.rouages = JSON.parse(gameDatabase.rouages);
+    game.portes = JSON.parse(gameDatabase.portes);
+    game.itemsDispo = JSON.parse(gameDatabase.itemsDispo);
 
     return game;
   },

@@ -8,6 +8,9 @@ import { checkAuthAccessGame } from './JWT';
 import { createServer } from 'http';
 import { Server, Socket } from 'socket.io';
 import { socketChat } from './sockets/chat';
+import { getUserByName } from './services/usersServices';
+import User from './models/user';
+import { socketWaitingRoom } from './sockets/waitingRoom';
 
 // Boot express
 const app: Application = express();
@@ -22,12 +25,8 @@ const port = 3000;
 app.use(express.static(__dirname + '/public'));
 app.use(bodyParser.json());
 
-// Application routing
-app.use('/users', usersRoutes);
-app.use('/games', gamesRoutes);
-app.use('/game', checkAuthAccessGame, gameRoutes);
-
 // SOCKETS
+const socketSessions: { [key: string]: User } = {};
 
 const io = new Server(http, {
   cors: {
@@ -38,7 +37,24 @@ const io = new Server(http, {
 
 io.on('connection', function (socket: Socket) {
   console.log('Socket connected');
-  socketChat(socket);
+
+  socket.on('join-game', async (data: { [key: string]: unknown }) => {
+    console.log('User joined game : ', data);
+    const user = await getUserByName(data.username as string);
+    if (user) {
+      socketSessions[socket.id] = user;
+    }
+  });
+
+  socketChat(io, socket, socketSessions);
+  socketWaitingRoom(io, socket, socketSessions);
 });
+
+app.set('sockets', { io, socketSessions });
+
+// Application routing
+app.use('/users', usersRoutes);
+app.use('/games', gamesRoutes);
+app.use('/game', checkAuthAccessGame, gameRoutes);
 
 http.listen(port, () => console.log(`Server is listening on port ${port}`));

@@ -1,27 +1,27 @@
-import FirestoreDatabase from '../FirestoreDatabase';
-import Game, { gameConverter, GameFirestore } from '../models/game';
+import Database from '../SqliteDatabase';
+import Game, { gameConverter, GameDatabase } from '../models/game';
 import { deleteUserById } from './usersServices';
 import { Item } from '../models/item';
 
-const db = FirestoreDatabase;
+const db = Database;
 
 export const getAllGames = async () => {
-  const gamesFirestore = await db.getAll<GameFirestore>('games');
+  const gamesFirestore = await db.getAll<GameDatabase>('games');
   return gamesFirestoreToGames(gamesFirestore);
 };
 
 export const getGameById = async (id: string) => {
-  const gameFirestore = await db.getOne<GameFirestore>('games', id);
-  return gameFirestore ? gameConverter.fromFirestore(gameFirestore) : null;
+  const gameDatabase = await db.getOne<GameDatabase>('games', id);
+  return gameDatabase ? gameConverter.fromDatabase(gameDatabase) : null;
 };
 
 export const createGame = async (game: Game) => {
-  game.id = await db.create<GameFirestore>('games', gameConverter.toFirestore(game));
+  game.id = await db.create<GameDatabase>('games', gameConverter.toDatabase(game));
   return game;
 };
 
 export const updateGame = async (game: Game) => {
-  await db.update<GameFirestore>('games', gameConverter.toFirestore(game));
+  await db.update<GameDatabase>('games', gameConverter.toDatabase(game));
 };
 
 export const deleteGame = async (id: string) => {
@@ -47,6 +47,6 @@ export const removeItemFromRoom = async (gameId: string, room: number, item: Ite
   return game;
 };
 
-const gamesFirestoreToGames = async (gamesFirestore: GameFirestore[]) => {
-  return await Promise.all(gamesFirestore.map(async (game: GameFirestore) => await gameConverter.fromFirestore(game)));
+const gamesFirestoreToGames = async (gamesFirestore: GameDatabase[]) => {
+  return await Promise.all(gamesFirestore.map(async (game: GameDatabase) => await gameConverter.fromDatabase(game)));
 };

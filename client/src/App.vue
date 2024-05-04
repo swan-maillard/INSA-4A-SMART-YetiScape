@@ -1,48 +1,148 @@
+<script setup>
+import ChatRoom from "@/components/ChatRoom.vue";
+import useAuth from "@/stores/auth.store";
+import { computed, watchEffect } from "vue";
+import socketio from "@/services/socketio";
 
-<script>
+const auth = useAuth();
+auth.initData();
 
+const gameId = computed(() => auth.gameId);
 
+watchEffect(() => {
+  if (gameId.value) {
+    socketio.socket.emit("join-game", { username: auth.username });
+  }
+}, [gameId]);
 </script>
 
 <template>
-  <head></head>
-  <body>
-    <main class="background-init">
-      <RouterView></RouterView>
-    </main>
-  </body>
+  <div class="noise" />
+  <div class="main-container">
+    <ChatRoom v-if="gameId" />
+    <div class="section-container">
+      <RouterView />
+    </div>
+  </div>
 </template>
 
-
 <style>
+@import url("https://fonts.googleapis.com/css2?family=Josefin+Sans:ital,wght@0,100..700;1,100..700&display=swap");
+
+@font-face {
+  font-family: "Berani";
+  src: url("assets/fonts/Berani/Berani.otf") format("opentype");
+}
+
+body,
+html,
 #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  background-image: url("https://www.textures.com/system/gallery/photos/Ground/Snow/120168/Snow0158_9_350.jpg");
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  color: white;
-  height: 100%;
+  position: relative;
+  background-size: 7%;
+  font-family: "Josefin Sans", sans-serif;
 }
 
-body, html{
-  height: 100%;
-  margin: 0;
-  background: url("./assets/background_init.jpg");
-  background-size: contain;
+.cursor-pointer {
+  cursor: pointer;
 }
 
-.flex
-{
+.noise {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  background-image: url("assets/noisy.png");
+  opacity: 0.3;
+  background-size: 25%;
+  pointer-events: none;
+  z-index: 100;
+}
+
+.main-container {
+  width: 100%;
+  height: 100%;
+  color: #ddd;
+  padding: 40px;
   display: flex;
-  flex-direction: row;
-  width:100%;
+  gap: 40px;
 }
 
-.justify-between{
-  justify-content: space-between;
+.section-container {
+  border-radius: 20px;
+  flex-grow: 1;
+  height: 100%;
+  box-shadow: 0 0 10px 4px #000000a6;
+  background-color: #151515;
+  padding: 15px;
+  transition: 1s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-.m-1{
-  margin-left: 1rem;
-  margin-right: 1rem;
+.berani {
+  font-family: "Berani", sans-serif;
+}
+
+button,
+input,
+optgroup,
+select,
+textarea {
+  border-radius: 30px;
+  padding: 5px 10px;
+  text-align: center;
+  border: 2px solid #ddd;
+  color: #ddd;
+  font-size: 1.2rem !important;
+  background-color: rgba(51, 51, 51, 0.92);
+}
+button.dark,
+input.dark,
+optgroup.dark,
+select.dark,
+textarea.dark {
+  border: 2px solid #222;
+  color: #222;
+  background-color: #00000038;
+}
+
+[type="button"],
+[type="reset"],
+[type="submit"],
+button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer !important;
+  border-radius: 30px !important;
+  padding: 10px 20px !important;
+  color: #222 !important;
+  background-color: #ddd !important;
+  transition: 0.5s;
+  border: none !important;
+}
+
+[type="button"]:hover,
+[type="reset"]:hover,
+[type="submit"]:hover,
+button:hover {
+  background-color: #b0b0b0 !important;
+  transform: scale(1.05);
+}
+
+.button-spinner {
+  width: 1.5em !important;
+  height: 1.5em !important;
 }
 </style>

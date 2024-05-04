@@ -3,12 +3,12 @@ import Game from './game';
 import { getGameById } from '../services/gamesServices';
 import { Item } from './item';
 
-export interface UserFirestore extends AbstractDocument {
+export interface UserDatabase extends AbstractDocument {
   id: string;
   name: string;
   salle: number | null;
   game: string | null;
-  items: Item[];
+  items: string;
 }
 
 export default class User {
@@ -28,23 +28,23 @@ export default class User {
 }
 
 export const userConverter = {
-  toFirestore: (user: User): UserFirestore => {
+  toDatabase: (user: User): UserDatabase => {
     return {
       id: user.id,
       name: user.name,
       salle: user.salle,
       game: user.game,
-      items: user.items,
+      items: JSON.stringify(user.items),
     };
   },
 
-  fromFirestore: (userFirestore: UserFirestore) => {
+  fromDatabase: (userDatabase: UserDatabase) => {
     const user = new User();
-    user.id = userFirestore.id;
-    user.name = userFirestore.name;
-    user.salle = userFirestore.salle;
-    user.game = userFirestore.game;
-    user.items = userFirestore.items;
+    user.id = userDatabase.id;
+    user.name = userDatabase.name;
+    user.salle = userDatabase.salle;
+    user.game = userDatabase.game;
+    user.items = JSON.parse(userDatabase.items);
 
     return user;
   },
