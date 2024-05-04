@@ -1,13 +1,11 @@
-import Database from '../SqliteDatabase';
 import Game, { gameConverter, GameDatabase } from '../models/game';
 import { deleteUserById } from './usersServices';
 import { Item } from '../models/item';
-
-const db = Database;
+import db from '../databases/db';
 
 export const getAllGames = async () => {
-  const gamesFirestore = await db.getAll<GameDatabase>('games');
-  return gamesFirestoreToGames(gamesFirestore);
+  const gamesDatabase = await db.getAll<GameDatabase>('games');
+  return gamesDatabaseToGames(gamesDatabase);
 };
 
 export const getGameById = async (id: string) => {
@@ -47,6 +45,6 @@ export const removeItemFromRoom = async (gameId: string, room: number, item: Ite
   return game;
 };
 
-const gamesFirestoreToGames = async (gamesFirestore: GameDatabase[]) => {
-  return await Promise.all(gamesFirestore.map(async (game: GameDatabase) => await gameConverter.fromDatabase(game)));
+const gamesDatabaseToGames = async (gamesDatabase: GameDatabase[]) => {
+  return await Promise.all(gamesDatabase.map(async (game: GameDatabase) => await gameConverter.fromDatabase(game)));
 };

@@ -18,7 +18,7 @@ export default class User {
   game: string | null;
   items: Item[];
 
-  constructor(name: string = 'Anonymous') {
+  constructor(name: string) {
     this.id = '-1';
     this.name = name;
     this.salle = null;
@@ -39,9 +39,8 @@ export const userConverter = {
   },
 
   fromDatabase: (userDatabase: UserDatabase) => {
-    const user = new User();
+    const user = new User(userDatabase.name);
     user.id = userDatabase.id;
-    user.name = userDatabase.name;
     user.salle = userDatabase.salle;
     user.game = userDatabase.game;
     user.items = JSON.parse(userDatabase.items);

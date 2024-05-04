@@ -1,19 +1,20 @@
 // service.ts
 
-import AbstractDocument from './models/AbstractDocument';
+import AbstractDocument from '../models/AbstractDocument';
 import { Database, open } from 'sqlite';
-import { Database as SqliteDatabase } from 'sqlite3';
+import { Database as SqliteDriver } from 'sqlite3';
 
-// Initialize the SQLite database
-let db: Database<SqliteDatabase>;
-async function connectDatabase(): Promise<void> {
-  db = await open({
-    filename: './data.db', // SQLite database file
-    driver: SqliteDatabase,
-  });
+export default class SqliteDatabase {
+  private db?: Database<SqliteDriver>;
 
-  // Create tables if they don't exist
-  await db.exec(`
+  constructor() {
+    open({
+      filename: './src/databases/sqlite.db', // SQLite database file
+      driver: SqliteDriver,
+    })
+      .then(async (db: Database<SqliteDriver>) => {
+        this.db = db;
+        await this.db.exec(`
       CREATE TABLE IF NOT EXISTS games (
        id TEXT PRIMARY KEY,
        users TEXT,  -- store as JSON string
@@ -25,8 +26,7 @@ async function connectDatabase(): Promise<void> {
        itemsDispo TEXT
       );
   `);
-
-  await db.exec(`
+        await this.db.exec(`
     CREATE TABLE IF NOT EXISTS users (
       id TEXT PRIMARY KEY,
       name TEXT,
@@ -35,26 +35,25 @@ async function connectDatabase(): Promise<void> {
       items TEXT  -- store as JSON string
     );
   `);
-}
-connectDatabase()
-  .then(() => {
-    console.log('Database connected');
-  })
-  .catch((error) => {
-    console.error('Failed to connect to database:', error);
-  });
+        console.log('SQLite Database connected');
+      })
+      .catch((error) => {
+        console.error('Failed to connect to SQLite database:', error);
+      });
+  }
 
-export default {
   async getAll<T extends AbstractDocument>(collectionName: string): Promise<T[]> {
-    return db.all(`SELECT * FROM ${collectionName}`);
-  },
+    return this.db!.all(`SELECT * FROM ${collectionName}`);
+  }
 
   async getOne<T extends AbstractDocument>(collectionName: string, documentId: string): Promise<T | null> {
-    const document = await db.get(`SELECT * FROM ${collectionName} WHERE id = ?`, [documentId]);
+    const document = await this.db!.get(`SELECT * FROM ${collectionName} WHERE id = ?`, [documentId]);
     return document || null;
-  },
+  }
 
   async create<T extends AbstractDocument>(collectionName: string, data: T) {
+    data.id = new Date().getTime().toString();
+
     // Extract keys and values from the data object
     const keys = Object.keys(data).join(', ');
     const placeholders = Object.keys(data)
@@ -66,11 +65,11 @@ export default {
 
     // Execute the SQL query
     const params = Object.values(data);
-    await db.run(sql, params);
+    await this.db!.run(sql, params);
 
     // Return the document ID
     return data.id;
-  },
+  }
 
   async update<T extends AbstractDocument>(collectionName: string, data: T) {
     // Extract keys and values from the data object
@@ -83,13 +82,14 @@ export default {
 
     // Execute the SQL query
     const params = [...Object.values(data), data.id];
-    await db.run(sql, params);
-  },
+    await this.db!.run(sql, params);
+  }
 
   async delete(collectionName: string, documentId: string) {
-    await db.run(`DELETE FROM ${collectionName} WHERE id = ?`, [documentId]);
-  },
+    await this.db!.run(`DELETE FROM ${collectionName} WHERE id = ?`, [documentId]);
+  }
+
   async getFromQuery<T>(query: string, params: unknown[] = []): Promise<T[]> {
-    return await db.all(query, params);
-  },
-};
+    return await this.db!.all(query, params);
+  }
+}

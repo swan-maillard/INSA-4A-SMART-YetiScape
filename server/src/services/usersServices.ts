@@ -1,28 +1,37 @@
-import Database from '../SqliteDatabase';
 import User, { userConverter, UserDatabase } from '../models/user';
-
-const db = Database;
+import db, { dbDriver } from '../databases/db';
+import { query, where } from 'firebase/firestore';
+import FirestoreDatabase from '../databases/FirestoreDatabase';
+import SqliteDatabase from '../databases/SqliteDatabase';
 
 export const getAllUsers = async () => {
-  const usersFirestore = await db.getAll<UserDatabase>('users');
-  return usersFirestore.map((user) => userConverter.fromDatabase(user));
+  const usersDatabase = await db.getAll<UserDatabase>('users');
+  return usersDatabase.map((user) => userConverter.fromDatabase(user));
 };
 
 export const getUserById = async (id: string) => {
-  const usersFirestore = await db.getOne<UserDatabase>('users', id);
-  return usersFirestore ? userConverter.fromDatabase(usersFirestore) : null;
+  const usersDatabase = await db.getOne<UserDatabase>('users', id);
+  return usersDatabase ? userConverter.fromDatabase(usersDatabase) : null;
 };
 
 export const getUserByName = async (name: string) => {
-  // FIRESTORE
-  // const refUsers = db.getRef('users');
-  // const q = query(refUsers, where('name', '==', name));
-  // const usersFirestore = await db.getFromQuery<UserDatabase>(q);
+  let usersDatabase: UserDatabase[];
+  let q;
+  let customDb: FirestoreDatabase | SqliteDatabase;
+  switch (dbDriver) {
+    case 'firestore':
+      customDb = db as FirestoreDatabase;
+      q = query(customDb.getRef('users'), where('name', '==', name));
+      usersDatabase = await customDb.getFromQuery<UserDatabase>(q);
+      break;
 
-  // SQLITE
-  const q = 'SELECT * FROM users WHERE name = ?';
-  const usersFirestore = await db.getFromQuery<UserDatabase>(q, [name]);
-  return usersFirestore.length > 0 ? userConverter.fromDatabase(usersFirestore[0]) : null;
+    case 'sqlite':
+      customDb = db as SqliteDatabase;
+      q = 'SELECT * FROM users WHERE name = ?';
+      usersDatabase = await customDb.getFromQuery<UserDatabase>(q, [name]);
+      break;
+  }
+  return usersDatabase.length > 0 ? userConverter.fromDatabase(usersDatabase[0]) : null;
 };
 
 export const createUser = async (user: User) => {
