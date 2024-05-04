@@ -11,17 +11,16 @@ const createScene = (canvas, verif) => {
     //base pour creer la scene
     const engine = new Engine(canvas);
     const scene = new Scene(engine);
-    const drag = ref(null);
 
     getGemme(scene, 'triangle').then(() => {
         scene.getMeshByName('gemmeTriangle').rotation = new Vector3(Math.PI/4, Math.PI/4, 0);
-        scene.getMeshByName('gemmeTriangle').position = new Vector3(0, 0, 0);
+        scene.getMeshByName('gemmeTriangle').position = new Vector3(-4.3, 0.2, 3);
         scene.getMeshByName('gemmeTriangle').name = 'item:gemmeTriangle';
     })
 
     getGemme(scene, 'carre').then(() => {
         scene.getMeshByName('gemmeCarre').rotation = new Vector3(Math.PI/4, Math.PI/4, 0);
-        scene.getMeshByName('gemmeCarre').position = new Vector3(0, 0, 0);
+        scene.getMeshByName('gemmeCarre').position = new Vector3(-4.3, 0.2, 3);
         scene.getMeshByName('gemmeCarre').name = 'item:gemmeCarre';
     })
 
@@ -68,14 +67,17 @@ const createScene = (canvas, verif) => {
         currentMesh = mesh;
         console.log("click")
         if(currentMesh.name.startsWith('item')){
-            verif('item', currentMesh.name.substring(5))
-            .then(() => {
-                console.log("promesse tenue : on supprime l'engrenage")
-                currentMesh.dispose();
-            })
-            .catch(() => {
-                console.log('promesse non tenue, on garde l engrenage')
-            });
+            var coffre = scene.getMeshByName("wooden_crate_01_lid")
+            if(coffre != null){
+                verif('item', currentMesh.name.substring(5))
+                .then(() => {
+                    console.log("promesse tenue : on supprime l'engrenage")
+                    currentMesh.dispose();
+                })
+                .catch(() => {
+                    console.log('promesse non tenue, on garde l engrenage')
+                });
+            }
         }
         if(position.value === "centre"){
             if(currentMesh.name.startsWith("wooden_crate")){
