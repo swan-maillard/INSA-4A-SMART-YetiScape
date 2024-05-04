@@ -138,19 +138,24 @@ function getTrappeGauche(scene){
     trappe.position = new Vector3(-4.75,0.2,1.5);
     trappe.material = matTrappe;
     trappe.rotation = new Vector3(Math.PI/2,0,-Math.PI/2);
+    const matBlanc = new StandardMaterial("matBlanc", scene);
+    matBlanc.diffuseColor = Color3.White();
 
     for(var i=0; i<5; i++){
         let haut = MeshBuilder.CreateCylinder("cercle:"+i,{diameter: 0.07, height:0.01}, scene)
         haut.position = new Vector3(-4.75,0.3,1.1+i*0.2);
         haut.rotation = new Vector3(Math.PI/2,0,-Math.PI/2);
+        haut.material = matBlanc;
 
         let milieu = MeshBuilder.CreateCylinder("cercle:"+i+5,{diameter: 0.07, height:0.01}, scene)
         milieu.position = new Vector3(-4.75,0.2,1.1+i*0.2);
         milieu.rotation = new Vector3(Math.PI/2,0,-Math.PI/2);
+        milieu.material = matBlanc;
 
         let bas = MeshBuilder.CreateCylinder("cercle:"+i+10,{diameter: 0.07, height:0.01}, scene)
         bas.position = new Vector3(-4.75,0.1,1.1+i*0.2);
         bas.rotation = new Vector3(Math.PI/2,0,-Math.PI/2);
+        bas.material = matBlanc;
     }
     
 }

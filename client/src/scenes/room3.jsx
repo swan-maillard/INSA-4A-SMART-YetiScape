@@ -88,7 +88,8 @@ const createScene = (canvas, verif) => {
         }else if(position.value === "trappe"){
             if(currentMesh.name === "allWalls"){
                 moveCameraInit(camera)
-            }else if(currentMesh.name.startsWith("cercle")){
+            }
+            else if(currentMesh.name.startsWith("cercle")){
                 console.log("cercle click !")
                 changeColorCircle();
             }
@@ -133,10 +134,12 @@ const createScene = (canvas, verif) => {
         texture[index].update();
     }
     
-    changeColorCircle = function(){
+    var changeColorCircle = function(){
         console.log(currentMesh.material)
-        if(currentMesh.material == undefined || currentMesh.material == matBlanc){
+        if(currentMesh.material.name == matBlanc.name){
             currentMesh.material = matNoir;
+        }else{
+            currentMesh.material = matBlanc;
         }
 
     }
@@ -144,6 +147,7 @@ const createScene = (canvas, verif) => {
     scene.onPointerObservable.add((pointerInfo) => {
         switch (pointerInfo.type) {
             case PointerEventTypes.POINTERDOWN:
+                console.log("ahhhhh!")
                 if (pointerInfo.pickInfo.hit) {
                     pointerDown(pointerInfo.pickInfo.pickedMesh)
                 }
