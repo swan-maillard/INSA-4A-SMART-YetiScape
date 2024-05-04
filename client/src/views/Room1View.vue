@@ -54,15 +54,17 @@ function verif(type, nom) {
             addItemToInv(nom);
         });
         return prom;
-    } else {
+    } else if (type === 'tuyau') {
         ///TODO DATABASE : verifier que c'est OK
         let prom = new Promise((resolve, reject) => {
             if (nom == 5 /*&& itemDedans = engrenageMoyen*/){
                 resolve();
             } else {
-                //si c'est pas bon renvoyer l'item dans le tuyau! et le remettre dans l'inventaire
                 reject();
             }
+        }).then(() => {
+            //si c'est pas bon renvoyer l'item dans le tuyau! et le remettre dans l'inventaire
+            console.log('result');
         });
         return prom;
     }
@@ -95,13 +97,9 @@ export default {
     onMounted(() => {
       if (bjsCanvas.value) {
         scene = createScene(bjsCanvas.value, verif);
-
         document.getElementById('jeu').addEventListener('dragover', (evt) => evt.preventDefault());
         document.getElementById('jeu').addEventListener('drop', imgDrop);
       }
-
-
-      
     });
 
     return {

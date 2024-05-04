@@ -136,12 +136,12 @@ async function getImportedMesh(scene, nomModel, nomTexture) {
     return await SceneLoader.ImportMeshAsync(nomModel, "./models/", nomModel + ".glb", scene)
     .then(() => {
         let gear = scene.getMeshByName(nomModel)
-        //if (nomTexture !== undefined) {
+        if (nomTexture !== undefined) {
             const textureRouille = new Texture("./textures/" + nomTexture, scene);
             const matRouille = new StandardMaterial("matRouille");
             matRouille.diffuseTexture = textureRouille;
             gear.material = matRouille;
-        //}
+        }
     });
 }
 

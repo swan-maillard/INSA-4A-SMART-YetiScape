@@ -72,16 +72,19 @@ const createScene = (canvas, verif) => {
             console.log(pickinfo.hit);
             if(pickinfo.hit){
                 console.log("Hit !!!!!!" + i);
-                verif('trappe', i);
+                //On delete la navette de la scene (mesh.dispose)
+                verif('tuyau', i).catch(() => {
+                    console.log('mauvaise solution')
+                })
                 break;
             }
             tuyauPick.isPickable = false;
         }
         pickPlane.isPickable = true;
-        //si rien de touché : on remet le tube a sa place
+        //si rien de touché : on remet la navette a sa place : Vector3(-4.1, 1.4, 1.3);
         //si qqch de touché, on lance la vérif =>
             // verif OK : rien
-            // verif non OK : remettre le tube vide a sa place
+            // verif non OK : remettre le tube vide a sa place (getNavette)
     }
 
     var pointerDown = function (mesh) {
@@ -135,9 +138,8 @@ const createScene = (canvas, verif) => {
         if (!current) {
             return;
         }
-        console.log("Current:" +current)
+        console.log("Current:" + current)
         var diff = current.subtract(drag.value);
-        diff.x = 0;
         currentMesh.position.addInPlace(diff);
         console.log("Current Mesh: "+currentMesh.position)
 
@@ -196,7 +198,9 @@ const placeItem = (scene, item) => {
                 let couvercle = scene.getMeshByName('navetteCouvercle');
                 couvercle.position = new Vector3(4.35, 1.4, 1.3);
                 let navettePleine = Mesh.MergeMeshes([gear, tubeVide, couvercle], true, false, null, false, true);
+                navettePleine.setPivotPoint(new Vector3(4.3, 1.4, 1.3));
                 navettePleine.name = 'navettePleine';
+
             });
             return position.value;
         }
