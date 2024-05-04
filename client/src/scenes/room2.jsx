@@ -32,13 +32,19 @@ const createScene = (canvas, verif) => {
     .then( () => {
         let eng1 = scene.getMeshByName('engrenagePetit');
         eng1.position = new Vector3(2.1, 0.12, 4.1);
+        eng1.setPivotPoint = new Vector3(2.1, 0.12, 4.1);
         eng1.scalingDeterminant = 0.1;
-        eng1.name = 'eng1';
-        let eng2 = eng1.clone('eng2');
+        eng1.name = 'dragEngP1';
+        let eng2 = eng1.clone('dragEngP2');
         eng2.position = new Vector3(2.4, 0.12, 4)
-        let eng3 = eng1.clone('eng2');
+        let eng3 = eng1.clone('dragEngP3');
         eng3.position = new Vector3(2.65, 0.12, 4.1)
     });
+
+    var pickPlane = MeshBuilder.CreatePlane("pickPlane", {size: 2});
+    pickPlane.isVisible = false;
+    pickPlane.position= new Vector3(-2, 1, 3.8);
+    pickPlane.isPickable = true;
     
     getPorte(scene);
     getTuyau(scene);
@@ -48,6 +54,7 @@ const createScene = (canvas, verif) => {
     });
 
     var currentMesh;
+    var dragOrigin = null;
 
     var pointerDown = function (mesh) {
         currentMesh = mesh;
@@ -65,11 +72,58 @@ const createScene = (canvas, verif) => {
             if (currentMesh.name === 'coffreRouage') {
                 moveCamera(camera, currentMesh, -1,1.6,0.125, -1);
             }
+        } else if (position.value === 'coffreRouage'){
+            if (currentMesh.name.startsWith('dragEng')){
+                console.log(currentMesh.position);
+                dragOrigin = new Vector3 (currentMesh.position.x, currentMesh.position.y, currentMesh.position.z);
+                console.log(dragOrigin);
+                currentMesh.rotation = new Vector3(Math.PI/2,0, 0);
+            }
         }
         if (position.value !== "centre" && currentMesh.name === "allWalls") {
             console.log("Retour position départ")
             moveCameraInit(camera)
         }
+    }
+
+    var pointerUp = function(pointerInfo){
+        if(dragOrigin){
+            console.log('here2 ' + pointerInfo.pickInfo.pickedMesh.name);
+            if (pointerInfo.pickInfo.pickedMesh.name.startsWith('cyl')){
+                currentMesh.position.x = - pointerInfo.pickInfo.pickedMesh.position.x;
+                currentMesh.position.z = pointerInfo.pickInfo.pickedMesh.position.z;
+                currentMesh.position.y = pointerInfo.pickInfo.pickedMesh.position.y;
+            } else {
+                currentMesh.rotation = new Vector3(0, 0, 0);
+                currentMesh.position = dragOrigin;
+            }
+            //verifier qu'un cylindre est touché.
+            //Si oui, poser l'eng dessus
+            //Sinon, remettre dans sa position et rotation d'origine
+            dragOrigin = null;   
+        }
+    }
+
+    var pointerMove = function(){
+        if(!dragOrigin){
+            return;
+        }
+        var current = getWallPosition();
+        if (!current) {
+            return;
+        }
+        currentMesh.position.x = - current.x;
+        currentMesh.position.y = current.y;
+        currentMesh.position.z = current.z;
+    }
+
+    var getWallPosition = function () {
+        var pickinfo = scene.pick(scene.pointerX, scene.pointerY, function (mesh) { return mesh == pickPlane; });
+        console.log(pickinfo.hit);
+        if (pickinfo.hit) {
+            return pickinfo.pickedPoint;
+        }
+        return null;
     }
 
     scene.onPointerObservable.add((pointerInfo) => {
@@ -80,6 +134,10 @@ const createScene = (canvas, verif) => {
                 }
                 break;
             case PointerEventTypes.POINTERUP:
+                pointerUp(pointerInfo);
+                break;
+            case PointerEventTypes.POINTERMOVE:
+                pointerMove();
                 break;
         }
     });
@@ -111,7 +169,7 @@ const placeItem = (scene, item) => {
                 .then( () => {
                     scene.getMeshByName('engrenageGrand').position = new Vector3(2.9, 0.1, 3.8);
                     scene.getMeshByName('engrenageGrand').scalingDeterminant = 0.16;
-                    scene.getMeshByName('engrenageGrand').name = 'eng0';
+                    scene.getMeshByName('engrenageGrand').name = 'dragEngG0';
                 });
         }
         if (item === 'engrenageMoyen'){
@@ -119,7 +177,7 @@ const placeItem = (scene, item) => {
                 .then( () => {
                     scene.getMeshByName('engrenageMoyen').position = new Vector3(2, 0.1, 3.8);
                     scene.getMeshByName('engrenageMoyen').scalingDeterminant = 0.15;
-                    scene.getMeshByName('engrenageMoyen').name = 'eng3';
+                    scene.getMeshByName('engrenageMoyen').name = 'dragEngM3';
                 });
         }
         return position.value;

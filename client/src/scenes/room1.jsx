@@ -41,13 +41,9 @@ const createScene = (canvas, verif) => {
     });
 
     var pickPlane = MeshBuilder.CreatePlane("pickPlane", {size: 10});
-    var mat = new StandardMaterial("MatpickPlane");
-    mat.diffuseColor = Color3.Red();
-    mat.backFaceCulling = false;
-    pickPlane.material = mat;
-    pickPlane.rotation = new Vector3(0, Math.PI/2,0);
-    pickPlane.position.x = -4.6;
     pickPlane.isVisible = false;
+    pickPlane.rotation = new Vector3(0, Math.PI/2,0);
+    pickPlane.position.x = -3.5;
     pickPlane.isPickable = true;
 
     var currentMesh;
@@ -64,26 +60,21 @@ const createScene = (canvas, verif) => {
 
     var getTuyauxPicked = function() {
         pickPlane.isPickable = false;
+        let tuyauTouche = -1;
         for(var i=0; i<8; i++){
             var tuyauPick = scene.getMeshByName("tuyau"+i);
-            console.log(tuyauPick);
             tuyauPick.isPickable = true;
             var pickinfo = scene.pick(scene.pointerX, scene.pointerY, function (mesh) { return mesh == tuyauPick; });
-            console.log(pickinfo.hit);
             if(pickinfo.hit){
                 console.log("Hit !!!!!!" + i);
+                tuyauTouche = i;
                 //On delete la navette de la scene (mesh.dispose)
-                verif('tuyau', i).then(()=>{
-                    setInvisible();
-                })
-                .catch(() => {
-                    setOldPosition();
-                })
                 break;
             }
             tuyauPick.isPickable = false;
         }
         pickPlane.isPickable = true;
+        return tuyauTouche;
         //si rien de touché : on remet la navette a sa place : Vector3(-4.1, 1.4, 1.3);
         //si qqch de touché, on lance la vérif =>
             // verif OK : rien
@@ -121,7 +112,8 @@ const createScene = (canvas, verif) => {
             if(currentMesh.name === "allWalls"){
                 moveCameraInit(camera)
             } else if(currentMesh.name === "navettePleine"){
-                currentMesh.position.addInPlace(new Vector3(0.5, 0, 0));
+
+                currentMesh.position.addInPlace(new Vector3(0.5, 0, -0.1));
                 drag.value = getWallPosition();
                 console.log("Click sur navette pleine "+ drag.value)
             }
@@ -137,7 +129,19 @@ const createScene = (canvas, verif) => {
         if(drag.value){
             drag.value = null;
             console.log("Navette lachee");
-            getTuyauxPicked();            
+            let tuyauTouche = getTuyauxPicked(); 
+            if (tuyauTouche === -1) {
+                setOldPosition();
+            } else {
+                currentMesh.dispose();
+                verif('tuyau', tuyauTouche).then(()=>{
+                    console.log('OK pour le tuyau');
+                })
+                .catch(() => {
+                    console.log('Not OK, ca reviens');
+                    getNavette(scene);
+                }) 
+            }        
         }
     }
 
@@ -150,13 +154,11 @@ const createScene = (canvas, verif) => {
             return;
         }
         console.log("Current:" + current)
-        var diff = current.subtract(drag.value);
-        diff.x = 0
-        currentMesh.position.addInPlace(diff);
-        console.log("Current Mesh: "+currentMesh.position)
+        currentMesh.position.x = current.x + 4;
+        currentMesh.position.y = current.y - 1.4;
+        currentMesh.position.z = current.z * 0.9 - 1.3;
 
         drag.value = current;
-
     }
 
     scene.onPointerObservable.add((pointerInfo) => {
