@@ -44,7 +44,7 @@ function verif(type, code) {
     if (type === 'item'){
         // TODO: remplacer par les gemmes quand ils sont placés
         let prom = new Promise((resolve, reject) => {
-            if (code === 'engrenageGrand' || code === 'gemmeRonde'){
+            if (code === 'gemmeTriangle' || code === 'gemmeCarre'){
                 resolve();
             } else {
                 reject();

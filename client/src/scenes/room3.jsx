@@ -1,7 +1,7 @@
 /* eslint-disable */
 import {PointerEventTypes, Engine, Scene, FreeCamera, Vector3, HemisphericLight, DynamicTexture, StandardMaterial, MeshBuilder, Color3} from "@babylonjs/core";
 import {ref} from "@vue/runtime-core";
-import {getPorte, getImportedMesh,  getSalle, getCoffreGemmes, getCodeCoffre, getButtonValdier, getTrappeGauche} from "./roomsElements";
+import {getPorte, getGemme,  getSalle, getCoffreGemmes, getCodeCoffre, getButtonValdier, getTrappeGauche} from "./roomsElements";
 
 //Salle 3 : 
 // position possible : centre, trappe, image, coffre
@@ -13,13 +13,17 @@ const createScene = (canvas, verif) => {
     const scene = new Scene(engine);
     const drag = ref(null);
 
-    //TODO : supprimer ça une fois gemmes bien mis
-    getImportedMesh(scene, 'engrenageGrand', 'rouille.jpg')
-        .then(()=> {
-            scene.getMeshByName('engrenageGrand').position = new Vector3(-2.4, 0.15, 2.4);
-            scene.getMeshByName('engrenageGrand').scalingDeterminant = 0.16;
-            scene.getMeshByName('engrenageGrand').name = 'item:engrenageGrand';
-        });
+    getGemme(scene, 'triangle').then(() => {
+        scene.getMeshByName('gemmeTriangle').rotation = new Vector3(Math.PI/4, Math.PI/4, 0);
+        scene.getMeshByName('gemmeTriangle').position = new Vector3(0, 0, 0);
+        scene.getMeshByName('gemmeTriangle').name = 'item:gemmeTriangle';
+    })
+
+    getGemme(scene, 'carre').then(() => {
+        scene.getMeshByName('gemmeCarre').rotation = new Vector3(Math.PI/4, Math.PI/4, 0);
+        scene.getMeshByName('gemmeCarre').position = new Vector3(0, 0, 0);
+        scene.getMeshByName('gemmeCarre').name = 'item:gemmeCarre';
+    })
 
 
     const matBlanc = new StandardMaterial("matBlanc", scene);
@@ -223,21 +227,20 @@ function moveCameraInit(camera){
 
 const placeItem = (scene, item) => {
     if (position.value === "trappe") {
-        if (item === 'engrenageGrand'){
-            getImportedMesh(scene, 'engrenageGrand', 'rouille.jpg')
-                .then( () => {
-                    scene.getMeshByName('engrenageGrand').position = new Vector3(4.5,0,1.5);
-                    scene.getMeshByName('engrenageGrand').scalingDeterminant = 0.16;
-                });
+        if (item === 'gemmeTriangle'){
+            getGemme(scene, 'triangle').then(() => {
+                scene.getMeshByName('gemmeTriangle').rotation = new Vector3(Math.PI/4, Math.PI/4, 0);
+                scene.getMeshByName('gemmeTriangle').position = new Vector3(4.75, 0, 1.5);
+                scene.getMeshByName('gemmeTriangle').name = 'item:gemmeTriangle';
+            })
                 return position.value;
-        }
-        if (item === 'engrenageMoyen'){
-            getImportedMesh(scene, 'engrenageMoyen', 'rouille.jpg')
-                .then( () => {
-                    scene.getMeshByName('engrenageMoyen').position = Vector3(4.5,0,1.5);
-                    scene.getMeshByName('engrenageMoyen').scalingDeterminant = 0.15;
-                });
-            return position.value;
+        }else if (item === 'gemmeCarre'){
+            getGemme(scene, 'carre').then(() => {
+                scene.getMeshByName('gemmeCarre').rotation = new Vector3(Math.PI/4, Math.PI/4, 0);
+                scene.getMeshByName('gemmeCarre').position = new Vector3(4.75, 0, 1.5);
+                scene.getMeshByName('gemmeCarre').name = 'item:gemmeCarre';
+            })
+                return position.value;
         }
     }
     return 'erreur';
