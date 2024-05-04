@@ -65,6 +65,8 @@ const createScene = (canvas, verif) => {
                 
             }else if(currentMesh.name === "trappe" || currentMesh.name.startsWith("cercle")){
                 moveCamera(camera,-2, 0.2,1.5, -1, new Vector3(-3,0.2,1.5))
+            }else if(currentMesh.name === "objetTrappe"){
+                moveCamera(camera,-2, 1.6,1.5, -1, new Vector3(-5,0,1.5))
             }
         }
         else if(position.value === "coffre"){
@@ -115,6 +117,9 @@ const createScene = (canvas, verif) => {
             var cercle = scene.getMeshByName("cercle:"+i);
             cercle.isVisible = false;
         }
+        var cercle = MeshBuilder.CreateCylinder("objetTrappe",{diameter:0.5, height:0.001}, scene);
+        cercle.position = new Vector3(-4.5,0,1.5);
+        moveCameraInit(camera);
     }
 
     var reinitCode = function(){

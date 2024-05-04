@@ -90,7 +90,7 @@ function getSalle(scene, numSalle){
     let murFond = MeshBuilder.CreateBox("murFond", { width: 10, height: 4, depth: 1 }, scene);
     murFond.position = new Vector3(0, 2, 5);
 
-    let ground = MeshBuilder.CreateGround("ground", { width: 10, height: 10 }, scene);
+    let ground = MeshBuilder.CreateGround("ground", { width: 20, height: 20 }, scene);
     let roof = MeshBuilder.CreateGround("roof", { width: 10, height: 10 }, scene);
     roof.position.y = 4;
 
