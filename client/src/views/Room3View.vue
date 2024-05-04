@@ -21,40 +21,10 @@
 <script>
 /* eslint-disable */
 import { ref, onMounted } from "@vue/runtime-core";
-import { createScene } from "../scenes/room3";
-
-function verif(type, code) {
-    var codeAssemble = "";
-    code.value.forEach((e) => {
-        codeAssemble += e;
-    });
-    if(type === "buttonValider"){
-        //TODO DATABASE: regarder si le codeAssemble est bien solution coffre
-        let prom = new Promise((resolve, reject)=>{
-            if(codeAssemble == 8163){
-                resolve();
-            }else {
-                reject();
-            }
-        })
-        return prom;
-    }else if(type === "trappe"){
-        console.log(codeAssemble)
-        // TODO regarder si le codeAssemble est bien solution trappe
-        let prom = new Promise((resolve, reject)=>{
-            if(codeAssemble == 110000111001111){
-                console.log("resolve");
-                resolve();
-            }else {
-                console.log("reject")
-                reject();
-            }
-        })
-        return prom;
-    }
-}
+import { createScene, placeItem } from "../scenes/room3";
 
 var dragElement;
+
 function imgDrop(evt) {
     let lieu = placeItem(scene, dragElement.id)
     console.log("l'item " + dragElement.id + " a etait placé dans l'enigme : " + lieu)
@@ -65,7 +35,73 @@ function imgDrop(evt) {
     } else {
         console.log('impossible de drop ici');
     }
+    //TODO DATABASE: téléporter vers l'autre coté de la trappe (envoyer message à user salle 1)
     dragElement = null;
+}
+
+function verif(type, code) {
+    console.log('verification de : ' + type + ' nommé ' + code);
+    if (type === 'item'){
+        // TODO: remplacer par les gemmes quand ils sont placés
+        let prom = new Promise((resolve, reject) => {
+            if (code === 'engrenageGrand' || code === 'gemmeRonde'){
+                resolve();
+            } else {
+                reject();
+            }
+        }).then( () => {
+            addItemToInv(code);
+        });
+        return prom;
+    }else{
+        var codeAssemble = "";
+        code.value.forEach((e) => {
+            codeAssemble += e;
+        });
+        if(type === "buttonValider"){
+            //TODO DATABASE: regarder si le codeAssemble est bien solution coffre
+            let prom = new Promise((resolve, reject)=>{
+                if(codeAssemble == 8163){
+                    resolve();
+                }else {
+                    reject();
+                }
+            })
+            return prom;
+        }else if(type === "trappe"){
+            console.log(codeAssemble)
+            // TODO regarder si le codeAssemble est bien solution trappe
+            let prom = new Promise((resolve, reject)=>{
+                if(codeAssemble == 110000111001111){
+                    console.log("resolve");
+                    resolve();
+                }else {
+                    console.log("reject")
+                    reject();
+                }
+            })
+            return prom;
+        }
+    }
+}
+
+function addItemToInv(nom) {
+    var imgEngrenage = document.createElement('img')
+    imgEngrenage.setAttribute('draggable', 'true');
+    imgEngrenage.src = "/img/" + nom + ".png";
+    imgEngrenage.style.width = '100%';
+
+    imgEngrenage.addEventListener('dragstart', (evt) => { dragElement = evt.currentTarget.parentElement;})
+
+    var newTh = document.createElement('th');
+    newTh.id = nom;
+    newTh.scope = "row";
+    newTh.appendChild(imgEngrenage);
+
+    var newTr = document.createElement('tr');
+    newTr.appendChild(newTh);
+
+    document.getElementById("ajoutInventaire").appendChild(newTr);
 }
 
 var scene;

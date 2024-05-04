@@ -1,7 +1,7 @@
 /* eslint-disable */
 import {PointerEventTypes, Engine, Scene, FreeCamera, Vector3, HemisphericLight, DynamicTexture, StandardMaterial, MeshBuilder, Color3} from "@babylonjs/core";
 import {ref} from "@vue/runtime-core";
-import {getPorte,  getSalle, getCoffreGemmes, getCodeCoffre, getButtonValdier, getTrappeGauche} from "./roomsElements";
+import {getPorte, getImportedMesh,  getSalle, getCoffreGemmes, getCodeCoffre, getButtonValdier, getTrappeGauche} from "./roomsElements";
 
 //Salle 3 : 
 // position possible : centre, trappe, image, coffre
@@ -12,6 +12,15 @@ const createScene = (canvas, verif) => {
     const engine = new Engine(canvas);
     const scene = new Scene(engine);
     const drag = ref(null);
+
+    //TODO : supprimer ça une fois gemmes bien mis
+    getImportedMesh(scene, 'engrenageGrand', 'rouille.jpg')
+        .then(()=> {
+            scene.getMeshByName('engrenageGrand').position = new Vector3(-2.4, 0.15, 2.4);
+            scene.getMeshByName('engrenageGrand').scalingDeterminant = 0.16;
+            scene.getMeshByName('engrenageGrand').name = 'item:engrenageGrand';
+        });
+
 
     const matBlanc = new StandardMaterial("matBlanc", scene);
     matBlanc.diffuseColor = Color3.White();
@@ -54,6 +63,16 @@ const createScene = (canvas, verif) => {
     var pointerDown = function (mesh) {
         currentMesh = mesh;
         console.log("click")
+        if(currentMesh.name.startsWith('item')){
+            verif('item', currentMesh.name.substring(5))
+            .then(() => {
+                console.log("promesse tenue : on supprime l'engrenage")
+                currentMesh.dispose();
+            })
+            .catch(() => {
+                console.log('promesse non tenue, on garde l engrenage')
+            });
+        }
         if(position.value === "centre"){
             if(currentMesh.name.startsWith("wooden_crate")){
                 var coffre = scene.getMeshByName("wooden_crate_01_lid")
@@ -201,4 +220,26 @@ function moveCameraInit(camera){
     camera.setTarget(new Vector3(0,1.6,0))
     camera.lockedTarget = null;
 }
-export {createScene};
+
+const placeItem = (scene, item) => {
+    if (position.value === "trappe") {
+        if (item === 'engrenageGrand'){
+            getImportedMesh(scene, 'engrenageGrand', 'rouille.jpg')
+                .then( () => {
+                    scene.getMeshByName('engrenageGrand').position = new Vector3(4.5,0,1.5);
+                    scene.getMeshByName('engrenageGrand').scalingDeterminant = 0.16;
+                });
+                return position.value;
+        }
+        if (item === 'engrenageMoyen'){
+            getImportedMesh(scene, 'engrenageMoyen', 'rouille.jpg')
+                .then( () => {
+                    scene.getMeshByName('engrenageMoyen').position = Vector3(4.5,0,1.5);
+                    scene.getMeshByName('engrenageMoyen').scalingDeterminant = 0.15;
+                });
+            return position.value;
+        }
+    }
+    return 'erreur';
+};
+export {createScene, placeItem};
