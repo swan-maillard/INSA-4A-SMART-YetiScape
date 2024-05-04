@@ -289,4 +289,4 @@ function getButtonValdier(scene){
     button.rotation =  new Vector3(0, Math.PI/2,0);
 }
 
-export {getPorte, getTuyaux, getSalle, getTuyau, getTrappe, getImportedMesh, getNavette,getCoffreRouage, getCoffre, getCoffreGemmes, getCodeCoffre, getButtonValdier};
+export {getPorte, getTuyaux, getSalle, getTuyau, getTrappe, getImportedMesh, getNavette,getCoffreRouage, getCoffreGemmes, getCodeCoffre, getButtonValdier};
