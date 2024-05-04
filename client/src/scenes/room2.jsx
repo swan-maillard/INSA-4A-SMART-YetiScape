@@ -2,7 +2,7 @@
 import { Texture, Mesh, Engine, Scene, SceneLoader, FreeCamera, Vector3, MeshBuilder, StandardMaterial, Color3, HemisphericLight, PointerEventTypes, Color4 } from "@babylonjs/core";
 import "@babylonjs/loaders";
 import {ref} from "@vue/runtime-core";
-import {getPorte, getSalle, getImportedMesh, getTuyau, getCoffre} from "./roomsElements";
+import {getPorte, getSalle, getImportedMesh, getTuyau, getCoffreRouage} from "./roomsElements";
 
 //Salle 2 : 
 //Position possible : centre, murDroite, tuyau, coffreRouage
@@ -27,18 +27,18 @@ const createScene = (canvas, verif) => {
             scene.getMeshByName('engrenageGrand').scalingDeterminant = 0.16;
             scene.getMeshByName('engrenageGrand').name = 'item:engrenageGrand';
         });
-    getCoffre(scene)
+    getCoffreRouage(scene)
     getImportedMesh(scene, 'engrenagePetit', 'rouille.jpg')
     .then( () => {
         let eng1 = scene.getMeshByName('engrenagePetit');
         eng1.position = new Vector3(2.1, 0.12, 4.1);
         eng1.setPivotPoint = new Vector3(2.1, 0.12, 4.1);
         eng1.scalingDeterminant = 0.1;
-        eng1.name = 'dragEngP1';
-        let eng2 = eng1.clone('dragEngP2');
-        eng2.position = new Vector3(2.4, 0.12, 4)
-        let eng3 = eng1.clone('dragEngP3');
-        eng3.position = new Vector3(2.65, 0.12, 4.1)
+        eng1.name = 'dragEngP1||2.1,0.12,4.1';
+        let eng2 = eng1.clone('dragEngP2||2.4,0.12,4');
+        eng2.position = new Vector3(2.4, 0.12, 4);
+        let eng3 = eng1.clone('dragEngP3||2.65,0.12,4.1');
+        eng3.position = new Vector3(2.65, 0.12, 4.1);
     });
 
     var pickPlane = MeshBuilder.CreatePlane("pickPlane", {size: 2});
@@ -54,10 +54,11 @@ const createScene = (canvas, verif) => {
     });
 
     var currentMesh;
-    var dragOrigin = null;
+    var drag = false;
 
     var pointerDown = function (mesh) {
         currentMesh = mesh;
+        console.log('click sur ' + currentMesh.name)
         if(currentMesh.name.startsWith('item')){
             verif('item', currentMesh.name.substring(5))
             .then(() => {
@@ -75,9 +76,16 @@ const createScene = (canvas, verif) => {
         } else if (position.value === 'coffreRouage'){
             if (currentMesh.name.startsWith('dragEng')){
                 console.log(currentMesh.position);
-                dragOrigin = new Vector3 (currentMesh.position.x, currentMesh.position.y, currentMesh.position.z);
-                console.log(dragOrigin);
+                drag = true;
                 currentMesh.rotation = new Vector3(Math.PI/2,0, 0);
+            } else if (currentMesh.name === 'engBas'){
+                let bon = verifRouage(scene);
+                console.log('verification du puzzle : ' + bon);
+                if (bon === true) {
+                    verif('rouage', true).then(() => {
+                        //getGemmes
+                    });
+                }
             }
         }
         if (position.value !== "centre" && currentMesh.name === "allWalls") {
@@ -86,26 +94,63 @@ const createScene = (canvas, verif) => {
         }
     }
 
-    var pointerUp = function(pointerInfo){
-        if(dragOrigin){
-            console.log('here2 ' + pointerInfo.pickInfo.pickedMesh.name);
-            if (pointerInfo.pickInfo.pickedMesh.name.startsWith('cyl')){
-                currentMesh.position.x = - pointerInfo.pickInfo.pickedMesh.position.x;
-                currentMesh.position.z = pointerInfo.pickInfo.pickedMesh.position.z;
-                currentMesh.position.y = pointerInfo.pickInfo.pickedMesh.position.y;
+    var replaceEngInit = function(currentMesh, forceOrigin) {
+        let engComps = currentMesh.name.split('|');
+        let pos = [];
+        if (forceOrigin || engComps[1] === ""){
+            currentMesh.rotation = new Vector3(0, 0, 0);
+            pos = engComps[2].split(',');
+            if (engComps[1] !== ""){
+                console.log('ici')
+                let cyl = scene.getMeshByName(engComps[1] + '|' + engComps[0]);
+                let cylComps = cyl.name.split('|');
+                cyl.name = cylComps[0] + '|';
+                engComps[1] = '';
+                currentMesh.name = engComps.join('|');
+            }
+        } else {
+            console.log('ici2')
+            let cyl = scene.getMeshByName(engComps[1] + '|' + engComps[0]);
+            pos[0] = - cyl.position.x;
+            pos[1] = cyl.position.y;
+            pos[2] = cyl.position.z;
+        }
+        currentMesh.position = new Vector3(...pos);
+    }
+
+    var pointerUp = function(pickedMesh){
+        if(drag){
+            if (pickedMesh.name.startsWith('cyl')){ // j'ai fini sur un cyl
+                if (pickedMesh.name.endsWith('|')){ // le cyl est dispo
+                    let engComps = currentMesh.name.split('|');
+                    let cylComps = pickedMesh.name.split('|');
+                    if (engComps[1] !== ""){
+                        console.log('crach ici')
+                        console.log('cherche : ' + engComps[1] + '|' + engComps[0])
+                        scene.getMeshByName(engComps[1] + '|' + engComps[0]).name = engComps[1] + '|';
+                    }
+                    engComps[1] = cylComps[0];
+                    cylComps[1] = engComps[0];
+                    currentMesh.name = engComps.join('|');
+                    pickedMesh.name = cylComps.join('|');
+                    currentMesh.position.x = - pickedMesh.position.x;
+                    currentMesh.position.z = pickedMesh.position.z;
+                    currentMesh.position.y = pickedMesh.position.y;
+                } else {
+                    replaceEngInit(currentMesh, false);
+                }
             } else {
-                currentMesh.rotation = new Vector3(0, 0, 0);
-                currentMesh.position = dragOrigin;
+                replaceEngInit(currentMesh, true);
             }
             //verifier qu'un cylindre est touché.
             //Si oui, poser l'eng dessus
             //Sinon, remettre dans sa position et rotation d'origine
-            dragOrigin = null;   
+            drag = null;   
         }
     }
 
     var pointerMove = function(){
-        if(!dragOrigin){
+        if(!drag){
             return;
         }
         var current = getWallPosition();
@@ -119,7 +164,6 @@ const createScene = (canvas, verif) => {
 
     var getWallPosition = function () {
         var pickinfo = scene.pick(scene.pointerX, scene.pointerY, function (mesh) { return mesh == pickPlane; });
-        console.log(pickinfo.hit);
         if (pickinfo.hit) {
             return pickinfo.pickedPoint;
         }
@@ -134,13 +178,34 @@ const createScene = (canvas, verif) => {
                 }
                 break;
             case PointerEventTypes.POINTERUP:
-                pointerUp(pointerInfo);
+                pointerUp(pointerInfo.pickInfo.pickedMesh);
                 break;
             case PointerEventTypes.POINTERMOVE:
                 pointerMove();
                 break;
         }
     });
+
+    function verifRouage(scene){
+        let count = 0;
+        if (scene.getMeshByName('dragEngP1||2.1,0.12,4.1')) {
+            count++;
+        }
+        if (scene.getMeshByName('dragEngP2||2.4,0.12,4')) {
+            count++;
+        }
+        if (scene.getMeshByName('dragEngP3||2.65,0.12,4.1')) {
+            count++;
+        }
+        if (count == 1
+            && scene.getMeshByName('cyl4|dragEngP3') == null 
+            && scene.getMeshByName('cyl4|dragEngP2') == null 
+            && scene.getMeshByName('cyl4|dragEngP1') == null
+            && scene.getMeshByName('cyl0|dragEngG') != null
+            /*&& scene.getMeshByName('cyl3|dragEngM') != null*/)
+            return true;
+        return false;
+    }
 
     return scene;
 };
@@ -169,7 +234,7 @@ const placeItem = (scene, item) => {
                 .then( () => {
                     scene.getMeshByName('engrenageGrand').position = new Vector3(2.9, 0.1, 3.8);
                     scene.getMeshByName('engrenageGrand').scalingDeterminant = 0.16;
-                    scene.getMeshByName('engrenageGrand').name = 'dragEngG0';
+                    scene.getMeshByName('engrenageGrand').name = 'dragEngG||2.9,0.1,3.8';
                 });
         }
         if (item === 'engrenageMoyen'){
@@ -177,7 +242,7 @@ const placeItem = (scene, item) => {
                 .then( () => {
                     scene.getMeshByName('engrenageMoyen').position = new Vector3(2, 0.1, 3.8);
                     scene.getMeshByName('engrenageMoyen').scalingDeterminant = 0.15;
-                    scene.getMeshByName('engrenageMoyen').name = 'dragEngM3';
+                    scene.getMeshByName('engrenageMoyen').name = 'dragEngM||2,0.1,3.8';
                 });
         }
         return position.value;

@@ -53,9 +53,9 @@ function verif(type, nom) {
         });
         return prom;
     } else if (type === 'coffreRouage') {
-        ///TODO DATABASE : verifier que c'est OK
+        ///TODO DATABASE : envoyer enigme reussis
         let prom = new Promise((resolve, reject) => {
-            if (nom == 5 /*&& itemDedans = engrenageMoyen*/){
+            if (nom == true){
                 resolve();
             } else {
                 reject();

@@ -59,10 +59,6 @@ function getTuyaux(scene) {
     });
 }
 
-function getCoffreRouage() {
-
-}
-
 function getSalle(scene, numSalle){
     let textureMur = new Texture("./textures/mur.jpg", scene);
     let matMur = new StandardMaterial("matMur");
@@ -148,22 +144,22 @@ async function getImportedMesh(scene, nomModel, nomTexture) {
     });
 }
 
-async function getCoffre(scene) {
+async function getCoffreRouage(scene) {
     const textureRouille = new Texture("./textures/copper.jpg", scene);
     const matRouille = new StandardMaterial("matRouille");
     matRouille.diffuseTexture = textureRouille;
     var cyl = [];
-    cyl[0] = MeshBuilder.CreateCylinder('cyl0', {height:0.1, diameter:0.06, tessellation:10}, scene);
+    cyl[0] = MeshBuilder.CreateCylinder('cyl0|', {height:0.1, diameter:0.06, tessellation:10}, scene);
     cyl[0].position = new Vector3(-2.53, 0.35, 4.2);
     cyl[0].rotation = new Vector3(Math.PI / 2, 0, 0);
     cyl[0].material = matRouille;
-    cyl[1] = cyl[0].clone('cyl1');
+    cyl[1] = cyl[0].clone('cyl1|');
     cyl[1].position = new Vector3(-2.26, 0.34, 4.2);
-    cyl[2] = cyl[0].clone('cyl2');
+    cyl[2] = cyl[0].clone('cyl2|');
     cyl[2].position = new Vector3(-2.16, 0.48, 4.2);
-    cyl[3] = cyl[0].clone('cyl3');
+    cyl[3] = cyl[0].clone('cyl3|');
     cyl[3].position = new Vector3(-2.3, 0.7, 4.2);
-    cyl[4] = cyl[0].clone('cyl4');
+    cyl[4] = cyl[0].clone('cyl4|');
     cyl[4].position = new Vector3(-2.53, 0.61, 4.2);
     getImportedMesh(scene, 'engrenageMoyen', 'rouille.jpg')
         .then( () => {
@@ -227,7 +223,6 @@ function getCoffreGemmes(scene){
             resultat.meshes[i].position.x = -4.3;
             resultat.meshes[i].position.z = 3;
             resultat.meshes[i].rotation = new Vector3(0, Math.PI/2,0);
-
         }
     })
 }
@@ -276,4 +271,4 @@ function getCodeCoffre(scene, number, coordz){
 
     return numberTexture;
 }
-export {getPorte, getTuyaux, getSalle, getTuyau, getTrappe, getImportedMesh, getNavette, getCoffre, getCoffreGemmes, getCodeCoffre};
+export {getPorte, getTuyaux, getSalle, getTuyau, getTrappe, getImportedMesh, getNavette, getCoffreRouage, getCoffreGemmes, getCodeCoffre};
