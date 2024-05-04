@@ -23,13 +23,15 @@ const createScene = (canvas, verif) => {
 
     var mursSalle = getSalle(scene, 3);
     getPorte(scene);
-    //getCoffreGemmes(scene);
+    getCoffreGemmes(scene);
 
+    // Creation code coffre
     const code = ref([0,0,0,0]); // valeur de la combinaison du coffre
 
     var texture = new Array();
-    texture.push(getCodeCoffre(scene,0));
-    var number1 = 0;
+    for(var i=0; i<4; i++){
+        texture.push(getCodeCoffre(scene,0,3-i*0.3));
+    }
 
     engine.runRenderLoop(() => {
         scene.render();

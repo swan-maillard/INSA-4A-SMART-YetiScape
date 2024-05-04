@@ -232,7 +232,7 @@ function getCoffreGemmes(scene){
     })
 }
 
-function getCodeCoffre(scene, number){
+function getCodeCoffre(scene, number, coordz){
     //Creation de l'élément avec le chiffre
     var numberTexture = new DynamicTexture("textureCode:"+number,{ height: 100, width: 100 }, scene, false);
     numberTexture.drawText("0",35,70,"bold 50px Arial","white", "black",true);
@@ -241,7 +241,10 @@ function getCodeCoffre(scene, number){
 
     var code = MeshBuilder.CreateBox("code:"+number, { width: 0.25, height: 0.25, depth: 0.001 }, scene);
     code.material = numberMat;
+    code.position.z = coordz;
     code.position.y = 1.6;
+    code.position.x = 4.5;
+    code.rotation = new Vector3(0, Math.PI/2,0)
 
     // Create a dynamic texture
     var textureAdd = new DynamicTexture('codeAdd:'+number, { height: 100, width: 100 }, scene, false);
@@ -252,7 +255,10 @@ function getCodeCoffre(scene, number){
     matAdd.diffuseTexture = textureAdd;
     var add = MeshBuilder.CreateBox("add:"+number, { width: 0.15, height: 0.15, depth: 0.001 }, scene);
     add.position.y = 1.85;
+    add.position.x = 4.5;
+    add.position.z = coordz;
     add.material = matAdd;
+    add.rotation = new Vector3(0, Math.PI/2,0)
 
     // Create a dynamic texture
     var textureSub = new DynamicTexture('codeSub:'+number, { height: 100, width: 100 }, scene, false);
@@ -263,7 +269,10 @@ function getCodeCoffre(scene, number){
     matSub.diffuseTexture = textureSub;
     var sub = MeshBuilder.CreateBox("sub:"+number, { width: 0.15, height: 0.15, depth: 0.001 }, scene);
     sub.position.y = 1.35;
+    sub.position.x = 4.5;
+    sub.position.z = coordz;
     sub.material = matSub;
+    sub.rotation = new Vector3(0, Math.PI/2,0)
 
     return numberTexture;
 }
