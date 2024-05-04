@@ -147,12 +147,12 @@ function getTrappeGauche(scene){
         haut.rotation = new Vector3(Math.PI/2,0,-Math.PI/2);
         haut.material = matBlanc;
 
-        let milieu = MeshBuilder.CreateCylinder("cercle:"+i+5,{diameter: 0.07, height:0.01}, scene)
+        let milieu = MeshBuilder.CreateCylinder("cercle:"+(i+5),{diameter: 0.07, height:0.01}, scene)
         milieu.position = new Vector3(-4.75,0.2,1.1+i*0.2);
         milieu.rotation = new Vector3(Math.PI/2,0,-Math.PI/2);
         milieu.material = matBlanc;
 
-        let bas = MeshBuilder.CreateCylinder("cercle:"+i+10,{diameter: 0.07, height:0.01}, scene)
+        let bas = MeshBuilder.CreateCylinder("cercle:"+(i+10),{diameter: 0.07, height:0.01}, scene)
         bas.position = new Vector3(-4.75,0.1,1.1+i*0.2);
         bas.rotation = new Vector3(Math.PI/2,0,-Math.PI/2);
         bas.material = matBlanc;

@@ -29,6 +29,9 @@ const createScene = (canvas, verif) => {
 
     var mursSalle = getSalle(scene, 3);
     getPorte(scene);
+
+    const forme = ref([])
+    for(var i=0; i<15;i++){forme.value.push(0)}
     getTrappeGauche(scene);
 
     getCoffreGemmes(scene);
@@ -105,6 +108,15 @@ const createScene = (canvas, verif) => {
         hautCoffre.isVisible = false;
     }
 
+    var openTrappe = function(){
+        var trappe = scene.getMeshByName("trappe");
+        trappe.isVisible = false;
+        for(var i=0; i<15; i++){
+            var cercle = scene.getMeshByName("cercle:"+i);
+            cercle.isVisible = false;
+        }
+    }
+
     var reinitCode = function(){
         for(var i=0; i<4; i++){
             code.value[i] = 0;
@@ -136,12 +148,18 @@ const createScene = (canvas, verif) => {
     
     var changeColorCircle = function(){
         console.log(currentMesh.material)
+        var index = currentMesh.name.split(':')[1];
         if(currentMesh.material.name == matBlanc.name){
             currentMesh.material = matNoir;
+            forme.value[index] = 1;
         }else{
             currentMesh.material = matBlanc;
+            forme.value[index] = 0;
         }
-
+        verif("trappe",forme).then(()=>{
+            console.log("bien joué !")
+            openTrappe();
+        }, ()=>{console.log("c'est pas ça")})
     }
 
     scene.onPointerObservable.add((pointerInfo) => {

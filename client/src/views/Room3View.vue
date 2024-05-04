@@ -24,14 +24,25 @@ import { ref, onMounted } from "@vue/runtime-core";
 import { createScene } from "../scenes/room3";
 
 function verif(type, code) {
+    var codeAssemble = "";
+    code.value.forEach((e) => {
+        codeAssemble += e;
+    });
     if(type === "buttonValider"){
-        var codeAssemble = "";
-        code.value.forEach((e) => {
-            codeAssemble += e;
-        });
-        //TODO DATABASE: regarder si le codeAssemble est bon
+        //TODO DATABASE: regarder si le codeAssemble est bien solution coffre
         let prom = new Promise((resolve, reject)=>{
             if(codeAssemble == 8163){
+                resolve();
+            }else {
+                reject();
+            }
+        })
+        return prom;
+    }else if(type === "trappe"){
+        console.log(codeAssemble)
+        // TODO regarder si le codeAssemble est bien solution trappe
+        let prom = new Promise((resolve, reject)=>{
+            if(codeAssemble == 110000111001111){
                 console.log("resolve");
                 resolve();
             }else {
