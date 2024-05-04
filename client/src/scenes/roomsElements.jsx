@@ -74,7 +74,7 @@ function getSalle(scene, numSalle){
     if (numSalle == 3) {
         murGauche = getMurTrappe(scene);
         murDroite = MeshBuilder.CreateBox("murPlein", { width: 0.5, height: 4, depth: 10 }, scene);
-        murGauche.position = new Vector3(-5, 1, 0);
+        murGauche.position = new Vector3(-5, 0, 0);
         murDroite.position = new Vector3(5, 2, 0);
     } else if (numSalle == 2){
         murGauche = MeshBuilder.CreateBox("murPlein", { width: 0.5, height: 4, depth: 10 }, scene);
@@ -170,4 +170,24 @@ function getNavette(scene) {
         couvercle.position = new Vector3(4.4, 1.4, 1.3);
     })
 }
-export {getPorte, getTuyaux, getSalle, getTuyau, getTrappe, getImportedMesh, getNavette};
+
+function getCoffre(scene){
+    let textureDoor = new Texture("./textures/coffre.jpg", scene);
+    let matDoor = new StandardMaterial("matDoor");
+    matDoor.diffuseTexture = textureDoor;
+
+    const result = SceneLoader.ImportMeshAsync("", "./models/", "coffre.glb", scene);
+    result.then((resultat) => {
+        console.log('dabord : ' + resultat.meshes.length)
+        for (var i = 1; i < resultat.meshes.length; i++) {
+            resultat.meshes[i].material = matDoor;
+            resultat.meshes[i].scalingDeterminant = 2;
+            resultat.meshes[i].position.x = -4.3;
+            resultat.meshes[i].position.z = 3;
+            resultat.meshes[i].rotation = new Vector3(0, Math.PI/2,0);
+
+        }
+    })
+
+}
+export {getPorte, getTuyaux, getSalle, getTuyau, getTrappe, getImportedMesh, getNavette, getCoffre};

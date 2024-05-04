@@ -21,47 +21,23 @@
 <script>
 /* eslint-disable */
 import { ref, onMounted } from "@vue/runtime-core";
-import { createScene, makeEngrenageVisible } from "../scenes/room1";
+import { createScene } from "../scenes/room3";
+
+function verif(type, nom) {}
 
 var dragElement;
-
 function imgDrop(evt) {
-    console.log('dropping a element');
-    let bon = makeEngrenageVisible(scene, dragElement.id);
-    if (bon == true) {
+    console.log('Face de pet')
+    let lieu = placeItem(scene, dragElement.id)
+    console.log("l'item " + dragElement.id + " a etait placé dans l'enigme : " + lieu)
+    if (lieu !== "erreur") {
+        ///TODO DATABASE : envoyer au serveur la sortie d'inventaire vers lieu
         var parent = dragElement.parentElement;
         parent.removeChild(dragElement);
     } else {
         console.log('impossible de drop ici');
     }
     dragElement = null;
-}
-
-const ajoutInventaire = ref(null);
-function verif(x) {
-    console.log('LOG:' + x);
-    if (x === "engrenageMoyen"){
-        var imgEngrenage = document.createElement('img')
-        imgEngrenage.setAttribute('draggable', 'true');
-        imgEngrenage.src = "/img/engrenageMoyen.png";
-        imgEngrenage.style.width = '100%';
-
-        imgEngrenage.addEventListener('dragstart', (evt) => dragElement = evt.currentTarget.parentElement)
-
-        var newTh = document.createElement('th');
-        newTh.id = x;
-        newTh.scope = "row";
-        newTh.appendChild(imgEngrenage);
-
-        var newTr = document.createElement('tr');
-        newTr.appendChild(newTh);
-
-        document.getElementById("ajoutInventaire").appendChild(newTr);
-
-        return true;
-    } else {
-        return false;
-    }
 }
 
 var scene;
