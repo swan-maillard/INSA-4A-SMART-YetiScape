@@ -23,11 +23,28 @@
 import { ref, onMounted } from "@vue/runtime-core";
 import { createScene } from "../scenes/room3";
 
-function verif(type, nom) {}
+function verif(type, code) {
+    if(type === "buttonValider"){
+        var codeAssemble = "";
+        code.value.forEach((e) => {
+            codeAssemble += e;
+        });
+        //TODO DATABASE: regarder si le codeAssemble est bon
+        let prom = new Promise((resolve, reject)=>{
+            if(codeAssemble == 8163){
+                console.log("resolve");
+                resolve();
+            }else {
+                console.log("reject")
+                reject();
+            }
+        })
+        return prom;
+    }
+}
 
 var dragElement;
 function imgDrop(evt) {
-    console.log('Face de pet')
     let lieu = placeItem(scene, dragElement.id)
     console.log("l'item " + dragElement.id + " a etait placé dans l'enigme : " + lieu)
     if (lieu !== "erreur") {

@@ -1,7 +1,7 @@
 /* eslint-disable */
 import {PointerEventTypes, Engine, Scene, FreeCamera, Vector3, HemisphericLight, DynamicTexture, StandardMaterial, MeshBuilder, Color3} from "@babylonjs/core";
 import {ref} from "@vue/runtime-core";
-import {getPorte,  getSalle, getCoffreGemmes, getCodeCoffre} from "./roomsElements";
+import {getPorte,  getSalle, getCoffreGemmes, getCodeCoffre, getButtonValdier} from "./roomsElements";
 
 //Salle 3 : 
 // position possible : centre, trappe, image, coffre
@@ -23,6 +23,7 @@ const createScene = (canvas, verif) => {
 
     var mursSalle = getSalle(scene, 3);
     getPorte(scene);
+
     getCoffreGemmes(scene);
 
     // Creation code coffre
@@ -32,6 +33,7 @@ const createScene = (canvas, verif) => {
     for(var i=0; i<4; i++){
         texture.push(getCodeCoffre(scene,i,3.5-i*0.3));
     }
+    getButtonValdier();
 
     engine.runRenderLoop(() => {
         scene.render();
@@ -43,18 +45,53 @@ const createScene = (canvas, verif) => {
         currentMesh = mesh;
         if(position.value === "centre"){
             if(currentMesh.name.startsWith("wooden_crate")){
-                moveCamera(camera, 1,1.6,3, 1 );
+                var coffre = scene.getMeshByName("wooden_crate_01_lid")
+                if(coffre.isVisible){
+                    moveCamera(camera, 0.5,1.6,3, 1 );
+                }else{
+                    moveCamera(camera, 3,1.6,3, 1 );
+                }
+                
             }
         }
         else if(position.value === "coffre"){
             if(currentMesh.name.startsWith("add")){
                 addNumberCode();
             }
-            if(currentMesh.name.startsWith("sub")){
+            else if(currentMesh.name.startsWith("sub")){
                 subNumberCode();
+            }
+            else if(currentMesh.name === "buttonValider"){
+                verif(currentMesh.name,code)
+                .then(() => {
+                    //TODO: ouvrir le coffre avec les gemmes
+                    console.log("Vous avez ouvert le coffre !")
+                    openCoffre();
+                    moveCamera(camera, 3,1.6,3, 1 );
+                },()=>{
+                    console.log("Mauvais code ...");
+                    reinitCode();
+                });
+            }else if(currentMesh.name === "allWalls"){
+                moveCameraInit(camera)
             }
         }
         
+    }
+
+    var openCoffre = function(){
+        var cordeCoffre = scene.getMeshByName("wooden_crate_01_latch");
+        cordeCoffre.isVisible = false;
+        var hautCoffre = scene.getMeshByName("wooden_crate_01_lid")
+        console.log(hautCoffre);
+        hautCoffre.isVisible = false;
+    }
+
+    var reinitCode = function(){
+        for(var i=0; i<4; i++){
+            code.value[i] = 0;
+            texture[i].drawText(code.value[i], 35,70,"bold 50px Arial", "white", "black", true)
+        }
     }
 
     var subNumberCode = function(){
@@ -103,7 +140,14 @@ function moveCamera(camera, x, y, z, pos){
     var target = new Vector3(x,y,z);
     camera.position = target;
     camera.setTarget(new Vector3(x+pos,y,z));
-    camera.lockedTarget = new Vector3(x+pos,y,z);
+    camera.lockedTarget = new Vector3(5.3,0,3);
 }
 
+function moveCameraInit(camera){
+    position.value = "centre";
+
+    camera.position = new Vector3(0, 1.6, -3);
+    camera.setTarget(new Vector3(0,1.6,0))
+    camera.lockedTarget = null;
+}
 export {createScene};

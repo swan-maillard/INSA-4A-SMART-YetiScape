@@ -222,6 +222,7 @@ function getCoffreGemmes(scene){
     result.then((resultat) => {
         console.log('dabord : ' + resultat.meshes.length)
         for (var i = 1; i < resultat.meshes.length; i++) {
+            console.log("Nom coffre: "+resultat.meshes[i].name)
             resultat.meshes[i].material = matDoor;
             resultat.meshes[i].scalingDeterminant = 2;
             resultat.meshes[i].position.x = -4.3;
@@ -272,8 +273,25 @@ function getCodeCoffre(scene, number, coordz){
     sub.position.x = 4.5;
     sub.position.z = coordz;
     sub.material = matSub;
-    sub.rotation = new Vector3(0, Math.PI/2,0)
+    sub.rotation = new Vector3(0, Math.PI/2,0);
 
     return numberTexture;
 }
-export {getPorte, getTuyaux, getSalle, getTuyau, getTrappe, getImportedMesh, getNavette, getCoffre, getCoffreGemmes, getCodeCoffre};
+
+function getButtonValdier(scene){
+    var matSocle =  new StandardMaterial("socleValiderMat", scene);
+    matSocle.diffuseColor = Color3.Gray();
+    var socle = MeshBuilder.CreateBox("socleValider", { width: 0.2, height: 0.2, depth: 0.005 }, scene)
+    socle.material = matSocle;
+    socle.position = new Vector3(4.5,1.6,2.3);
+    socle.rotation =  new Vector3(0, Math.PI/2,0);
+
+    var matButton = new StandardMaterial("buttonValiderMat", scene);
+    matButton.diffuseColor = Color3.Red();
+    var button = MeshBuilder.CreateBox("buttonValider", { width: 0.15, height: 0.15, depth: 0.05 }, scene)
+    button.material = matButton;
+    button.position = new Vector3(4.5,1.6,2.3);
+    button.rotation =  new Vector3(0, Math.PI/2,0);
+}
+
+export {getPorte, getTuyaux, getSalle, getTuyau, getTrappe, getImportedMesh, getNavette, getCoffre, getCoffreGemmes, getCodeCoffre, getButtonValdier};
