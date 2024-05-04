@@ -26,7 +26,6 @@ import { createScene, placeItem } from "../scenes/room1";
 var dragElement;
 
 function imgDrop(evt) {
-    console.log('Face de pet')
     let lieu = placeItem(scene, dragElement.id)
     console.log("l'item " + dragElement.id + " a etait placé dans l'enigme : " + lieu)
     if (lieu !== "erreur") {
@@ -39,7 +38,6 @@ function imgDrop(evt) {
     dragElement = null;
 }
 
-const ajoutInventaire = ref(null);
 function verif(type, nom) {
     console.log('verification de : ' + type + ' nommé ' + nom);
     if (type === 'item'){

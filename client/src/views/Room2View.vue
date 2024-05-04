@@ -21,14 +21,15 @@
 <script>
 /* eslint-disable */
 import { ref, onMounted } from "@vue/runtime-core";
-import { createScene, makeEngrenageVisible } from "../scenes/room2";
+import { createScene, placeItem } from "../scenes/room2";
 
 var dragElement;
 
 function imgDrop(evt) {
-    console.log('dropping a element');
-    let bon = makeEngrenageVisible(scene, dragElement.id);
-    if (bon == true) {
+    let lieu = placeItem(scene, dragElement.id)
+    console.log("l'item " + dragElement.id + " a etait placé dans l'enigme : " + lieu)
+    if (lieu !== "erreur") {
+        ///TODO DATABASE : envoyer au serveur la sortie d'inventaire vers lieu
         var parent = dragElement.parentElement;
         parent.removeChild(dragElement);
     } else {
@@ -37,31 +38,52 @@ function imgDrop(evt) {
     dragElement = null;
 }
 
-const ajoutInventaire = ref(null);
-function verif(item) {
-    console.log('LOG:' + item);
-    if (item === "engrenageGrand"){
-        var imgEngrenage = document.createElement('img')
-        imgEngrenage.setAttribute('draggable', 'true');
-        imgEngrenage.src = "/img/engrenageGrand.png";
-        imgEngrenage.style.width = '100%';
-
-        imgEngrenage.addEventListener('dragstart', (evt) => dragElement = evt.currentTarget.parentElement)
-
-        var newTh = document.createElement('th');
-        newTh.id = item;
-        newTh.scope = "row";
-        newTh.appendChild(imgEngrenage);
-
-        var newTr = document.createElement('tr');
-        newTr.appendChild(newTh);
-
-        document.getElementById("ajoutInventaire").appendChild(newTr);
-
-        return true;
-    } else {
-        return false;
+function verif(type, nom) {
+    console.log('verification de : ' + type + ' nommé ' + nom);
+    if (type === 'item'){
+        ///TODO DATABASE : mettre item nom dans l'inventaire
+        let prom = new Promise((resolve, reject) => {
+            if (nom === 'engrenageGrand'){
+                resolve();
+            } else {
+                reject();
+            }
+        }).then( () => {
+            addItemToInv(nom);
+        });
+        return prom;
+    } else if (type === 'coffreRouage') {
+        ///TODO DATABASE : verifier que c'est OK
+        let prom = new Promise((resolve, reject) => {
+            if (nom == 5 /*&& itemDedans = engrenageMoyen*/){
+                resolve();
+            } else {
+                reject();
+            }
+        }).then(() => {
+            //si c'est pas bon renvoyer l'item dans le tuyau! et le remettre dans l'inventaire
+            console.log('result');
+        });
+        return prom;
     }
+}
+function addItemToInv(nom) {
+    var imgEngrenage = document.createElement('img')
+    imgEngrenage.setAttribute('draggable', 'true');
+    imgEngrenage.src = "/img/" + nom + ".png";
+    imgEngrenage.style.width = '100%';
+
+    imgEngrenage.addEventListener('dragstart', (evt) => { dragElement = evt.currentTarget.parentElement;})
+
+    var newTh = document.createElement('th');
+    newTh.id = nom;
+    newTh.scope = "row";
+    newTh.appendChild(imgEngrenage);
+
+    var newTr = document.createElement('tr');
+    newTr.appendChild(newTh);
+
+    document.getElementById("ajoutInventaire").appendChild(newTr);
 }
 
 var scene;
