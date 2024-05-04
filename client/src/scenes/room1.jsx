@@ -115,7 +115,7 @@ const createScene = (canvas, verif) => {
                 console.log("Click sur navette pleine "+ drag.value)
             }
 
-        } else if(position.value === "droite"){
+        } else if(position.value === "trappe"){
             if(currentMesh.name === "allWalls"){
                 moveCameraInit(camera)
             }
