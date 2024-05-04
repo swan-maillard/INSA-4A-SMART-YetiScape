@@ -30,7 +30,7 @@ const createScene = (canvas, verif) => {
 
     var texture = new Array();
     for(var i=0; i<4; i++){
-        texture.push(getCodeCoffre(scene,0,3-i*0.3));
+        texture.push(getCodeCoffre(scene,i,3.5-i*0.3));
     }
 
     engine.runRenderLoop(() => {
@@ -41,12 +41,20 @@ const createScene = (canvas, verif) => {
 
     var pointerDown = function (mesh) {
         currentMesh = mesh;
-        if(currentMesh.name.startsWith("add")){
-            addNumberCode();
+        if(position.value === "centre"){
+            if(currentMesh.name.startsWith("wooden_crate")){
+                moveCamera(camera, 1,1.6,3, 1 );
+            }
         }
-        if(currentMesh.name.startsWith("sub")){
-            subNumberCode();
-         }
+        else if(position.value === "coffre"){
+            if(currentMesh.name.startsWith("add")){
+                addNumberCode();
+            }
+            if(currentMesh.name.startsWith("sub")){
+                subNumberCode();
+            }
+        }
+        
     }
 
     var subNumberCode = function(){
@@ -86,6 +94,16 @@ const createScene = (canvas, verif) => {
     return scene;
 }
 
+function moveCamera(camera, x, y, z, pos){
+    if(pos === -1)
+        position.value = "coffre";
+    else
+        position.value = "coffre";
 
+    var target = new Vector3(x,y,z);
+    camera.position = target;
+    camera.setTarget(new Vector3(x+pos,y,z));
+    camera.lockedTarget = new Vector3(x+pos,y,z);
+}
 
 export {createScene};
