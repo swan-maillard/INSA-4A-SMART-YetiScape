@@ -4,6 +4,7 @@ import { createGame, deleteGame, getAllGames, getGameById, updateGame } from '..
 import { createUser, deleteUserById, getUserByName, updateUser } from '../services/usersServices';
 import Game from '../models/game';
 import { signUserData } from '../JWT';
+import { Server } from 'socket.io';
 
 export default {
   getGames: async (req: Request, res: Response) => {
@@ -68,6 +69,18 @@ export default {
           user.salle = game.users.length;
           await updateGame(game);
           await updateUser(user);
+
+          const { io, socketSessions } = req.app.get('sockets') as {
+            io: Server;
+            socketSessions: { [key: string]: User };
+          };
+
+          for (const [socketId, userSocket] of Object.entries(socketSessions)) {
+            if (userSocket.game === game.id) {
+              io.to(socketId).emit('waiting-room/new-user', user);
+            }
+          }
+
           res.status(200).send({ game, token: signUserData({ userId: user.id, gameId: game.id }) });
         } else {
           await deleteUserById(user.id);
