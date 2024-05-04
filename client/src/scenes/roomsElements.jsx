@@ -165,6 +165,20 @@ async function getCoffre(scene) {
     cyl[3].position = new Vector3(-2.3, 0.7, 4.2);
     cyl[4] = cyl[0].clone('cyl4');
     cyl[4].position = new Vector3(-2.53, 0.61, 4.2);
+    getImportedMesh(scene, 'engrenageMoyen', 'rouille.jpg')
+        .then( () => {
+            scene.getMeshByName('engrenageMoyen').position = new Vector3(2.4, 0.05, 4.2);
+            scene.getMeshByName('engrenageMoyen').rotation = new Vector3(Math.PI / 2, 0, 0);
+            scene.getMeshByName('engrenageMoyen').scalingDeterminant = 0.12;
+            scene.getMeshByName('engrenageMoyen').name = 'engBas';
+        });
+    getImportedMesh(scene, 'engrenagePetit', 'rouille.jpg')
+        .then( () => {
+            scene.getMeshByName('engrenagePetit').position = new Vector3(2.45, 0.95, 4.2);
+            scene.getMeshByName('engrenagePetit').rotation = new Vector3(Math.PI / 2, 0, 0);
+            scene.getMeshByName('engrenagePetit').scalingDeterminant = 0.15;
+            scene.getMeshByName('engrenagePetit').name = 'engHaut';
+        });
     return await SceneLoader.ImportMeshAsync("coffreRouage", "./models/", "coffreRouage.glb", scene)
     .then(() => {
         let coffre = scene.getMeshByName('coffreRouage')
