@@ -58,6 +58,7 @@ function verif(type, nom) {
             if (nom == 5 /*&& itemDedans = engrenageMoyen*/){
                 resolve();
             } else {
+                addItemToInv('engrenageMoyen');
                 reject();
             }
         })
