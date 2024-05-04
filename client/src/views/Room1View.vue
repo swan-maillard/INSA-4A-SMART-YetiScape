@@ -43,7 +43,7 @@ function verif(type, nom) {
     if (type === 'item'){
         ///TODO DATABASE : mettre item nom dans l'inventaire
         let prom = new Promise((resolve, reject) => {
-            if (nom === 'engrenageMoyen'){
+            if (nom === 'engrenageMoyen' || nom === 'engrenageGrand'){
                 resolve();
             } else {
                 reject();

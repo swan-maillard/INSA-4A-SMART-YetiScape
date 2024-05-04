@@ -28,54 +28,16 @@ const createScene = (canvas, verif) => {
             scene.getMeshByName('engrenageGrand').name = 'item:engrenageGrand';
         });
     getCoffre(scene)
-    getImportedMesh(scene, 'engrenageMoyen', 'rouille.jpg')
-        .then( () => {
-            scene.getMeshByName('engrenageMoyen').position = new Vector3(2.4, 0.05, 4.2);
-            scene.getMeshByName('engrenageMoyen').rotation = new Vector3(Math.PI / 2, 0, 0);
-            scene.getMeshByName('engrenageMoyen').scalingDeterminant = 0.12;
-            scene.getMeshByName('engrenageMoyen').name = 'engBas';
-        });
-    getImportedMesh(scene, 'engrenagePetit', 'rouille.jpg')
-        .then( () => {
-            scene.getMeshByName('engrenagePetit').position = new Vector3(2.45, 0.95, 4.2);
-            scene.getMeshByName('engrenagePetit').rotation = new Vector3(Math.PI / 2, 0, 0);
-            scene.getMeshByName('engrenagePetit').scalingDeterminant = 0.15;
-            scene.getMeshByName('engrenagePetit').name = 'engHaut';
-        });
-    getImportedMesh(scene, 'engrenageGrand', 'rouille.jpg')
-        .then( () => {
-            scene.getMeshByName('engrenageGrand').position = new Vector3(2.53, 0.35, 4.2);
-            scene.getMeshByName('engrenageGrand').rotation = new Vector3(Math.PI / 2, 0, 0);
-            scene.getMeshByName('engrenageGrand').scalingDeterminant = 0.16;
-            scene.getMeshByName('engrenageGrand').name = 'eng0';
-        });
-    getImportedMesh(scene, 'engrenageMoyen', 'rouille.jpg')
-    .then( () => {
-        scene.getMeshByName('engrenageMoyen').position = new Vector3(2.3, 0.7, 4.2);
-        scene.getMeshByName('engrenageMoyen').rotation = new Vector3(Math.PI / 2, 0, 0);
-        scene.getMeshByName('engrenageMoyen').scalingDeterminant = 0.15;
-        scene.getMeshByName('engrenageMoyen').name = 'eng3';
-    });
     getImportedMesh(scene, 'engrenagePetit', 'rouille.jpg')
     .then( () => {
-        scene.getMeshByName('engrenagePetit').position = new Vector3(2.53, 0.61, 4.2);
-        scene.getMeshByName('engrenagePetit').rotation = new Vector3(Math.PI / 2, 0, 0);
-        scene.getMeshByName('engrenagePetit').scalingDeterminant = 0.1;
-        scene.getMeshByName('engrenagePetit').name = 'eng4';
-    });
-    getImportedMesh(scene, 'engrenagePetit', 'rouille.jpg')
-    .then( () => {
-        scene.getMeshByName('engrenagePetit').position = new Vector3(2.26, 0.34, 4.2);
-        scene.getMeshByName('engrenagePetit').rotation = new Vector3(Math.PI / 2, 0, 0);
-        scene.getMeshByName('engrenagePetit').scalingDeterminant = 0.1;
-        scene.getMeshByName('engrenagePetit').name = 'eng1';
-    });
-    getImportedMesh(scene, 'engrenagePetit', 'rouille.jpg')
-    .then( () => {
-        scene.getMeshByName('engrenagePetit').position = new Vector3(2.16, 0.48, 4.2);
-        scene.getMeshByName('engrenagePetit').rotation = new Vector3(Math.PI / 2, 0, 0);
-        scene.getMeshByName('engrenagePetit').scalingDeterminant = 0.1;
-        scene.getMeshByName('engrenagePetit').name = 'eng2';
+        let eng1 = scene.getMeshByName('engrenagePetit');
+        eng1.position = new Vector3(2.1, 0.12, 4.1);
+        eng1.scalingDeterminant = 0.1;
+        eng1.name = 'eng1';
+        let eng2 = eng1.clone('eng2');
+        eng2.position = new Vector3(2.4, 0.12, 4)
+        let eng3 = eng1.clone('eng2');
+        eng3.position = new Vector3(2.65, 0.12, 4.1)
     });
     
     getPorte(scene);
@@ -145,14 +107,22 @@ function moveCameraInit(camera){
 const placeItem = (scene, item) => {
     if (position.value === "coffreRouage") {
         if (item === 'engrenageGrand'){
-            getImportedMesh(scene, 'engrenageGrand', 'rouille.jpg').then(() => {
-                let gear = scene.getMeshByName('engrenageGrand')
-                gear.position = new Vector3(1, 1, 1);
-                gear.rotation = new Vector3(0, 0, 0);
-                gear.scalingDeterminant = 0.1;
-            });
-            return position.value;
+            getImportedMesh(scene, 'engrenageGrand', 'rouille.jpg')
+                .then( () => {
+                    scene.getMeshByName('engrenageGrand').position = new Vector3(2.9, 0.1, 3.8);
+                    scene.getMeshByName('engrenageGrand').scalingDeterminant = 0.16;
+                    scene.getMeshByName('engrenageGrand').name = 'eng0';
+                });
         }
+        if (item === 'engrenageMoyen'){
+            getImportedMesh(scene, 'engrenageMoyen', 'rouille.jpg')
+                .then( () => {
+                    scene.getMeshByName('engrenageMoyen').position = new Vector3(2, 0.1, 3.8);
+                    scene.getMeshByName('engrenageMoyen').scalingDeterminant = 0.15;
+                    scene.getMeshByName('engrenageMoyen').name = 'eng3';
+                });
+        }
+        return position.value;
     }
     return 'erreur';
 };
