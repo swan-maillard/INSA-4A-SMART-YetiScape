@@ -1,7 +1,7 @@
 /* eslint-disable */
 import {Engine, Scene, FreeCamera, Vector3, HemisphericLight} from "@babylonjs/core";
 import {ref} from "@vue/runtime-core";
-import {getPorte,  getSalle, getCoffre} from "./roomsElements";
+import {getPorte,  getSalle, getCoffreGemmes} from "./roomsElements";
 
 //Salle 3 : 
 // position possible : centre, trappe, image, coffre
@@ -23,7 +23,7 @@ const createScene = (canvas, verif) => {
 
     var mursSalle = getSalle(scene, 3);
     getPorte(scene);
-    getCoffre(scene);
+    getCoffreGemmes(scene);
 
     engine.runRenderLoop(() => {
         scene.render();
