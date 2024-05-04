@@ -47,7 +47,7 @@ const createScene = (canvas, verif) => {
     pickPlane.material = mat;
     pickPlane.rotation = new Vector3(0, Math.PI/2,0);
     pickPlane.position.x = -4.6;
-    //pickPlane.isVisible = false;
+    pickPlane.isVisible = false;
     pickPlane.isPickable = true;
 
     var currentMesh;
@@ -73,8 +73,11 @@ const createScene = (canvas, verif) => {
             if(pickinfo.hit){
                 console.log("Hit !!!!!!" + i);
                 //On delete la navette de la scene (mesh.dispose)
-                verif('tuyau', i).catch(() => {
-                    console.log('mauvaise solution')
+                verif('tuyau', i).then(()=>{
+                    setInvisible();
+                })
+                .catch(() => {
+                    setOldPosition();
                 })
                 break;
             }
@@ -85,6 +88,14 @@ const createScene = (canvas, verif) => {
         //si qqch de touché, on lance la vérif =>
             // verif OK : rien
             // verif non OK : remettre le tube vide a sa place (getNavette)
+    }
+
+    var setInvisible = function(){
+        currentMesh.isVisible = false;
+    }
+
+    var setOldPosition = function(){
+        currentMesh.position = new Vector3(0, 0, 0);
     }
 
     var pointerDown = function (mesh) {
@@ -126,7 +137,7 @@ const createScene = (canvas, verif) => {
         if(drag.value){
             drag.value = null;
             console.log("Navette lachee");
-            getTuyauxPicked();
+            getTuyauxPicked();            
         }
     }
 
@@ -140,6 +151,7 @@ const createScene = (canvas, verif) => {
         }
         console.log("Current:" + current)
         var diff = current.subtract(drag.value);
+        diff.x = 0
         currentMesh.position.addInPlace(diff);
         console.log("Current Mesh: "+currentMesh.position)
 

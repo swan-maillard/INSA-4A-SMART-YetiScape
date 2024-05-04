@@ -62,10 +62,7 @@ function verif(type, nom) {
             } else {
                 reject();
             }
-        }).then(() => {
-            //si c'est pas bon renvoyer l'item dans le tuyau! et le remettre dans l'inventaire
-            console.log('result');
-        });
+        })
         return prom;
     }
 }
