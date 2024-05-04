@@ -2,7 +2,7 @@
 import { Texture, Mesh, Engine, Scene, SceneLoader, FreeCamera, Vector3, MeshBuilder, StandardMaterial, Color3, HemisphericLight, PointerEventTypes, Color4 } from "@babylonjs/core";
 import "@babylonjs/loaders";
 import {ref} from "@vue/runtime-core";
-import {getPorte, getSalle, getImportedMesh, getTuyau, getCoffreRouage} from "./roomsElements";
+import {getPorte, getSalle, getImportedMesh, getTuyau, getCoffreRouage, getGemme} from "./roomsElements";
 
 //Salle 2 : 
 //Position possible : centre, murDroite, tuyau, coffreRouage
@@ -59,6 +59,7 @@ const createScene = (canvas, verif) => {
     var pointerDown = function (mesh) {
         currentMesh = mesh;
         console.log('click sur ' + currentMesh.name)
+        console.log('texture : ' + scene.getMaterialByName('rouille.j'));
         if(currentMesh.name.startsWith('item')){
             verif('item', currentMesh.name.substring(5))
             .then(() => {
@@ -82,8 +83,12 @@ const createScene = (canvas, verif) => {
                 let bon = verifRouage(scene);
                 console.log('verification du puzzle : ' + bon);
                 if (bon === true) {
-                    verif('rouage', true).then(() => {
-                        //getGemmes
+                    verif(position.value, true).then(() => {
+                        getGemme(scene, 'ronde').then(() => {
+                            scene.getMeshByName('gemmeRonde').rotation = new Vector3(Math.PI/4, Math.PI/4, 0);
+                            scene.getMeshByName('gemmeRonde').position = new Vector3(2.45, 1.05, 4.2);
+                            scene.getMeshByName('gemmeRonde').name = 'item:gemmeRonde';
+                        })
                     });
                 }
             }
@@ -236,6 +241,7 @@ const placeItem = (scene, item) => {
                     scene.getMeshByName('engrenageGrand').scalingDeterminant = 0.16;
                     scene.getMeshByName('engrenageGrand').name = 'dragEngG||2.9,0.1,3.8';
                 });
+                return position.value;
         }
         if (item === 'engrenageMoyen'){
             getImportedMesh(scene, 'engrenageMoyen', 'rouille.jpg')
@@ -244,8 +250,8 @@ const placeItem = (scene, item) => {
                     scene.getMeshByName('engrenageMoyen').scalingDeterminant = 0.15;
                     scene.getMeshByName('engrenageMoyen').name = 'dragEngM||2,0.1,3.8';
                 });
+            return position.value;
         }
-        return position.value;
     }
     return 'erreur';
 };

@@ -134,14 +134,40 @@ function getTrappe(scene){
 async function getImportedMesh(scene, nomModel, nomTexture) {
     return await SceneLoader.ImportMeshAsync(nomModel, "./models/", nomModel + ".glb", scene)
     .then(() => {
-        let gear = scene.getMeshByName(nomModel)
+        let mesh = scene.getMeshByName(nomModel)
         if (nomTexture !== undefined) {
-            const textureRouille = new Texture("./textures/" + nomTexture, scene);
-            const matRouille = new StandardMaterial("matRouille");
-            matRouille.diffuseTexture = textureRouille;
-            gear.material = matRouille;
+            let mat = scene.getMaterialByName(nomTexture);
+            if (mat == null){
+                let text = new Texture("./textures/" + nomTexture, scene);
+                mat = new StandardMaterial(nomTexture);
+                mat.diffuseTexture = text;
+            } else {
+                console.log('reuse texture');
+            }
+            mesh.material = mat;
         }
     });
+}
+
+async function getGemme(scene, forme){
+    let mat = new StandardMaterial();
+    let nom;
+    if (forme == 'triangle') {
+        nom = "gemmeTriangle";
+        mat.diffuseColor = Color3.Green();
+    } else if (forme  == "carre") {
+        nom = "gemmeCarre";
+        mat.diffuseColor = Color3.Red();
+    } else {
+        nom = "gemmeRonde";
+        mat.diffuseColor = Color3.Blue();
+    }
+
+    return await SceneLoader.ImportMeshAsync(nom, "./models/", "gemmes.glb", scene)
+        .then( () => {
+            let gemme = scene.getMeshByName(nom);
+            gemme.material = mat;
+        })
 }
 
 async function getCoffreRouage(scene) {
@@ -289,4 +315,4 @@ function getButtonValdier(scene){
     button.rotation =  new Vector3(0, Math.PI/2,0);
 }
 
-export {getPorte, getTuyaux, getSalle, getTuyau, getTrappe, getImportedMesh, getNavette,getCoffreRouage, getCoffreGemmes, getCodeCoffre, getButtonValdier};
+export {getPorte, getTuyaux, getSalle, getTuyau, getTrappe, getImportedMesh, getNavette,getCoffreRouage, getCoffreGemmes, getCodeCoffre, getButtonValdier, getGemme};
