@@ -10,9 +10,8 @@ function getPorte(scene){
 
     const result = SceneLoader.ImportMeshAsync("", "./models/", "porte.glb", scene);
     result.then((resultat) => {
-        console.log('dabord : ' + resultat.meshes.length)
         for (var i = 1; i < resultat.meshes.length; i++) {
-            resultat.meshes[i].position.z = 4;
+            resultat.meshes[i].position.z = 4.2;
             resultat.meshes[i].material = matDoor;
         }
     })
@@ -58,6 +57,10 @@ function getTuyaux(scene) {
             tuyaux[i].material = mat;
         }
     });
+}
+
+function getCoffreRouage() {
+
 }
 
 function getSalle(scene, numSalle){
@@ -145,6 +148,31 @@ async function getImportedMesh(scene, nomModel, nomTexture) {
     });
 }
 
+async function getCoffre(scene) {
+    const textureRouille = new Texture("./textures/copper.jpg", scene);
+    const matRouille = new StandardMaterial("matRouille");
+    matRouille.diffuseTexture = textureRouille;
+    var cyl = [];
+    cyl[0] = MeshBuilder.CreateCylinder('cyl0', {height:0.1, diameter:0.06, tessellation:10}, scene);
+    cyl[0].position = new Vector3(-2.53, 0.35, 4.2);
+    cyl[0].rotation = new Vector3(Math.PI / 2, 0, 0);
+    cyl[0].material = matRouille;
+    cyl[1] = cyl[0].clone('cyl1');
+    cyl[1].position = new Vector3(-2.26, 0.34, 4.2);
+    cyl[2] = cyl[0].clone('cyl2');
+    cyl[2].position = new Vector3(-2.16, 0.48, 4.2);
+    cyl[3] = cyl[0].clone('cyl3');
+    cyl[3].position = new Vector3(-2.3, 0.7, 4.2);
+    cyl[4] = cyl[0].clone('cyl4');
+    cyl[4].position = new Vector3(-2.53, 0.61, 4.2);
+    return await SceneLoader.ImportMeshAsync("coffreRouage", "./models/", "coffreRouage.glb", scene)
+    .then(() => {
+        let coffre = scene.getMeshByName('coffreRouage')
+        coffre.material = matRouille;
+        coffre.position = new Vector3(2.4, 0.5, 4.2);
+    });
+}
+
 function getNavette(scene) {
     SceneLoader.ImportMeshAsync("", "./models/", "navette.glb", scene)
     .then((resultat) => {
@@ -170,4 +198,4 @@ function getNavette(scene) {
         couvercle.position = new Vector3(4.4, 1.4, 1.3);
     })
 }
-export {getPorte, getTuyaux, getSalle, getTuyau, getTrappe, getImportedMesh, getNavette};
+export {getPorte, getTuyaux, getSalle, getTuyau, getTrappe, getImportedMesh, getNavette, getCoffre};
