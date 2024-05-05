@@ -1,5 +1,5 @@
 <template>
-        <div id="GameScreen" class="d-flex flex-raw">
+        <div v-if="user" id="GameScreen" class="d-flex flex-raw">
             <div id="inventaire" class="d-flex flex-col">
                 <table class="table table-striped table-dark">
                     <thead class="height">
@@ -30,41 +30,40 @@
 
 <script setup>
 /* eslint-disable */
-import { ref, onMounted, computed, watchEffect } from "@vue/runtime-core";
-import { createScene, placeItem } from "../scenes/room1";
+import { ref, computed, watchEffect } from "@vue/runtime-core";
+import { createScene, verifItemInNavette } from "../scenes/room1";
 import useApi from "../stores/api.store";
 import useAuth from "../stores/auth.store";
 
 const bjsCanvas = ref(null);
-const {user} = useAuth();
+const canvaMounted = ref(false)
+const auth = useAuth();
+const user = computed(() => useAuth().user);
 const inventaire = computed(() => useAuth().user.items);
 const itemsDispo = computed(() => useAuth().game.itemsDispo);
 const dragElement = ref(null);
 let scene;
 
-watchEffect(() =>  {
-    console.log('Inventaire: ', inventaire.value);
-    console.log('Items Dispo: ', itemsDispo.value);
-})
-
-onMounted(() => {
-    if (bjsCanvas.value) {
+watchEffect(() => {
+    if (!canvaMounted.value && bjsCanvas.value) {
+        canvaMounted.value = true;
+        console.log('mount canva')
         scene = createScene(bjsCanvas.value, verif);
     }
-});
+}, [bjsCanvas])
 
 function imgDrop() {
     console.log('elem : ' + dragElement.value)
     if (dragElement.value) {
-        let lieu = placeItem(scene, dragElement.value.id)
-        console.log("l'item " + dragElement.value.id + " a etait placé dans l'enigme : " + lieu)
+        verifItemInNavette(scene, dragElement.value.id)
+        /*console.log("l'item " + dragElement.value.id + " a etait placé dans l'enigme : " + lieu)
         if (lieu !== "erreur") {
             ///TODO DATABASE : envoyer au serveur la sortie d'inventaire vers lieu
             var parent = dragElement.value.parentElement;
             parent.removeChild(dragElement.value);
         } else {
             console.log('impossible de drop ici');
-        }
+        }*/
         dragElement.value = null;
     }
     else {
@@ -75,17 +74,7 @@ function imgDrop() {
 
 function verif(type, nom) {
     console.log('verification de : ' + type + ' nommé ' + nom);
-    if (type === 'item'){
-        return useApi().post('/game/pick-item', {item: nom})
-        .then(res => {
-            const data = res.data;
-            if (data.status === 'ok') {
-                useAuth().user = data.user;
-                useAuth().game.itemsDispo = data.game.itemsDispo;
-            }
-        })
-        .catch(console.log);
-    } else if (type === 'tuyau') {
+    if (type === 'tuyau') {
         ///TODO DATABASE : verifier que c'est OK
         let prom = new Promise((resolve, reject) => {
             if (nom == 5 /*&& itemDedans = engrenageMoyen*/){

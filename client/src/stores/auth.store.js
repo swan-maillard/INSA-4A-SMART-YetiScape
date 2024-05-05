@@ -11,10 +11,8 @@ const useAuth = defineStore("auth", {
   actions: {
     initData() {
       this.token = localStorage.getItem("token");
-      this.user = localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")) : null;
-      this.game = localStorage.getItem("game") ? JSON.parse(localStorage.getItem("game")) : null
 
-      if (this.game) {
+      if (this.token) {
         useApi().get('/game/salle').then(res => {
           this.saveSession(this.token, res.data.user, res.data.game);
         })
@@ -24,13 +22,13 @@ const useAuth = defineStore("auth", {
 
     saveSession(token, user, game) {
       localStorage.clear();
-      localStorage.setItem("user", user ? JSON.stringify(user) : null);
       localStorage.setItem("token", token);
-      localStorage.setItem("game", game ? JSON.stringify(game) : null);
 
       this.token = token;
       this.user = user;
       this.game = game;
+
+      console.log(user, game)
     },
 
     clearSession() {

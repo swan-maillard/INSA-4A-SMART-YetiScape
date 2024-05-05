@@ -185,7 +185,7 @@ export default {
       }
 
       // We check that it's the right hole and that it's the right item
-      if (trou == 6 && tuyau.etapeActuelle === 1 && tuyau.items[0] === 'engrenageMoyen') {
+      if (trou == 5 && tuyau.etapeActuelle === 1 && tuyau.items[0] === 'engrenageMoyen') {
         tuyau.etapeActuelle = 2;
         game.tuyau = tuyau;
         await updateGame(game);

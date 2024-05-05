@@ -170,8 +170,6 @@ async function getImportedMesh(scene, nomModel, nomTexture) {
                 let text = new Texture("./textures/" + nomTexture, scene);
                 mat = new StandardMaterial(nomTexture);
                 mat.diffuseTexture = text;
-            } else {
-                console.log('reuse texture');
             }
             mesh.material = mat;
         }
@@ -238,30 +236,23 @@ async function getCoffreRouage(scene) {
     });
 }
 
-function getNavette(scene) {
-    SceneLoader.ImportMeshAsync("", "./models/", "navette.glb", scene)
-    .then((resultat) => {
-        console.log('navette : ' + resultat.meshes.length)
-        let base = scene.getMeshByName('navetteBase');
-        let mat = new StandardMaterial();
-        mat.diffuseColor = new Color3(1, 0, 0);
-        base.material = mat;
-
-        let couvercle = scene.getMeshByName('navetteCouvercle');
-        couvercle.material = mat;
-
-        let tube = scene.getMeshByName('navetteTube');
-        let matJaune = new StandardMaterial();
-        matJaune.diffuseColor = new Color3(1, 1, 0);
-        matJaune.alpha = .4;
-        tube.material = matJaune;
-
-        let navBase = Mesh.MergeMeshes([base, tube], true, false, null, false, true);
-        navBase.name = 'navetteVide';
-
-        navBase.position = new Vector3(-4.1, 1.4, 1.3);
-        couvercle.position = new Vector3(4.4, 1.4, 1.3);
-    })
+async function getNavette(scene) {
+    const resultat = await SceneLoader.ImportMeshAsync("", "./models/", "navette.glb", scene);
+    let base = scene.getMeshByName('navetteBase');
+    let mat = new StandardMaterial();
+    mat.diffuseColor = new Color3(1, 0, 0);
+    base.material = mat;
+    let couvercle = scene.getMeshByName('navetteCouvercle');
+    couvercle.material = mat;
+    let tube = scene.getMeshByName('navetteTube');
+    let matJaune = new StandardMaterial();
+    matJaune.diffuseColor = new Color3(1, 1, 0);
+    matJaune.alpha = 0.4;
+    tube.material = matJaune;
+    let navBase = Mesh.MergeMeshes([base, tube], true, false, null, false, true);
+    navBase.name = 'navetteVide';
+    navBase.position = new Vector3(-4.1, 1.4, 1.3);
+    couvercle.position = new Vector3(4.4, 1.4, 1.3);
 }
 
 function getCoffreGemmes(scene){
@@ -271,9 +262,7 @@ function getCoffreGemmes(scene){
 
     const result = SceneLoader.ImportMeshAsync("", "./models/", "coffre.glb", scene);
     result.then((resultat) => {
-        console.log('dabord : ' + resultat.meshes.length)
         for (var i = 1; i < resultat.meshes.length; i++) {
-            console.log("Nom coffre: "+resultat.meshes[i].name)
             resultat.meshes[i].material = matDoor;
             resultat.meshes[i].scalingDeterminant = 2;
             resultat.meshes[i].position.x = -4.3;
