@@ -1,90 +1,83 @@
 import User from './user';
 import AbstractDocument from './AbstractDocument';
 import { getUserById } from '../services/usersServices';
-import Enigme from './enigme';
-import { createEnigme, getEnigmeById } from '../services/enigmesServices';
+import { Enigme } from './enigme';
 import { Item } from './item';
 
-export interface GameFirestore extends AbstractDocument {
+export interface GameDatabase extends AbstractDocument {
   id: string;
-  users: string[];
-  trappe: string | null;
-  tuyau: string | null;
-  coffre: string | null;
-  rouages: string | null;
-  portes: string | null;
-  itemsDispo: Item[];
+  users: string;
+  trappe: string;
+  tuyau: string;
+  coffre: string;
+  rouages: string;
+  portes: string;
+  itemsDispo: string;
 }
 
 export default class Game {
   id: string = '-1';
   users: User[];
-  trappe: Enigme | null = null;
-  tuyau: Enigme | null = null;
-  coffre: Enigme | null = null;
-  rouages: Enigme | null = null;
-  portes: Enigme | null = null;
-  itemsDispo: Item[] = [];
+  trappe: Enigme;
+  tuyau: Enigme;
+  coffre: Enigme;
+  rouages: Enigme;
+  portes: Enigme;
+  itemsDispo: { [key: number]: Item[] };
 
   constructor(user?: User) {
     this.users = user ? [user] : [];
-  }
-
-  async initEnigmes() {
-    const trappeSolutions: [string] = ['110000111001111'];
-    this.trappe = await createEnigme(new Enigme('trappe', 1, trappeSolutions));
-
-    const tuyauSolutions: [Item, number] = ['engrenage_grand', 6];
-    this.tuyau = await createEnigme(new Enigme('tuyau', 2, tuyauSolutions));
-
-    const coffreSolutions: [number] = [8163];
-    const coffreRecompenses: [Item[]] = [['gemme_carre', 'gemme_triangle']];
-    this.coffre = await createEnigme(new Enigme('coffre', 1, coffreSolutions, coffreRecompenses));
-
-    const rouageSolutions: [number] = [1234];
-    const rouageRecompenses: [Item[]] = [['gemme_cercle']];
-    this.rouages = await createEnigme(new Enigme('rouages', 1, rouageSolutions, rouageRecompenses));
-
-    this.portes = await createEnigme(new Enigme('portes', 0));
-  }
-
-  getEnigmes(): (Enigme | null)[] {
-    return [this.trappe, this.tuyau, this.coffre, this.rouages, this.portes];
+    this.trappe = initEnigme(1);
+    this.tuyau = initEnigme(2);
+    this.coffre = initEnigme(1);
+    this.coffre = initEnigme(1);
+    this.rouages = initEnigme(1);
+    this.portes = initEnigme(0);
+    this.itemsDispo = {
+      1: ['engrenage_grand'],
+      2: ['engrenage_petit'],
+      3: [],
+    };
   }
 }
 
+const initEnigme = (nbEtapes: number, etapeActuelle: number = 0, items: Item[] = []): Enigme => {
+  return { nbEtapes, etapeActuelle, items };
+};
+
 export const gameConverter = {
-  toFirestore: (game: Game): GameFirestore => {
+  toDatabase: (game: Game): GameDatabase => {
     return {
       id: game.id,
-      users: game.users.map((user) => user.id),
-      trappe: game.trappe ? game.trappe.id : null,
-      tuyau: game.tuyau ? game.tuyau.id : null,
-      coffre: game.coffre ? game.coffre.id : null,
-      rouages: game.rouages ? game.rouages.id : null,
-      portes: game.portes ? game.portes.id : null,
-      itemsDispo: game.itemsDispo,
+      users: JSON.stringify(game.users.map((user) => user.id)),
+      trappe: JSON.stringify(game.trappe),
+      tuyau: JSON.stringify(game.tuyau),
+      coffre: JSON.stringify(game.coffre),
+      rouages: JSON.stringify(game.rouages),
+      portes: JSON.stringify(game.portes),
+      itemsDispo: JSON.stringify(game.itemsDispo),
     };
   },
 
-  fromFirestore: async (gameFirestore: GameFirestore) => {
+  fromDatabase: async (gameDatabase: GameDatabase) => {
     const game = new Game();
-    game.id = gameFirestore.id;
+    game.id = gameDatabase.id;
 
+    const users = JSON.parse(gameDatabase.users);
     game.users = (
       await Promise.all(
-        gameFirestore.users.map(async (userId) => {
+        users.map(async (userId: string) => {
           return await getUserById(userId);
         })
       )
     ).filter((user) => user) as User[];
 
-    game.trappe = gameFirestore.trappe ? await getEnigmeById(gameFirestore.trappe) : null;
-    game.tuyau = gameFirestore.tuyau ? await getEnigmeById(gameFirestore.tuyau) : null;
-    game.coffre = gameFirestore.coffre ? await getEnigmeById(gameFirestore.coffre) : null;
-    game.rouages = gameFirestore.rouages ? await getEnigmeById(gameFirestore.rouages) : null;
-    game.portes = gameFirestore.portes ? await getEnigmeById(gameFirestore.portes) : null;
-    game.itemsDispo = gameFirestore.itemsDispo;
+    game.trappe = JSON.parse(gameDatabase.trappe);
+    game.tuyau = JSON.parse(gameDatabase.tuyau);
+    game.coffre = JSON.parse(gameDatabase.coffre);
+    game.rouages = JSON.parse(gameDatabase.rouages);
+    game.portes = JSON.parse(gameDatabase.portes);
+    game.itemsDispo = JSON.parse(gameDatabase.itemsDispo);
 
     return game;
   },

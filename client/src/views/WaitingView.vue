@@ -1,31 +1,119 @@
-<template>
-  <div class="m-3">
-    <div class="d-flex flex-row justify-content-between">
-      <p class="m-1">id de la partie : {{ gameId }}</p>
-      <p class="m-1">{{ gamerId }}/3</p>
-    </div>
+<script setup>
+import { computed, ref } from "vue";
+import apiStore from "@/stores/api.store";
+import socketio from "@/services/socketio";
+import useAuth from "@/stores/auth.store";
+import { useRouter } from "vue-router";
 
+const { username } = useAuth();
+
+const socket = socketio.socket;
+
+const router = useRouter();
+
+const idCopied = ref(false);
+
+let gameId = "ID DE LA ROOM";
+const gamers = ref([]);
+const nbGamers = computed(() => gamers.value.length);
+
+infosGame();
+
+function infosGame() {
+  apiStore()
+    .get("/game")
+    .then((response) => {
+      if (response.status !== 200) return;
+
+      gameId = response.data.id;
+      gamers.value = response.data.users;
+    })
+    .catch(console.log);
+}
+
+function lancerSalle() {
+  socket.emit("waiting-room/start-game");
+}
+
+socket.on("waiting-room/new-user", (data) => {
+  gamers.value.push(data);
+});
+socket.on("waiting-room/start-game", () => {
+  router.push("room1");
+});
+
+function copyGameIdToClipboard() {
+  const dummy = document.createElement("textarea");
+  // to avoid breaking orgain page when copying more words
+  // cant copy when adding below this code
+  // dummy.style.display = 'none'
+  document.body.appendChild(dummy);
+  //Be careful if you use texarea. setAttribute('value', value), which works with "input" does not work with "textarea". – Eduard
+  dummy.value = gameId;
+  dummy.select();
+  document.execCommand("copy");
+  document.body.removeChild(dummy);
+  setTimeout(() => (idCopied.value = false), 1000);
+}
+</script>
+
+<template>
+  <div
+    class="m-3 d-flex flex-column justify-content-between align-items-center w-100 flex-grow-1"
+  >
+    <div class="d-flex flex-row justify-content-between w-100">
+      <div style="flex: 1 1 0">
+        <div
+          tabindex="0"
+          class="m-1 fs-3 game-id"
+          :class="{ copied: idCopied }"
+          @click="copyGameIdToClipboard"
+          @mousedown="idCopied = true"
+        >
+          {{ gameId }}
+          <img
+            src="../assets/icons/copy.svg"
+            width="25"
+            alt="copy"
+            class="cursor-pointer"
+          />
+        </div>
+      </div>
+
+      <span class="fs-3 text-center" style="flex: 1 1 0">
+        Welcome, <strong>{{ username }}</strong>
+      </span>
+      <div class="m-1 fs-3 text-end" style="flex: 1 1 0">{{ nbGamers }}/3</div>
+    </div>
     <div class="d-flex flex-row text-center justify-content-center">
       <div class="mb-4 mb-md-0 m-4" v-for="gamer in gamers" :key="gamer.id">
         <div class="card testimonial-card">
           <div class="card-up"></div>
           <div class="avatar mx-auto bg-white">
             <img
-              src="../assets/avatar_yeti.png"
+              :src="
+                'https://source.boringavatars.com/beam/50/' +
+                gamer.name +
+                '?colors=DDDDDD,222222'
+              "
               class="rounded-circle img-fluid"
+              alt="Avatar"
+              width="110"
+              height="110"
             />
           </div>
           <div class="card-body">
             <h4 class="mb-4">{{ gamer.name }}</h4>
             <hr />
-            <p class="dark-grey-text mt-4">
-              <i class="fas fa-quote-left pe-2"></i>Un nouveau participant
-            </p>
+            <p>Salle {{ gamer.salle }}</p>
           </div>
         </div>
       </div>
     </div>
-    <div v-if="gamerId == 3" class="flex justify-content-end mt-4">
+    <div
+      v-if="nbGamers === 3"
+      class="d-flex justify-content-center align-items-center w-100 mt-4"
+    >
       <button
         type="button"
         class="btn btn-primary"
@@ -40,60 +128,34 @@
   </div>
 </template>
 
-<script setup>
-import { ref } from "vue";
-import axios from "axios";
-
-let gameId = 0;
-let gamerId = 0;
-let token = localStorage.getItem("token");
-
-const gamers = ref([]);
-
-const config = {
-  headers: {
-    "Content-Type": "application/json", // Content-Type header
-    Authorization: `Bearer ${token}`, // JWT token in the Authorization header
-    "Access-Control-Allow-Origin": "*", // CORS header to allow requests from any origin
-  },
-};
-infosGame();
-setInterval(infosGame,1000);
-
-function infosGame(){
-  axios
-  .get("http://localhost:3000/game", config)
-  .then((response) => respGame(response))
-  .catch(console.log);
-}
-
-function respGame(response) {
-  if (response.status == 200) {
-    gameId = response.data.id;
-
-    if(response.data.users.length > gamerId && gamerId < 4){
-      for(let i = gamerId; i<response.data.users.length; i++){
-        gamers.value.push({id: gamerId++, name: response.data.users[i].name})
-      }
-    }
-  }
-}
-
-function lancerSalle() {
-  let userName = localStorage.getItem("nom")
-  if(userName == gamers.value[0].name){
-    console.log("Salle 1")
-  }else if(userName == gamers.value[1].name){
-    console.log("Salle 2")
-  }else{
-    console.log("Salle 3")
-  }
-}
-</script>
-
 <style>
+.game-id {
+  background-color: #ddd;
+  color: #222;
+  padding: 5px 20px;
+  border-radius: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  transition: 0.3s;
+  cursor: pointer;
+  width: fit-content;
+}
+
+.game-id.copied {
+  background-color: #45933e;
+}
+
+.game-id:focus {
+  transform: scale(0.9);
+}
+
 .card {
   width: 15rem;
+  border: none !important;
+  background-color: #ddd !important;
+  box-shadow: 0 0 10px 5px #0000004f;
 }
 
 .testimonial-card .card-up {
@@ -103,22 +165,20 @@ function lancerSalle() {
   border-top-right-radius: 0.25rem;
 }
 
-.card-up{
-  background: #667eea;
-  
-    /* Chrome 10-25, Safari 5.1-6 */
-    background: -webkit-linear-gradient(to top, rgba(97,154,239,0.5), rgba(94,113,145,0.5));
-  
-    /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
-    background: linear-gradient(to top, rgba(97,154,239,0.5), rgba(94,113,145,0.5))
-  
+.card-up {
+  background: #222;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.83),
+    rgba(15, 15, 15, 0.61)
+  );
 }
 
 .testimonial-card .avatar {
   width: 110px;
   margin-top: -60px;
   overflow: hidden;
-  border: 3px solid #fff;
+  border: 3px solid #ddd;
   border-radius: 50%;
 }
 
@@ -133,7 +193,7 @@ function lancerSalle() {
   width: 110px;
   margin-top: -60px;
   overflow: hidden;
-  border: 3px solid #fff;
+  border: 3px solid #ddd;
   border-radius: 50%;
 }
 </style>
