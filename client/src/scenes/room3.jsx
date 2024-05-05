@@ -19,7 +19,7 @@ const createScene = (canvas, verif) => {
     camera.setTarget(new Vector3(0, 2, 5));
     camera.inputs.clear();
     camera.inputs.addMouse();
-    camera.attachControl(canvas, false); ///TODO : blocker pour diminuer l'amplitude de mvt
+    camera.attachControl(canvas, false); 
     console.log(camera.position)
 
     new HemisphericLight("light", Vector3.Up(), scene);
@@ -36,7 +36,7 @@ const createScene = (canvas, verif) => {
     textePlane.rotation = new Vector3(0, - Math.PI / 2, 0);
     textePlane.position = new Vector3(-4.7, 1.6, 0);
 
-    
+    // Load scene de base 
     const matBlanc = new StandardMaterial("matBlanc", scene);
     matBlanc.diffuseColor = Color3.White();
 
@@ -61,7 +61,6 @@ const createScene = (canvas, verif) => {
     if(game.value.trappe.etapeActuelle != game.value.trappe.nbEtapes){
         getTrappeGauche(scene);
     }else{
-        // TODO : tester placer item
         var cercle = MeshBuilder.CreateCylinder("objetTrappe",{diameter:0.5, height:0.001}, scene);
         cercle.position = new Vector3(-4.5,0,1.5);
         game.value.trappe.items.forEach((element) => {
@@ -70,7 +69,6 @@ const createScene = (canvas, verif) => {
     }
     getCoffreGemmes(scene).then(()=>{
         if(game.value.coffre.etapeActuelle == game.value.coffre.nbEtapes){
-            // TODO : tester 
             openCoffre();
             game.value.itemsDispo.forEach(e => {
                 placeCoffre(e);
@@ -78,6 +76,9 @@ const createScene = (canvas, verif) => {
         }  
     });
       
+
+    //TODO: pour Swan lorsque l'objet a été gemme a été recupéré de l'autre côté, le faire disparaitre, pour cela faire :
+    // scene.getMeshByName("gemmeTriangle").dispose();
 
 
     engine.runRenderLoop(() => {
@@ -116,7 +117,7 @@ const createScene = (canvas, verif) => {
                 moveCamera(camera,-1,new Vector3(-2,1.6,1.5), new Vector3(-5,0,1.5))
             }
             else if(currentMesh.name === 'textePlane') {
-                moveCamera(camera, 0,new Vector3(-3.5,1.6,0), new Vector3(-5.7,1.6,0))
+                moveCamera(camera, 0,new Vector3(-3,1.6,0), new Vector3(-5.7,1.6,0))
             }
         }
         else if(position.value === "coffre"){
@@ -188,8 +189,7 @@ const createScene = (canvas, verif) => {
     var openCoffre = function(){
         var cordeCoffre = scene.getMeshByName("wooden_crate_01_latch");
         cordeCoffre.isVisible = false;
-        var hautCoffre = scene.getMeshByName("wooden_crate_01_lid")
-        console.log(hautCoffre);
+        var hautCoffre = scene.getMeshByName("wooden_crate_01_lid");
         hautCoffre.isVisible = false;        
     }
 
@@ -231,7 +231,6 @@ const createScene = (canvas, verif) => {
     }
 
     var subNumberCode = function(){
-        console.log("Boite cliqué Add!");
         var index = currentMesh.name.split(':')[1];
         if(code.value[index]>0)
             code.value[index]--;
@@ -242,7 +241,6 @@ const createScene = (canvas, verif) => {
     }
 
     var addNumberCode = function(){
-        console.log("Boite cliqué Add!");
         var index = currentMesh.name.split(':')[1];
         if(code.value[index]<9)
             code.value[index]++;
@@ -253,7 +251,6 @@ const createScene = (canvas, verif) => {
     }
     
     var changeColorCircle = function(){
-        console.log(currentMesh.material)
         var index = currentMesh.name.split(':')[1];
         if(currentMesh.material.name == matBlanc.name){
             currentMesh.material = matNoir;
@@ -262,16 +259,11 @@ const createScene = (canvas, verif) => {
             currentMesh.material = matBlanc;
             forme.value[index] = 0;
         }
-        // verif("trappe",forme).then(()=>{
-        //     console.log("bien joué !")
-        //     openTrappe();
-        // }, ()=>{console.log("c'est pas ça")})
     }
 
     scene.onPointerObservable.add((pointerInfo) => {
         switch (pointerInfo.type) {
             case PointerEventTypes.POINTERDOWN:
-                console.log("ahhhhh!")
                 if (pointerInfo.pickInfo.hit) {
                     pointerDown(pointerInfo.pickInfo.pickedMesh)
                 }
@@ -291,7 +283,6 @@ function moveCamera(camera, pos, cameraPos, lockedTarget){
     else if(pos === 0)
         position.value = "images";
 
-    console.log("la!")
     camera.position = cameraPos;
     camera.setTarget(lockedTarget);
     camera.lockedTarget = lockedTarget;
@@ -306,23 +297,22 @@ function moveCameraInit(camera){
 }
 
 const placeItem = (scene, item) => {
-    if (position.value === "trappe") {
-        if (item === 'gemmeTriangle'){
-            getGemme(scene, 'triangle').then(() => {
-                scene.getMeshByName('gemmeTriangle').rotation = new Vector3(Math.PI/4, Math.PI/4, 0);
-                scene.getMeshByName('gemmeTriangle').position = new Vector3(4.75, 0, 1.5);
-                scene.getMeshByName('gemmeTriangle').name = 'item:gemmeTriangle';
-            })
-                return position.value;
-        }else if (item === 'gemmeCarre'){
-            getGemme(scene, 'carre').then(() => {
-                scene.getMeshByName('gemmeCarre').rotation = new Vector3(Math.PI/4, Math.PI/4, 0);
-                scene.getMeshByName('gemmeCarre').position = new Vector3(4.75, 0, 1.5);
-                scene.getMeshByName('gemmeCarre').name = 'item:gemmeCarre';
-            })
-                return position.value;
-        }
+    if (item === 'gemmeTriangle'){
+        getGemme(scene, 'triangle').then(() => {
+            scene.getMeshByName('gemmeTriangle').rotation = new Vector3(Math.PI/4, Math.PI/4, 0);
+            scene.getMeshByName('gemmeTriangle').position = new Vector3(4.75, 0, 1.5);
+            scene.getMeshByName('gemmeTriangle').name = 'item:gemmeTriangle';
+        })
+            return position.value;
+    }else if (item === 'gemmeCarre'){
+        getGemme(scene, 'carre').then(() => {
+            scene.getMeshByName('gemmeCarre').rotation = new Vector3(Math.PI/4, Math.PI/4, 0);
+            scene.getMeshByName('gemmeCarre').position = new Vector3(4.75, 0, 1.5);
+            scene.getMeshByName('gemmeCarre').name = 'item:gemmeCarre';
+        })
+            return position.value;
     }
+    
     return 'erreur';
 };
 
