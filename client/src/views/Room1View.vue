@@ -48,7 +48,7 @@ watchEffect(() => {
     if (!canvaMounted.value && bjsCanvas.value) {
         canvaMounted.value = true;
         console.log('mount canva')
-        scene = createScene(bjsCanvas.value, verif);
+        scene = createScene(bjsCanvas.value);
     }
 }, [bjsCanvas])
 
@@ -72,21 +72,6 @@ function imgDrop() {
     
 }
 
-function verif(type, nom) {
-    console.log('verification de : ' + type + ' nommé ' + nom);
-    if (type === 'tuyau') {
-        ///TODO DATABASE : verifier que c'est OK
-        let prom = new Promise((resolve, reject) => {
-            if (nom == 5 /*&& itemDedans = engrenageMoyen*/){
-                resolve();
-            } else {
-                //addItemToInv('engrenageMoyen');
-                reject();
-            }
-        })
-        return prom;
-    }
-}
 </script>
 
 

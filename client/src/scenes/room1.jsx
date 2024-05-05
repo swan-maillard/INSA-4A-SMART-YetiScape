@@ -10,7 +10,7 @@ import useApi from "../stores/api.store";
 // position possible : centre, tuyau (gauche), trappe (gauche)
 const position = ref("centre");
 
-const createScene = (canvas, verif) => {
+const createScene = (canvas) => {
     //base pour creer la scene
     const engine = new Engine(canvas);
     const scene = new Scene(engine);
