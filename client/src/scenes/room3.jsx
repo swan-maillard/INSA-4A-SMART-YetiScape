@@ -1,5 +1,5 @@
 /* eslint-disable */
-import {PointerEventTypes, Engine, Scene, FreeCamera, Vector3, HemisphericLight, DynamicTexture, StandardMaterial, MeshBuilder, Color3} from "@babylonjs/core";
+import {PointerEventTypes, Engine, Scene, FreeCamera, Vector3, HemisphericLight, Texture, DynamicTexture, StandardMaterial, MeshBuilder, Color3} from "@babylonjs/core";
 import {ref} from "@vue/runtime-core";
 import {getPorte, getGemme,  getSalle, getCoffreGemmes, getCodeCoffre, getButtonValdier, getTrappeGauche} from "./roomsElements";
 
@@ -42,6 +42,15 @@ const createScene = (canvas, verif) => {
     var mursSalle = getSalle(scene, 3);
     getPorte(scene);
 
+    var textePlane = MeshBuilder.CreatePlane('textePlane', {width:2, height:1.2});
+    let textTexte = new Texture("./img/textes.png", scene);
+    let matTextes = new StandardMaterial("matTextes");
+    matTextes.diffuseTexture = textTexte;
+    matTextes.diffuseTexture.hasAlpha = true;
+    textePlane.material = matTextes;
+    textePlane.rotation = new Vector3(0, - Math.PI / 2, 0);
+    textePlane.position = new Vector3(-4.7, 2.3, 0);
+
     const forme = ref([])
     for(var i=0; i<15;i++){forme.value.push(0)}
     getTrappeGauche(scene);
@@ -65,7 +74,7 @@ const createScene = (canvas, verif) => {
 
     var pointerDown = function (mesh) {
         currentMesh = mesh;
-        console.log("click")
+        console.log("click sur " + currentMesh.name)
         if(currentMesh.name.startsWith('item')){
             var coffre = scene.getMeshByName("wooden_crate_01_lid")
             if(coffre != null){
