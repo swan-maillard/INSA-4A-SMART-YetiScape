@@ -39,7 +39,7 @@ const createScene = (canvas, verif) => {
     matTextes.diffuseTexture.hasAlpha = true;
     textePlane.material = matTextes;
     textePlane.rotation = new Vector3(0, - Math.PI / 2, 0);
-    textePlane.position = new Vector3(-4.7, 2.3, 0);
+    textePlane.position = new Vector3(-4.7, 1.6, 0);
 
     const forme = ref([])
     for(var i=0; i<15;i++){forme.value.push(0)}
@@ -84,20 +84,20 @@ const createScene = (canvas, verif) => {
             if(currentMesh.name.startsWith("wooden_crate")){
                 var coffre = scene.getMeshByName("wooden_crate_01_latch")
                 if(coffre.isVisible){
-                    moveCamera(camera, 0.5,1.6,3, 1, new Vector3(5.3,0,3) );
+                    moveCamera(camera, 1,new Vector3(0.5,1.6,3), new Vector3(5.3,0,3) );
                 }else{
-                    moveCamera(camera, 3,1.6,3, 1, new Vector3(5.3,0,3) );
+                    moveCamera(camera, 1,new Vector3(3,1.6,3), new Vector3(5.3,0,3) );
                 }
                 
             }else if(currentMesh.name === "trappe" || currentMesh.name.startsWith("cercle")){
-                moveCamera(camera,-2, 0.2,1.5, -1, new Vector3(-3,0.2,1.5))
+                moveCamera(camera,-1,new Vector3(-2,0.2,1.5), new Vector3(-3,0.2,1.5))
             }else if(currentMesh.name === "objetTrappe"){
-                moveCamera(camera,-2, 1.6,1.5, -1, new Vector3(-5,0,1.5))
+                moveCamera(camera,-1,new Vector3(-2,1.6,1.5), new Vector3(-5,0,1.5))
             }
             //CAMERA A REVOIR POUR TEXTEPLANE
-            /*else if(currentMesh.name === 'textePlane') {
-                moveCamera(camera,-3.4, 2.3,0, -1, new Vector3(-4,2.3,0))
-            }*/
+            else if(currentMesh.name === 'textePlane') {
+                moveCamera(camera, 0,new Vector3(-3.5,1.6,0), new Vector3(-5.7,1.6,0))
+            }
         }
         else if(position.value === "coffre"){
             if(currentMesh.name.startsWith("add")){
@@ -112,7 +112,7 @@ const createScene = (canvas, verif) => {
                     //TODO: ouvrir le coffre avec les gemmes
                     console.log("Vous avez ouvert le coffre !")
                     openCoffre();
-                    moveCamera(camera, 3,1.6,3, 1, new Vector3(5.3,0,3) );
+                    moveCamera(camera, 1,new Vector3(3,1.6,3), new Vector3(5.3,0,3) );
                 },()=>{
                     console.log("Mauvais code ...");
                     reinitCode();
@@ -127,6 +127,10 @@ const createScene = (canvas, verif) => {
             else if(currentMesh.name.startsWith("cercle")){
                 console.log("cercle click !")
                 changeColorCircle();
+            }
+        }else{
+            if(currentMesh.name === "allWalls"){
+                moveCameraInit(camera)
             }
         }
         
@@ -224,15 +228,17 @@ const createScene = (canvas, verif) => {
     return scene;
 }
 
-function moveCamera(camera, x, y, z, pos, lockedTarget){
+function moveCamera(camera, pos, cameraPos, lockedTarget){
     if(pos === 1)
         position.value = "coffre";
     else if(pos === -1)
         position.value = "trappe";
+    else if(pos === 0)
+        position.value = "images";
 
-    var target = new Vector3(x,y,z);
-    camera.position = target;
-    camera.setTarget(new Vector3(x+pos,y,z));
+    console.log("la!")
+    camera.position = cameraPos;
+    camera.setTarget(lockedTarget);
     camera.lockedTarget = lockedTarget;
 }
 
