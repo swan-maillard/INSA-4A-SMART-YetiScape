@@ -1,6 +1,8 @@
 # Node modules
 node_modules
 
+*.db
+
 # Dependency directories
 npm-debug.log
 yarn-error.log
