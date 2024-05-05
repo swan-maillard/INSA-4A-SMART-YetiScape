@@ -49,6 +49,16 @@ const createScene = (canvas, verif) => {
     getPorte(scene);
     getTuyau(scene);
 
+    var romainPlane = MeshBuilder.CreatePlane('romainPlane', {width:3, height:0.6});
+    let textRomain = new Texture("./img/nombreRomain.png", scene);
+    let matRomain = new StandardMaterial("matRomain");
+    matRomain.diffuseTexture = textRomain;
+    matRomain.diffuseTexture.hasAlpha = true;
+    romainPlane.material = matRomain;
+    romainPlane.rotation = new Vector3(0, - Math.PI / 2, 0);
+    romainPlane.position = new Vector3(-4.7, 2.3, 0);
+    
+
     engine.runRenderLoop(() => {
         scene.render();
     });
@@ -59,7 +69,6 @@ const createScene = (canvas, verif) => {
     var pointerDown = function (mesh) {
         currentMesh = mesh;
         console.log('click sur ' + currentMesh.name)
-        console.log('texture : ' + scene.getMaterialByName('rouille.j'));
         if(currentMesh.name.startsWith('item')){
             verif('item', currentMesh.name.substring(5))
             .then(() => {
