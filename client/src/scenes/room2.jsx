@@ -1,14 +1,16 @@
 /* eslint-disable */
 import { Texture, Mesh, Engine, Scene, SceneLoader, FreeCamera, Vector3, MeshBuilder, StandardMaterial, Color3, HemisphericLight, PointerEventTypes, Color4 } from "@babylonjs/core";
 import "@babylonjs/loaders";
-import {ref} from "@vue/runtime-core";
-import {getPorte, getSalle, getImportedMesh, getTuyau, getCoffreRouage, getGemme} from "./roomsElements";
+import {ref, computed} from "@vue/runtime-core";
+import {getPorte, getSalle, getImportedMesh, getTuyau, getCoffreRouage, getGemme, getNavette} from "./roomsElements";
+import useAuth from "../stores/auth.store";
+import useApi from "../stores/api.store";
 
 //Salle 2 : 
 //Position possible : centre, murDroite, tuyau, coffreRouage
 const position = ref("centre");
 
-const createScene = (canvas, verif) => {
+const createScene = (canvas) => {   
     //base pour creer la scene
     const engine = new Engine(canvas);
     const scene = new Scene(engine);
@@ -22,14 +24,9 @@ const createScene = (canvas, verif) => {
 
     new HemisphericLight("light", Vector3.Up(), scene);
 
+    //Element de base de la scene : 
     getSalle(scene, 2);
-    getImportedMesh(scene, 'engrenageGrand', 'rouille.jpg')
-        .then(()=> {
-            scene.getMeshByName('engrenageGrand').position = new Vector3(-2.4, 0.15, 2.4);
-            scene.getMeshByName('engrenageGrand').scalingDeterminant = 0.16;
-            scene.getMeshByName('engrenageGrand').name = 'item:engrenageGrand';
-        });
-    getCoffreRouage(scene)
+    getCoffreRouage(scene);
     getImportedMesh(scene, 'engrenagePetit', 'rouille.jpg')
     .then( () => {
         let eng1 = scene.getMeshByName('engrenagePetit');
@@ -42,38 +39,44 @@ const createScene = (canvas, verif) => {
         let eng3 = eng1.clone('dragEngP3||2.65,0.12,4.1');
         eng3.position = new Vector3(2.65, 0.12, 4.1);
     });
-
     var pickPlane = MeshBuilder.CreatePlane("pickPlane", {size: 2});
     pickPlane.isVisible = false;
     pickPlane.position= new Vector3(-2, 1, 3.8);
     pickPlane.isPickable = true;
-    
     getPorte(scene);
     getTuyau(scene);
 
-    var romainPlane = MeshBuilder.CreatePlane('romainPlane', {width:3, height:0.6});
-    let textRomain = new Texture("./img/nombreRomain.png", scene);
-    let matRomain = new StandardMaterial("matRomain");
-    matRomain.diffuseTexture = textRomain;
-    matRomain.diffuseTexture.hasAlpha = true;
-    romainPlane.material = matRomain;
+    var romainPlane = createTexturePlane(scene, 3, 0.6, 'nombreRomain')
     romainPlane.rotation = new Vector3(0, - Math.PI / 2, 0);
     romainPlane.position = new Vector3(-4.7, 2.3, 0);
 
-    var eclairPlane = MeshBuilder.CreatePlane('eclairPlane', {height:4, width: 3});
-    let textEclair = new Texture("./img/eclair.png", scene);
-    let matElcair = new StandardMaterial("matElcair");
-    matElcair.diffuseTexture = textEclair;
-    matElcair.diffuseTexture.hasAlpha = true;
-    eclairPlane.material = matElcair;
+    var eclairPlane = createTexturePlane(scene, 4, 3, 'eclair');
     eclairPlane.rotation = new Vector3(0, Math.PI / 2, 0);
     eclairPlane.position = new Vector3(4.7, 2.3, -1);
+    //Fin des elements de base de la scene
     
+    //Elements reactifs de la scene
+    const game = computed(() => useAuth().game);
+    console.log(game.value)
+    game.value.itemsDispo.forEach((e) => {
+        placeItemInit(scene, e);
+    })
+    if (game.value.coffreRouage.etapeActuelle != game.value.coffreRouage.nbEtapes) {
+        game.value.coffreRouage.items.forEach((e) => {
+            console.log('ici')
+            placeEngrOnCoffre(scene, e);
+        })
+    }
+    if (game.value.tuyau.etapeActuelle == game.value.tuyau.nbEtapes) {
+        placeNavette(scene);
+    }
+    //Fin des element réactifs de la scene
 
     engine.runRenderLoop(() => {
         scene.render();
     });
 
+    var solution = [];
     var currentMesh;
     var drag = false;
 
@@ -81,19 +84,21 @@ const createScene = (canvas, verif) => {
         currentMesh = mesh;
         console.log('click sur ' + currentMesh.name)
         if(currentMesh.name.startsWith('item')){
-            verif('item', currentMesh.name.substring(5))
-            .then(() => {
-                console.log("promesse tenue : on supprime l'engrenage")
-                currentMesh.dispose();
-            })
-            .catch(() => {
-                console.log('promesse non tenue, on garde l engrenage')
-            });
+            useApi().post('/game/pick-item', {item: currentMesh.name.split(':')[1]})
+                .then(res => {
+                    const data = res.data;
+                    if (data.status === 'ok') {
+                        useAuth().user = data.user;
+                        useAuth().game.itemsDispo = data.game.itemsDispo;
+                    }
+                    currentMesh.dispose();
+                })
+                .catch(console.log);
         }
         if (position.value === 'centre') {
             if (currentMesh.name === 'coffreRouage') {
                 moveCamera(camera, 1,new Vector3(-2.4, 1.3, 1), new Vector3(-2.4, 0.8, 4.2));
-            }else if (currentMesh.name === 'romainPlane') {
+            }else if (currentMesh.name === 'nombreRomain') {
                 moveCamera(camera, 0,new Vector3(-3, 1.6, 0), new Vector3(-5.7, 2.3, 0));
             }else if (currentMesh.name === 'tuyauOut') {
                 moveCamera(camera, 0,new Vector3(1, 1.6, -1), new Vector3(5, 1.7, -1));
@@ -104,15 +109,11 @@ const createScene = (canvas, verif) => {
                 drag = true;
                 currentMesh.rotation = new Vector3(Math.PI/2,0, 0);
             } else if (currentMesh.name === 'engBas'){
-                let bon = verifRouage(scene);
+                let bon = verifRouage(scene, solution);
                 console.log('verification du puzzle : ' + bon);
                 if (bon === true) {
                     verif(position.value, true).then(() => {
-                        getGemme(scene, 'ronde').then(() => {
-                            scene.getMeshByName('gemmeRonde').rotation = new Vector3(Math.PI/4, Math.PI/4, 0);
-                            scene.getMeshByName('gemmeRonde').position = new Vector3(2.45, 1.05, 4.2);
-                            scene.getMeshByName('gemmeRonde').name = 'item:gemmeRonde';
-                        })
+                        putGemmeInit(scene);
                     });
                 }
             }
@@ -126,19 +127,18 @@ const createScene = (canvas, verif) => {
     var replaceEngInit = function(currentMesh, forceOrigin) {
         let engComps = currentMesh.name.split('|');
         let pos = [];
-        if (forceOrigin || engComps[1] === ""){
+        if (forceOrigin || engComps[1] === ""){ // retour a la position sol
             currentMesh.rotation = new Vector3(0, 0, 0);
             pos = engComps[2].split(',');
             if (engComps[1] !== ""){
-                console.log('ici')
                 let cyl = scene.getMeshByName(engComps[1] + '|' + engComps[0]);
                 let cylComps = cyl.name.split('|');
+                solution[cylComps[0].charAt(3)] = "";
                 cyl.name = cylComps[0] + '|';
                 engComps[1] = '';
                 currentMesh.name = engComps.join('|');
             }
         } else {
-            console.log('ici2')
             let cyl = scene.getMeshByName(engComps[1] + '|' + engComps[0]);
             pos[0] = - cyl.position.x;
             pos[1] = cyl.position.y;
@@ -150,12 +150,12 @@ const createScene = (canvas, verif) => {
     var pointerUp = function(pickedMesh){
         if(drag){
             if (pickedMesh.name.startsWith('cyl')){ // j'ai fini sur un cyl
-                if (pickedMesh.name.endsWith('|')){ // le cyl est dispo
+                if (pickedMesh.name.endsWith('|')){ // le cyl est dispo, je le deplace
                     let engComps = currentMesh.name.split('|');
                     let cylComps = pickedMesh.name.split('|');
+                    solution[cylComps[0].charAt(3)] = engComps[0].charAt(engComps[0].length - 2);
+                    solution[engComps[1].charAt(3)] = '';
                     if (engComps[1] !== ""){
-                        console.log('crach ici')
-                        console.log('cherche : ' + engComps[1] + '|' + engComps[0])
                         scene.getMeshByName(engComps[1] + '|' + engComps[0]).name = engComps[1] + '|';
                     }
                     engComps[1] = cylComps[0];
@@ -165,15 +165,12 @@ const createScene = (canvas, verif) => {
                     currentMesh.position.x = - pickedMesh.position.x;
                     currentMesh.position.z = pickedMesh.position.z;
                     currentMesh.position.y = pickedMesh.position.y;
-                } else {
-                    replaceEngInit(currentMesh, false);
+                } else { //sinon je le remet a sa position d'avant
+                    replaceEngInit(currentMesh, false, solution);
                 }
-            } else {
-                replaceEngInit(currentMesh, true);
+            } else { // ou je le remet a sa position de départ si je touche pas de cylindre
+                replaceEngInit(currentMesh, true, solution);
             }
-            //verifier qu'un cylindre est touché.
-            //Si oui, poser l'eng dessus
-            //Sinon, remettre dans sa position et rotation d'origine
             drag = null;   
         }
     }
@@ -215,7 +212,8 @@ const createScene = (canvas, verif) => {
         }
     });
 
-    function verifRouage(scene){
+    function verifRouage(scene, solution){
+        let sol = solution.join('');
         let count = 0;
         if (scene.getMeshByName('dragEngP1||2.1,0.12,4.1')) {
             count++;
@@ -226,27 +224,24 @@ const createScene = (canvas, verif) => {
         if (scene.getMeshByName('dragEngP3||2.65,0.12,4.1')) {
             count++;
         }
-        if (count == 1
-            && scene.getMeshByName('cyl4|dragEngP3') == null 
-            && scene.getMeshByName('cyl4|dragEngP2') == null 
-            && scene.getMeshByName('cyl4|dragEngP1') == null
-            && scene.getMeshByName('cyl0|dragEngG') != null
-            /*&& scene.getMeshByName('cyl3|dragEngM') != null*/)
-            return true;
-        return false;
-    }
+        if (count != 1)
+            sol = 'faux';
+        console.log('solution : ', sol);
+        useApi().post('/game/rouages/solve', {configuration: sol})
+        .then(res => {
+            const data = res.data;
+            useAuth().user = data.user;
+            useAuth().game.coffreRouage = data.game.rouages;
+            if (data.status === 'ok') {
+                useAuth().game.itemsDispo = data.game.itemsDispo;
+                placeItemInit(scene, 'gemmeRonde');
+            }
+        })
+        .catch(console.log);
 
+    }
     return scene;
 };
-
-// function moveCamera(camera, mesh, x, y, z, pos){
-//     position.value = 'coffreRouage'
-
-//     var target = new Vector3(-2.4, 0.8, 2);
-//     camera.position = target;
-//     camera.setTarget(new Vector3(-2.4, 0.8, 4.2));
-//     camera.lockedTarget = new Vector3(-2.4, 0.8, 4.2);
-// }
 
 function moveCamera(camera, pos, cameraPos, lockedTarget){
     if(pos === 1)
@@ -271,30 +266,97 @@ function moveCameraInit(camera){
     camera.lockedTarget = null;
 }
 
-const placeItem = (scene, item) => {
-    if (position.value === "coffreRouage") {
-        if (item === 'engrenageGrand'){
-            getImportedMesh(scene, 'engrenageGrand', 'rouille.jpg')
-                .then( () => {
-                    scene.getMeshByName('engrenageGrand').position = new Vector3(2.9, 0.1, 3.8);
-                    scene.getMeshByName('engrenageGrand').scalingDeterminant = 0.16;
-                    scene.getMeshByName('engrenageGrand').name = 'dragEngG||2.9,0.1,3.8';
-                });
-                return position.value;
-        }
-        if (item === 'engrenageMoyen'){
-            getImportedMesh(scene, 'engrenageMoyen', 'rouille.jpg')
-                .then( () => {
-                    scene.getMeshByName('engrenageMoyen').position = new Vector3(2, 0.1, 3.8);
-                    scene.getMeshByName('engrenageMoyen').scalingDeterminant = 0.15;
-                    scene.getMeshByName('engrenageMoyen').name = 'dragEngM||2,0.1,3.8';
-                });
-            return position.value;
-        }
+const placeEngrOnCoffre = (scene, item) => {
+    if (item === 'engrenageGrand'){
+        getImportedMesh(scene, 'engrenageGrand', 'rouille.jpg')
+            .then( () => {
+                scene.getMeshByName('engrenageGrand').position = new Vector3(2.9, 0.1, 3.8);
+                scene.getMeshByName('engrenageGrand').scalingDeterminant = 0.16;
+                scene.getMeshByName('engrenageGrand').name = 'dragEngG3||2.9,0.1,3.8';
+            });
     }
-    return 'erreur';
+    if (item === 'engrenageMoyen'){
+        getImportedMesh(scene, 'engrenageMoyen', 'rouille.jpg')
+            .then( () => {
+                scene.getMeshByName('engrenageMoyen').position = new Vector3(2, 0.1, 3.8);
+                scene.getMeshByName('engrenageMoyen').scalingDeterminant = 0.15;
+                scene.getMeshByName('engrenageMoyen').name = 'dragEngM0||2,0.1,3.8';
+            });
+    }
 };
 
-// deplacement du pointer : https://playground.babylonjs.com/#7CBW04
+function createTexturePlane(scene, width, height, nom) {
+    var planTexture = MeshBuilder.CreatePlane(nom, {width:width, height:height});
+    let texture = new Texture("./img/" + nom + ".png", scene);
+    let mat = new StandardMaterial("matRomain");
+    mat.diffuseTexture = texture;
+    mat.diffuseTexture.hasAlpha = true;
+    planTexture.material = mat;
+    return planTexture
+}
 
-export { createScene, placeItem };
+function placeItemInit(scene, nomItem) {
+    if (nomItem == 'engrenageGrand') {
+        getImportedMesh(scene, 'engrenageGrand', 'rouille.jpg')
+        .then(()=> {
+            scene.getMeshByName('engrenageGrand').position = new Vector3(-2.4, 0.15, 2.4);
+            scene.getMeshByName('engrenageGrand').scalingDeterminant = 0.16;
+            scene.getMeshByName('engrenageGrand').name = 'item:engrenageGrand';
+        });
+    } else if (nomItem == 'gemmeRonde') {
+        getGemme(scene, 'ronde').then(() => {
+            scene.getMeshByName('gemmeRonde').rotation = new Vector3(Math.PI/4, Math.PI/4, 0);
+            scene.getMeshByName('gemmeRonde').position = new Vector3(2.45, 1.05, 4.2);
+            scene.getMeshByName('gemmeRonde').name = 'item:gemmeRonde';
+        })
+    } else if (nomItem == 'engrenageMoyen') {
+        placeEngMoyen(scene);
+    }
+}
+
+function placeEngMoyen(scene) {
+    getImportedMesh(scene, 'engrenageMoyen', 'rouille.jpg').then( () => {
+        let gear = scene.getMeshByName('engrenageMoyen');
+        gear.position = new Vector3(-3, 0.15, -1);
+        gear.scalingDeterminant = 0.1;
+        gear.name = 'item:engrenageMoyen';
+    });
+}
+
+function verif(scene, nomItem){
+    console.log('verif : ', scene);
+    verifEngInRouage(scene, nomItem);
+}
+
+//reception socket tube
+function placeEngNavette(scene) {
+    placeEngMoyen(scene);
+    placeNavette(scene);
+}
+function placeNavette(scene) {
+    getNavette(scene).then(()=>{
+        let navBase = scene.getMeshByName('navetteVide');
+        navBase.position = new Vector3(3, 0.13, -1.5);
+        navBase.rotation = new Vector3( 0, Math.PI/3, Math.PI/25);
+        let navCouvercle = scene.getMeshByName('navetteCouvercle');
+        navCouvercle.position = new Vector3(-2.6, 0.15, 0);
+        navCouvercle.rotation = new Vector3(0,Math.PI/2,  0);
+    })
+}
+
+function verifEngInRouage(scene, nomItem){
+    if(position.value === "coffreRouage"){
+        useApi().post('/game/rouages/put-gear', {item: nomItem})
+            .then(res => {
+                const data = res.data;
+                useAuth().user = data.user;
+                useAuth().game.coffreRouage = data.game.rouage;
+                if (data.status === 'ok') {
+                    placeEngrOnCoffre(scene, nomItem);
+                }
+            })
+            .catch(console.log);
+    }
+}
+
+export { createScene, verif };

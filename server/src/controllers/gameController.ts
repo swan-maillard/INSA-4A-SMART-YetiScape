@@ -40,6 +40,10 @@ export default {
         infos = { ...infos, coffre: game.coffre };
       }
 
+      if (user.salle === 2){
+        infos = { ...infos, coffreRouage: game.rouages };
+      }
+
       res.status(200).send({
         user,
         game: {
@@ -690,7 +694,7 @@ export default {
       }
 
       // On check que la position est correcte
-      if (configuration == 1234) {
+      if (configuration == "GPPM") {
         rouages.etapeActuelle = 1;
         game.rouages = rouages;
         game.itemsDispo[user.salle!].push('gemmeRonde');

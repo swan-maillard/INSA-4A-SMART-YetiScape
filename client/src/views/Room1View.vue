@@ -31,8 +31,7 @@
 <script setup>
 /* eslint-disable */
 import { ref, computed, watchEffect } from "@vue/runtime-core";
-import { createScene, verifItemInNavette } from "../scenes/room1";
-import useApi from "../stores/api.store";
+import { createScene, verif } from "../scenes/room1";
 import useAuth from "../stores/auth.store";
 
 const bjsCanvas = ref(null);
@@ -55,7 +54,7 @@ watchEffect(() => {
 function imgDrop() {
     console.log('elem : ' + dragElement.value)
     if (dragElement.value) {
-        verifItemInNavette(scene, dragElement.value.id)
+        verif(scene, dragElement.value.id)
         /*console.log("l'item " + dragElement.value.id + " a etait placé dans l'enigme : " + lieu)
         if (lieu !== "erreur") {
             ///TODO DATABASE : envoyer au serveur la sortie d'inventaire vers lieu
@@ -69,7 +68,6 @@ function imgDrop() {
     else {
         console.log('Aucun élément sélectionné');
     }
-    
 }
 
 </script>

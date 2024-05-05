@@ -218,20 +218,23 @@ function placeEngInit(scene){
         });
 }
 
+function verif(scene, nomItem){
+    verifItemInNavette(scene, nomItem);
+}
+
 function verifItemInNavette(scene, nomItem){
     if(position.value === "tuyau"){
         useApi().post('/game/tuyau/put-item', {item: nomItem})
-                .then(res => {
-                    const data = res.data;
-                    useAuth().user = data.user;
-                    useAuth().game.tuyau = data.game.tuyau;
-                    if (data.status === 'ok') {
-                        putItemInNavette(scene,nomItem)
-                    }
-                })
-                .catch(console.log);
+            .then(res => {
+                const data = res.data;
+                useAuth().user = data.user;
+                useAuth().game.tuyau = data.game.tuyau;
+                if (data.status === 'ok') {
+                    putItemInNavette(scene,nomItem)
+                }
+            })
+            .catch(console.log);
     }
-    
 }
 
 function putItemInNavette(scene, nomItem){
@@ -276,6 +279,7 @@ function deleteNavette(scene){
     }
 }
 
+//Apres reception socket
 function deleteTrappe(scene){
     let trappe = scene.getMeshByName('trappe')
     if (trappe) {
@@ -283,6 +287,7 @@ function deleteTrappe(scene){
     }
 }
 
+//apres reception socket
 function putItemFromTrappe(scene, item){
     if (item.startsWith('gemme')) {
         getGemme(scene, item.substring(5)).then(() => {
@@ -300,4 +305,4 @@ function placeItemFromTrappe(scene, item){
 
 // deplacement du pointer : https://playground.babylonjs.com/#7CBW04
 
-export { verifItemInNavette, createScene, placeEngInit, deleteNavette, deleteTrappe, putItemFromTrappe };
+export { verif, createScene, placeEngInit, deleteNavette, deleteTrappe, putItemFromTrappe };
