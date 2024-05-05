@@ -12,17 +12,7 @@ const createScene = (canvas, verif) => {
     const engine = new Engine(canvas);
     const scene = new Scene(engine);
 
-    getGemme(scene, 'triangle').then(() => {
-        scene.getMeshByName('gemmeTriangle').rotation = new Vector3(Math.PI/4, Math.PI/4, 0);
-        scene.getMeshByName('gemmeTriangle').position = new Vector3(-4.3, 0.2, 3);
-        scene.getMeshByName('gemmeTriangle').name = 'item:gemmeTriangle';
-    })
-
-    getGemme(scene, 'carre').then(() => {
-        scene.getMeshByName('gemmeCarre').rotation = new Vector3(Math.PI/4, Math.PI/4, 0);
-        scene.getMeshByName('gemmeCarre').position = new Vector3(-4.3, 0.2, 3);
-        scene.getMeshByName('gemmeCarre').name = 'item:gemmeCarre';
-    })
+    
 
 
     const matBlanc = new StandardMaterial("matBlanc", scene);
@@ -66,6 +56,8 @@ const createScene = (canvas, verif) => {
     }
     getButtonValdier();
 
+    //TODO DATABASE: Demander état page 
+
     engine.runRenderLoop(() => {
         scene.render();
     });
@@ -90,7 +82,7 @@ const createScene = (canvas, verif) => {
         }
         if(position.value === "centre"){
             if(currentMesh.name.startsWith("wooden_crate")){
-                var coffre = scene.getMeshByName("wooden_crate_01_lid")
+                var coffre = scene.getMeshByName("wooden_crate_01_latch")
                 if(coffre.isVisible){
                     moveCamera(camera, 0.5,1.6,3, 1, new Vector3(5.3,0,3) );
                 }else{
@@ -146,6 +138,18 @@ const createScene = (canvas, verif) => {
         var hautCoffre = scene.getMeshByName("wooden_crate_01_lid")
         console.log(hautCoffre);
         hautCoffre.isVisible = false;
+        
+        getGemme(scene, 'triangle').then(() => {
+            scene.getMeshByName('gemmeTriangle').rotation = new Vector3(Math.PI/4, Math.PI/4, 0);
+            scene.getMeshByName('gemmeTriangle').position = new Vector3(-4.3, 0.2, 3);
+            scene.getMeshByName('gemmeTriangle').name = 'item:gemmeTriangle';
+        })
+    
+        getGemme(scene, 'carre').then(() => {
+            scene.getMeshByName('gemmeCarre').rotation = new Vector3(Math.PI/4, Math.PI/4, 0);
+            scene.getMeshByName('gemmeCarre').position = new Vector3(-4.3, 0.2, 3);
+            scene.getMeshByName('gemmeCarre').name = 'item:gemmeCarre';
+        })
     }
 
     var openTrappe = function(){
