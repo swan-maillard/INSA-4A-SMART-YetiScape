@@ -255,7 +255,7 @@ async function getNavette(scene) {
     couvercle.position = new Vector3(4.4, 1.4, 1.3);
 }
 
-function getCoffreGemmes(scene){
+async function getCoffreGemmes(scene){
     let textureDoor = new Texture("./textures/coffre.jpg", scene);
     let matDoor = new StandardMaterial("matDoor");
     matDoor.diffuseTexture = textureDoor;
@@ -270,6 +270,7 @@ function getCoffreGemmes(scene){
             resultat.meshes[i].rotation = new Vector3(0, Math.PI/2,0);
         }
     })
+    return result;
 }
 
 function getCodeCoffre(scene, number, coordz){

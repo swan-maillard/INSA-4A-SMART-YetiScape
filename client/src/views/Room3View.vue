@@ -1,89 +1,86 @@
 <template>
-        <div id="GameScreen" class="d-flex flex-raw">
-            <div id="inventaire" class="d-flex flex-col">
-                <table class="table table-striped table-dark">
-                    <thead class="height">
-                        <tr>
-                        <th scope="col">Inventaire du joueur</th>
-                        </tr>
-                    </thead>
-                    <tbody id="ajoutInventaire">
-                        
-                    </tbody>
-                </table>
-            </div>
-            <div id="jeu">
-                <canvas id="GameCanva" ref="bjsCanvas"/>
-            </div>
+    <div v-if="user" id="GameScreen" class="d-flex flex-raw">
+        <div id="inventaire" class="d-flex flex-col">
+            <table class="table table-striped table-dark">
+                <thead class="height">
+                    <tr>
+                    <th scope="col">Inventaire du joueur </th>
+                    </tr>
+                </thead>
+                <tbody id="ajoutInventaire">
+                    <tr v-for="item in inventaire" :key="item">
+                        <th :id="item" scope="row">
+                            <img draggable="true" :src="'/img/'+item+'.png'" style="width: 100%;" @dragstart="(evt) => dragElement = evt.currentTarget.parentElement">
+                        </th>
+                    </tr>
+                </tbody>
+            </table>
         </div>
+        <div id="jeu" @drop="imgDrop" @dragover.prevent>
+            <!-- <Room1 :dragElement="dragElement" :setDragElement="(v) => dragElement.value = v" v-if="user.salle === 1">
+
+            </Room1>
+            <Room2 v-if="user.salle === 2"/>
+            <Room3 v-if="user.salle === 3
+            "/> -->
+            <canvas id="GameCanva" ref="bjsCanvas"/>
+        </div>
+    </div>
 </template>
 
-<script>
+<script setup>
 /* eslint-disable */
-import { ref, onMounted } from "@vue/runtime-core";
-import { createScene, placeItem } from "../scenes/room3";
+import { ref, computed, watchEffect  } from "@vue/runtime-core";
+import { createScene, verifItemTrappe } from "../scenes/room3";
+import useApi from "../stores/api.store";
+import useAuth from "../stores/auth.store";
 
-var dragElement;
+const bjsCanvas = ref(null);
+const canvaMounted = ref(false)
+const auth = useAuth();
+const user = computed(() => useAuth().user);
+const inventaire = computed(() => useAuth().user.items);
+const itemsDispo = computed(() => useAuth().game.itemsDispo);
+const dragElement = ref(null);
+let scene;
+
+watchEffect(() => {
+    if (!canvaMounted.value && bjsCanvas.value) {
+        canvaMounted.value = true;
+        console.log('mount canva')
+        scene = createScene(bjsCanvas.value);
+    }
+}, [bjsCanvas])
 
 function imgDrop(evt) {
-    let lieu = placeItem(scene, dragElement.id)
-    console.log("l'item " + dragElement.id + " a etait placé dans l'enigme : " + lieu)
-    if (lieu !== "erreur") {
-        ///TODO DATABASE : envoyer au serveur la sortie d'inventaire vers lieu
-        var parent = dragElement.parentElement;
-        parent.removeChild(dragElement);
-    } else {
-        console.log('impossible de drop ici');
+    console.log('elem : ' + dragElement.value)
+    if (dragElement.value) {
+        verifItemTrappe(scene, dragElement.value.id)
+        /*console.log("l'item " + dragElement.value.id + " a etait placé dans l'enigme : " + lieu)
+        if (lieu !== "erreur") {
+            ///TODO DATABASE : envoyer au serveur la sortie d'inventaire vers lieu
+            var parent = dragElement.value.parentElement;
+            parent.removeChild(dragElement.value);
+        } else {
+            console.log('impossible de drop ici');
+        }*/
+        dragElement.value = null;
     }
-    //TODO DATABASE: téléporter vers l'autre coté de la trappe (envoyer message à user salle 1)
-    dragElement = null;
-}
-
-function verif(type, code) {
-    console.log('verification de : ' + type + ' nommé ' + code);
-    if (type === 'item'){
-        // TODO: remplacer par les gemmes quand ils sont placés
-        let prom = new Promise((resolve, reject) => {
-            if (code === 'gemmeTriangle' || code === 'gemmeCarre'){
-                resolve();
-            } else {
-                reject();
-            }
-        }).then( () => {
-            addItemToInv(code);
-        });
-        return prom;
-    }else{
-        var codeAssemble = "";
-        code.value.forEach((e) => {
-            codeAssemble += e;
-        });
-        if(type === "buttonValider"){
-            //TODO DATABASE: regarder si le codeAssemble est bien solution coffre
-            let prom = new Promise((resolve, reject)=>{
-                if(codeAssemble == 8163){
-                    resolve();
-                }else {
-                    reject();
-                }
-            })
-            return prom;
-        }else if(type === "trappe"){
-            console.log(codeAssemble)
-            // TODO regarder si le codeAssemble est bien solution trappe
-            let prom = new Promise((resolve, reject)=>{
-                if(codeAssemble == 110000111001111){
-                    console.log("resolve");
-                    resolve();
-                }else {
-                    console.log("reject")
-                    reject();
-                }
-            })
-            return prom;
-        }
+    else {
+        console.log('Aucun élément sélectionné');
     }
-}
+    // let lieu = placeItem(scene, dragElement.id)
+    // console.log("l'item " + dragElement.id + " a etait placé dans l'enigme : " + lieu)
+    // if (lieu !== "erreur") {
+    //     ///TODO DATABASE : envoyer au serveur la sortie d'inventaire vers lieu
+    //     var parent = dragElement.parentElement;
+    //     parent.removeChild(dragElement);
+    // } else {
+    //     console.log('impossible de drop ici');
+    // }
+    // //TODO DATABASE: téléporter vers l'autre coté de la trappe (envoyer message à user salle 1)
+    // dragElement = null;
+} 
 
 function addItemToInv(nom) {
     var imgEngrenage = document.createElement('img')
@@ -104,25 +101,6 @@ function addItemToInv(nom) {
     document.getElementById("ajoutInventaire").appendChild(newTr);
 }
 
-var scene;
-export default {
-  name: "BabylonScene",
-  setup() {
-    const bjsCanvas = ref(null);
-
-    onMounted(() => {
-      if (bjsCanvas.value) {
-        scene = createScene(bjsCanvas.value, verif);
-        document.getElementById('jeu').addEventListener('dragover', (evt) => evt.preventDefault());
-        document.getElementById('jeu').addEventListener('drop', imgDrop);
-      }
-    });
-
-    return {
-      bjsCanvas,
-    };
-  },
-};
 </script>
 
 

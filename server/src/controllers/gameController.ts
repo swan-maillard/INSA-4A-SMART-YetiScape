@@ -36,6 +36,10 @@ export default {
         infos = { ...infos, tuyau: game.tuyau };
       }
 
+      if (user.salle === 3) {
+        infos = { ...infos, coffre: game.coffre };
+      }
+
       res.status(200).send({
         user,
         game: {
@@ -313,11 +317,11 @@ export default {
       const trappe = game.trappe;
 
       // On check que le tuyau peut accueillir un item
-      if (trappe.etapeActuelle !== 0) {
-        return res.status(409).send({ message: 'Forbidden, you already solved this puzzle' });
+      if (trappe.etapeActuelle == 0) {
+        return res.status(409).send({ message: 'Forbidden, you have not solved this puzzle' });
       }
 
-      if (<Item>item === 'engrenageGrand') {
+      if (<Item>item === 'gemmeTriangle') {
         user.items.splice(user.items.indexOf(item), 1);
         trappe.items.push(item);
         trappe.etapeActuelle = 1;

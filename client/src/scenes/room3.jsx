@@ -1,7 +1,9 @@
 /* eslint-disable */
 import {PointerEventTypes, Engine, Scene, FreeCamera, Vector3, HemisphericLight, Texture, DynamicTexture, StandardMaterial, MeshBuilder, Color3} from "@babylonjs/core";
-import {ref} from "@vue/runtime-core";
+import {ref, computed, watchEffect} from "@vue/runtime-core";
 import {getPorte, getGemme,  getSalle, getCoffreGemmes, getCodeCoffre, getButtonValdier, getTrappeGauche} from "./roomsElements";
+import useAuth from "../stores/auth.store";
+import useApi from "../stores/api.store";
 
 //Salle 3 : 
 // position possible : centre, trappe, image, coffre, textes
@@ -11,11 +13,6 @@ const createScene = (canvas, verif) => {
     //base pour creer la scene
     const engine = new Engine(canvas);
     const scene = new Scene(engine);
-    const matBlanc = new StandardMaterial("matBlanc", scene);
-    matBlanc.diffuseColor = Color3.White();
-
-    const matNoir = new StandardMaterial("matNoir", scene);
-    matNoir.diffuseColor = Color3.Black();
     
     //On ajoute une caméra et une lumière
     const camera = new FreeCamera("camera1", new Vector3(0, 1.6, -3), scene);
@@ -39,12 +36,15 @@ const createScene = (canvas, verif) => {
     textePlane.rotation = new Vector3(0, - Math.PI / 2, 0);
     textePlane.position = new Vector3(-4.7, 1.6, 0);
 
+    
+    const matBlanc = new StandardMaterial("matBlanc", scene);
+    matBlanc.diffuseColor = Color3.White();
+
+    const matNoir = new StandardMaterial("matNoir", scene);
+    matNoir.diffuseColor = Color3.Black();
+
     const forme = ref([])
     for(var i=0; i<15;i++){forme.value.push(0)}
-    getTrappeGauche(scene);
-
-    getCoffreGemmes(scene);
-
     // Creation code coffre
     const code = ref([0,0,0,0]); // valeur de la combinaison du coffre
 
@@ -53,8 +53,32 @@ const createScene = (canvas, verif) => {
         texture.push(getCodeCoffre(scene,i,3.5-i*0.3));
     }
     getButtonValdier();
+    
 
-    //TODO DATABASE: Demander état page 
+    // Elements reactifs de la scene
+    const game = computed(() => useAuth().game);
+    console.log(game.value)
+    if(game.value.trappe.etapeActuelle != game.value.trappe.nbEtapes){
+        getTrappeGauche(scene);
+    }else{
+        // TODO : tester placer item
+        var cercle = MeshBuilder.CreateCylinder("objetTrappe",{diameter:0.5, height:0.001}, scene);
+        cercle.position = new Vector3(-4.5,0,1.5);
+        game.value.trappe.items.forEach((element) => {
+            placeItem(scene, element)
+        });
+    }
+    getCoffreGemmes(scene).then(()=>{
+        if(game.value.coffre.etapeActuelle == game.value.coffre.nbEtapes){
+            // TODO : tester 
+            openCoffre();
+            game.value.itemsDispo.forEach(e => {
+                placeCoffre(e);
+            });
+        }  
+    });
+      
+
 
     engine.runRenderLoop(() => {
         scene.render();
@@ -66,17 +90,16 @@ const createScene = (canvas, verif) => {
         currentMesh = mesh;
         console.log("click sur " + currentMesh.name)
         if(currentMesh.name.startsWith('item')){
-            var coffre = scene.getMeshByName("wooden_crate_01_lid")
-            if(coffre != null){
-                verif('item', currentMesh.name.substring(5))
-                .then(() => {
-                    console.log("promesse tenue : on supprime l'engrenage")
+            useApi().post('/game/pick-item', {item: currentMesh.name.split(':')[1]})
+                .then(res => {
+                    const data = res.data;
+                    if (data.status === 'ok') {
+                        useAuth().user = data.user;
+                        useAuth().game.itemsDispo = data.game.itemsDispo;
+                    }
                     currentMesh.dispose();
                 })
-                .catch(() => {
-                    console.log('promesse non tenue, on garde l engrenage')
-                });
-            }
+                .catch(console.log);
         }
         if(position.value === "centre"){
             if(currentMesh.name.startsWith("wooden_crate")){
@@ -92,7 +115,6 @@ const createScene = (canvas, verif) => {
             }else if(currentMesh.name === "objetTrappe"){
                 moveCamera(camera,-1,new Vector3(-2,1.6,1.5), new Vector3(-5,0,1.5))
             }
-            //CAMERA A REVOIR POUR TEXTEPLANE
             else if(currentMesh.name === 'textePlane') {
                 moveCamera(camera, 0,new Vector3(-3.5,1.6,0), new Vector3(-5.7,1.6,0))
             }
@@ -105,16 +127,29 @@ const createScene = (canvas, verif) => {
                 subNumberCode();
             }
             else if(currentMesh.name === "buttonValider"){
-                verif(currentMesh.name,code)
-                .then(() => {
-                    //TODO: ouvrir le coffre avec les gemmes
-                    console.log("Vous avez ouvert le coffre !")
-                    openCoffre();
-                    moveCamera(camera, 1,new Vector3(3,1.6,3), new Vector3(5.3,0,3) );
-                },()=>{
-                    console.log("Mauvais code ...");
-                    reinitCode();
+                var codeAssemble = "";
+                code.value.forEach((e) => {
+                    codeAssemble += e;
                 });
+                useApi().post('/game/coffre/solve', {code: codeAssemble})
+                .then(res => {
+                    const data = res.data;
+                        useAuth().user = data.user;
+                        useAuth().game.itemsDispo = data.game.itemsDispo;
+                        useAuth().game.coffre = data.game.coffre;
+                    if (data.status === 'ok') {
+                        console.log("Vous avez ouvert le coffre !")
+                        openCoffre();
+                        game.value.itemsDispo.forEach(e => {
+                            placeCoffre(e);
+                        });
+                        moveCamera(camera, 1,new Vector3(3,1.6,3), new Vector3(5.3,0,3) );
+                    }else if(data.status === 'no'){
+                        console.log("Mauvais code ...");
+                        reinitCode();
+                    }
+                })
+                .catch(console.log);
             }else if(currentMesh.name === "allWalls"){
                 moveCameraInit(camera)
             }
@@ -123,8 +158,24 @@ const createScene = (canvas, verif) => {
                 moveCameraInit(camera)
             }
             else if(currentMesh.name.startsWith("cercle")){
-                console.log("cercle click !")
                 changeColorCircle();
+                var configurationAssemble = "";
+                forme.value.forEach((e) => {
+                    configurationAssemble += e;
+                });
+                useApi().post('/game/trappe/solve', {configuration: configurationAssemble})
+                .then(res => {
+                    const data = res.data;
+                        useAuth().user = data.user;
+                        useAuth().game.trappe = data.game.trappe;
+                    if (data.status === 'ok') {
+                        console.log("Vous avez ouvert la trappe !")
+                        openTrappe();
+                    }else if(data.status === 'no'){
+                        console.log("Mauvaise forme ...");
+                    }
+                })
+                .catch(console.log);
             }
         }else{
             if(currentMesh.name === "allWalls"){
@@ -139,19 +190,24 @@ const createScene = (canvas, verif) => {
         cordeCoffre.isVisible = false;
         var hautCoffre = scene.getMeshByName("wooden_crate_01_lid")
         console.log(hautCoffre);
-        hautCoffre.isVisible = false;
+        hautCoffre.isVisible = false;        
+    }
+
+    var placeCoffre = function(nom){
+        if(nom == "gemmeTriangle"){
+            getGemme(scene, 'triangle').then(() => {
+                scene.getMeshByName('gemmeTriangle').rotation = new Vector3(Math.PI/4, Math.PI/4, 0);
+                scene.getMeshByName('gemmeTriangle').position = new Vector3(-4.3, 0.2, 3);
+                scene.getMeshByName('gemmeTriangle').name = 'item:gemmeTriangle';
+            })
+        }else if(nom == "gemmeCarre"){
+            getGemme(scene, 'carre').then(() => {
+                scene.getMeshByName('gemmeCarre').rotation = new Vector3(Math.PI/4, Math.PI/4, 0);
+                scene.getMeshByName('gemmeCarre').position = new Vector3(-4.3, 0.2, 3);
+                scene.getMeshByName('gemmeCarre').name = 'item:gemmeCarre';
+            })
+        }
         
-        getGemme(scene, 'triangle').then(() => {
-            scene.getMeshByName('gemmeTriangle').rotation = new Vector3(Math.PI/4, Math.PI/4, 0);
-            scene.getMeshByName('gemmeTriangle').position = new Vector3(-4.3, 0.2, 3);
-            scene.getMeshByName('gemmeTriangle').name = 'item:gemmeTriangle';
-        })
-    
-        getGemme(scene, 'carre').then(() => {
-            scene.getMeshByName('gemmeCarre').rotation = new Vector3(Math.PI/4, Math.PI/4, 0);
-            scene.getMeshByName('gemmeCarre').position = new Vector3(-4.3, 0.2, 3);
-            scene.getMeshByName('gemmeCarre').name = 'item:gemmeCarre';
-        })
     }
 
     var openTrappe = function(){
@@ -160,7 +216,8 @@ const createScene = (canvas, verif) => {
         for(var i=0; i<15; i++){
             var cercle = scene.getMeshByName("cercle:"+i);
             cercle.isVisible = false;
-        }
+        }      
+           
         var cercle = MeshBuilder.CreateCylinder("objetTrappe",{diameter:0.5, height:0.001}, scene);
         cercle.position = new Vector3(-4.5,0,1.5);
         moveCameraInit(camera);
@@ -205,10 +262,10 @@ const createScene = (canvas, verif) => {
             currentMesh.material = matBlanc;
             forme.value[index] = 0;
         }
-        verif("trappe",forme).then(()=>{
-            console.log("bien joué !")
-            openTrappe();
-        }, ()=>{console.log("c'est pas ça")})
+        // verif("trappe",forme).then(()=>{
+        //     console.log("bien joué !")
+        //     openTrappe();
+        // }, ()=>{console.log("c'est pas ça")})
     }
 
     scene.onPointerObservable.add((pointerInfo) => {
@@ -268,4 +325,20 @@ const placeItem = (scene, item) => {
     }
     return 'erreur';
 };
-export {createScene, placeItem};
+
+function verifItemTrappe(scene, nomItem){
+    if(position.value === "trappe"){
+        useApi().post('/game/trappe/put-item', {item: nomItem})
+                .then(res => {
+                    const data = res.data;
+                    useAuth().user = data.user;
+                    useAuth().game.trappe = data.game.trappe;
+                    if (data.status === 'ok') {
+                        placeItem(scene,nomItem)
+                    }
+                })
+                .catch(console.log);
+    }
+    
+}
+export {createScene, verifItemTrappe};
