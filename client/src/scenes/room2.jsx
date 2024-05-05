@@ -90,7 +90,11 @@ const createScene = (canvas, verif) => {
         }
         if (position.value === 'centre') {
             if (currentMesh.name === 'coffreRouage') {
-                moveCamera(camera, currentMesh, -1,1.6,0.125, -1);
+                moveCamera(camera, 1,new Vector3(-2.4, 1.3, 1), new Vector3(-2.4, 0.8, 4.2));
+            }else if (currentMesh.name === 'romainPlane') {
+                moveCamera(camera, 0,new Vector3(-3, 1.6, 0), new Vector3(-5.7, 2.3, 0));
+            }else if (currentMesh.name === 'tuyauOut') {
+                moveCamera(camera, 0,new Vector3(1, 1.6, -1), new Vector3(5, 1.7, -1));
             }
         } else if (position.value === 'coffreRouage'){
             if (currentMesh.name.startsWith('dragEng')){
@@ -233,14 +237,29 @@ const createScene = (canvas, verif) => {
     return scene;
 };
 
-function moveCamera(camera, mesh, x, y, z, pos){
-    position.value = 'coffreRouage'
+// function moveCamera(camera, mesh, x, y, z, pos){
+//     position.value = 'coffreRouage'
 
-    var target = new Vector3(-2.4, 0.8, 2);
-    camera.position = target;
-    camera.setTarget(new Vector3(-2.4, 0.8, 4.2));
-    camera.lockedTarget = new Vector3(-2.4, 0.8, 4.2);
+//     var target = new Vector3(-2.4, 0.8, 2);
+//     camera.position = target;
+//     camera.setTarget(new Vector3(-2.4, 0.8, 4.2));
+//     camera.lockedTarget = new Vector3(-2.4, 0.8, 4.2);
+// }
+
+function moveCamera(camera, pos, cameraPos, lockedTarget){
+    if(pos === 1)
+        position.value = "coffreRouage";
+    else if(pos === -1)
+        position.value = "tuyaux";
+    else if(pos === 0)
+        position.value = "images";
+
+    console.log("la!")
+    camera.position = cameraPos;
+    camera.setTarget(lockedTarget);
+    camera.lockedTarget = lockedTarget;
 }
+
 
 function moveCameraInit(camera){
     position.value = "centre";
