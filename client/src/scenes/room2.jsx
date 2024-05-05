@@ -16,6 +16,8 @@ const createScene = (canvas, verif) => {
     //On ajoute une caméra et une lumière
     const camera = new FreeCamera("camera1", new Vector3(0, 1.6, -3), scene);
     camera.setTarget(new Vector3(0, 2, 5));
+    camera.inputs.clear();
+    camera.inputs.addMouse();
     camera.attachControl(canvas, true); ///TODO : blocker pour diminuer l'amplitude de mvt
 
     new HemisphericLight("light", Vector3.Up(), scene);

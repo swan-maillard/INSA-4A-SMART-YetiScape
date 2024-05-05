@@ -1,5 +1,5 @@
 /* eslint-disable */
-import { Texture, Mesh, Engine, Scene, SceneLoader, FreeCamera, Vector3, MeshBuilder, StandardMaterial, Color3, HemisphericLight, PointerEventTypes, Color4 } from "@babylonjs/core";
+import { Texture, Mesh, Engine, Scene, SceneLoader,  FreeCamera, Vector3, MeshBuilder, StandardMaterial, Color3, HemisphericLight, PointerEventTypes, Color4 } from "@babylonjs/core";
 import "@babylonjs/loaders";
 import {ref} from "@vue/runtime-core";
 import {getPorte, getTuyaux, getSalle, getTrappe, getImportedMesh, getNavette} from "./roomsElements";
@@ -17,6 +17,8 @@ const createScene = (canvas, verif) => {
     //On ajoute une caméra et une lumière
     const camera = new FreeCamera("camera1", new Vector3(0, 1.6, -3), scene);
     camera.setTarget(new Vector3(0, 2, 5));
+    camera.inputs.clear();
+    camera.inputs.addMouse();
     camera.attachControl(canvas, false); ///TODO : blocker pour diminuer l'amplitude de mvt
     console.log(camera.position)
 

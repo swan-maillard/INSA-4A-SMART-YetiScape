@@ -11,10 +11,6 @@ const createScene = (canvas, verif) => {
     //base pour creer la scene
     const engine = new Engine(canvas);
     const scene = new Scene(engine);
-
-    
-
-
     const matBlanc = new StandardMaterial("matBlanc", scene);
     matBlanc.diffuseColor = Color3.White();
 
@@ -24,6 +20,8 @@ const createScene = (canvas, verif) => {
     //On ajoute une caméra et une lumière
     const camera = new FreeCamera("camera1", new Vector3(0, 1.6, -3), scene);
     camera.setTarget(new Vector3(0, 2, 5));
+    camera.inputs.clear();
+    camera.inputs.addMouse();
     camera.attachControl(canvas, false); ///TODO : blocker pour diminuer l'amplitude de mvt
     console.log(camera.position)
 
