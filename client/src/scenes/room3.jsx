@@ -4,7 +4,7 @@ import {ref} from "@vue/runtime-core";
 import {getPorte, getGemme,  getSalle, getCoffreGemmes, getCodeCoffre, getButtonValdier, getTrappeGauche} from "./roomsElements";
 
 //Salle 3 : 
-// position possible : centre, trappe, image, coffre
+// position possible : centre, trappe, image, coffre, textes
 const position = ref("centre");
 
 const createScene = (canvas, verif) => {
@@ -102,6 +102,10 @@ const createScene = (canvas, verif) => {
             }else if(currentMesh.name === "objetTrappe"){
                 moveCamera(camera,-2, 1.6,1.5, -1, new Vector3(-5,0,1.5))
             }
+            //CAMERA A REVOIR POUR TEXTEPLANE
+            /*else if(currentMesh.name === 'textePlane') {
+                moveCamera(camera,-3.4, 2.3,0, -1, new Vector3(-4,2.3,0))
+            }*/
         }
         else if(position.value === "coffre"){
             if(currentMesh.name.startsWith("add")){

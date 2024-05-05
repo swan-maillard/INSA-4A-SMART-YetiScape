@@ -57,6 +57,15 @@ const createScene = (canvas, verif) => {
     romainPlane.material = matRomain;
     romainPlane.rotation = new Vector3(0, - Math.PI / 2, 0);
     romainPlane.position = new Vector3(-4.7, 2.3, 0);
+
+    var eclairPlane = MeshBuilder.CreatePlane('eclairPlane', {size:4});
+    let textEclair = new Texture("./img/eclair.png", scene);
+    let matElcair = new StandardMaterial("matElcair");
+    matElcair.diffuseTexture = textEclair;
+    matElcair.diffuseTexture.hasAlpha = true;
+    eclairPlane.material = matElcair;
+    eclairPlane.rotation = new Vector3(0, Math.PI / 2, 0);
+    eclairPlane.position = new Vector3(4.7, 2.3, -1);
     
 
     engine.runRenderLoop(() => {

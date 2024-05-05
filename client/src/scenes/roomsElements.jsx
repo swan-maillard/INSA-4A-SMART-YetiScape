@@ -27,7 +27,7 @@ function getTuyau(scene) {
         tuyau.position = new Vector3(-4, 1.7, -1);
         tuyau.name = 'tuyauOut';
         var mat = new StandardMaterial();
-        mat.diffuseColor = Color3.Yellow();
+        mat.diffuseColor = Color3.Gray();
         mat.backFaceCulling = false;
         tuyau.material = mat;
     });
