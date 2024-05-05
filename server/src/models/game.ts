@@ -34,8 +34,8 @@ export default class Game {
     this.rouages = initEnigme(1);
     this.portes = initEnigme(0);
     this.itemsDispo = {
-      1: ['engrenage_grand'],
-      2: ['engrenage_petit'],
+      1: ['engrenageMoyen'],
+      2: ['engrenageGrand'],
       3: [],
     };
   }

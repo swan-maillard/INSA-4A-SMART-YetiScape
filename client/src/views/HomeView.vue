@@ -42,8 +42,8 @@ const handleResponse = (response) => {
   if (response.status !== 200) return;
   useAuth().saveSession(
     response.data.token,
-    form.value.username,
-    response.data.game.id
+    response.data.user,
+    response.data.game
   );
   router.push("/waiting");
 };

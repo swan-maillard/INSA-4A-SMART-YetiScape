@@ -35,7 +35,7 @@ export default {
       user.game = game.id;
       user.salle = 1;
       await updateUser(user);
-      res.status(200).send({ game, token: signUserData({ userId: user.id, gameId: game.id }) });
+      res.status(200).send({ game, user, token: signUserData({ userId: user.id, gameId: game.id }) });
     } catch (error) {
       // Rollback user creation if game creation fails
       console.error('Error creating game:', error);
@@ -81,7 +81,7 @@ export default {
             }
           }
 
-          res.status(200).send({ game, token: signUserData({ userId: user.id, gameId: game.id }) });
+          res.status(200).send({ game, user, token: signUserData({ userId: user.id, gameId: game.id }) });
         } else {
           await deleteUserById(user.id);
           res.status(403).send({ message: 'Game session ' + gameId + ' has already started' });

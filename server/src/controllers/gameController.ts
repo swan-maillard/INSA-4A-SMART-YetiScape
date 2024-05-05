@@ -7,11 +7,13 @@ import { Item } from '../models/item';
 
 export default {
   getGame: async (req: Request, res: Response) => {
-    const { gameId } = req.body.jwt;
+    const { userId, gameId } = req.body.jwt;
 
     try {
+      const user = (await getUserById(userId)) as User;
       const game = (await getGameById(gameId)) as Game;
-      res.status(200).send(game);
+
+      res.status(200).send({game, user});
     } catch (error) {
       console.error('Error getting game ' + gameId + ':', error);
       res.status(500).send({ message: 'Internal server error' });
@@ -183,7 +185,7 @@ export default {
       }
 
       // We check that it's the right hole and that it's the right item
-      if (trou == 6 && tuyau.etapeActuelle === 1 && tuyau.items[0] === 'engrenage_grand') {
+      if (trou == 6 && tuyau.etapeActuelle === 1 && tuyau.items[0] === 'engrenageMoyen') {
         tuyau.etapeActuelle = 2;
         game.tuyau = tuyau;
         await updateGame(game);
@@ -315,7 +317,7 @@ export default {
         return res.status(409).send({ message: 'Forbidden, you already solved this puzzle' });
       }
 
-      if (<Item>item === 'engrenage_petit') {
+      if (<Item>item === 'engrenageGrand') {
         user.items.splice(user.items.indexOf(item), 1);
         trappe.items.push(item);
         trappe.etapeActuelle = 1;
@@ -494,7 +496,7 @@ export default {
       if (code == 8163) {
         coffre.etapeActuelle = 1;
         game.coffre = coffre;
-        game.itemsDispo[user.salle!].push('gemme_carre', 'gemme_triangle');
+        game.itemsDispo[user.salle!].push('gemmeCarre', 'gemmeTriangle');
 
         await updateGame(game);
 
@@ -575,7 +577,7 @@ export default {
         return res.status(409).send({ message: "Forbidden, you don't have this item" });
       }
 
-      const gears: Item[] = ['engrenage_grand', 'engrenage_petit'];
+      const gears: Item[] = ['engrenageGrand', 'engrenageMoyen'];
       // On check que l'objet est un engrenage
       if (!gears.includes(item)) {
         return res.status(409).send({ message: 'Forbidden, this item is not allowed' });
@@ -676,7 +678,7 @@ export default {
         return res.status(409).send({ message: 'Forbidden, this puzzle has already been solved' });
       }
 
-      const gears: Item[] = ['engrenage_grand', 'engrenage_petit'];
+      const gears: Item[] = ['engrenageGrand', 'engrenageMoyen'];
 
       // On check que les deux engrenages sont posés
       if (!rouages.items.includes(gears[0]) || !rouages.items.includes(gears[1])) {
@@ -687,7 +689,7 @@ export default {
       if (configuration == 1234) {
         rouages.etapeActuelle = 1;
         game.rouages = rouages;
-        game.itemsDispo[user.salle!].push('gemme_cercle');
+        game.itemsDispo[user.salle!].push('gemmeRonde');
 
         await updateGame(game);
 

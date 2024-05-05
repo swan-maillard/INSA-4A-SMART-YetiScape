@@ -5,7 +5,7 @@ import socketio from "@/services/socketio";
 import useAuth from "@/stores/auth.store";
 import { useRouter } from "vue-router";
 
-const { username } = useAuth();
+const { user } = useAuth();
 
 const socket = socketio.socket;
 
@@ -25,8 +25,8 @@ function infosGame() {
     .then((response) => {
       if (response.status !== 200) return;
 
-      gameId = response.data.id;
-      gamers.value = response.data.users;
+      gameId = response.data.game.id;
+      gamers.value = response.data.game.users;
     })
     .catch(console.log);
 }
@@ -81,7 +81,7 @@ function copyGameIdToClipboard() {
       </div>
 
       <span class="fs-3 text-center" style="flex: 1 1 0">
-        Welcome, <strong>{{ username }}</strong>
+        Welcome, <strong>{{ user.name }}</strong>
       </span>
       <div class="m-1 fs-3 text-end" style="flex: 1 1 0">{{ nbGamers }}/3</div>
     </div>

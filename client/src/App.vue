@@ -7,19 +7,19 @@ import socketio from "@/services/socketio";
 const auth = useAuth();
 auth.initData();
 
-const gameId = computed(() => auth.gameId);
+const game = computed(() => auth.game);
 
 watchEffect(() => {
-  if (gameId.value) {
-    socketio.socket.emit("join-game", { username: auth.username });
+  if (game.value) {
+    socketio.socket.emit("join-game", { username: auth.user.name });
   }
-}, [gameId]);
+}, [game]);
 </script>
 
 <template>
   <div class="noise" />
   <div class="main-container">
-    <ChatRoom v-if="gameId" />
+    <ChatRoom v-if="game" />
     <div class="section-container">
       <RouterView />
     </div>
