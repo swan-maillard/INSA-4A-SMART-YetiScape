@@ -17,7 +17,6 @@ router.post('/pick-item', gameController.pickItem);
 router.get('/tuyau', gameController.getTuyau); // Room 1 & 2
 router.post('/tuyau/put-item', gameController.putItemTuyau); // Room 1
 router.post('/tuyau/envoi', gameController.sendTuyau); // Room 1
-router.post('/tuyau/get-item', gameController.getItemTuyau); // Room 2
 
 router.get('/trappe', gameController.getTrappe); // Room 1 & 3
 router.post('/trappe/get-item', gameController.getItemTrappe); // Room 1
