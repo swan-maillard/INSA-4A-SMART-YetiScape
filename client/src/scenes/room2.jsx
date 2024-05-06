@@ -38,6 +38,7 @@ const createScene = (canvas) => {
   const engine = new Engine(canvas);
   const scene = new Scene(engine);
   const popup = usePopup();
+  const game = computed(() => useAuth().game);
 
   const socket = socketio.socket;
   socket.on("game/tuyau-arrived", (data) => {
@@ -49,14 +50,15 @@ const createScene = (canvas) => {
         data.username
     );
   });
-  socket.on("game/portes-open", () => {
+  socket.on("game/portes-open", (data) => {
+    game.value.dateEnd = data.dateEnd;
     scene.getMeshByName("porteGauche").rotation = new Vector3(
       0,
       -Math.PI / 5,
       0
     );
     setTimeout(() => {
-      popup.send("La porte s'est ouverte !!", "success");
+      popup.send("La porte s'est ouverte !! Encore un dernier petit effort");
     }, 50);
   });
 
@@ -87,8 +89,16 @@ const createScene = (canvas) => {
   pickPlane.isVisible = false;
   pickPlane.position = new Vector3(-2, 1, 3.8);
   pickPlane.isPickable = true;
-  getPorte(scene);
   getTuyau(scene);
+  getPorte(scene).then(() => {
+    if (game.value.portes.etapeActuelle === game.value.portes.nbEtapes) {
+      scene.getMeshByName("porteGauche").rotation = new Vector3(
+        0,
+        -Math.PI / 5,
+        0
+      );
+    }
+  });
 
   var romainPlane = createTexturePlane(scene, 3, 0.6, "nombreRomain");
   romainPlane.rotation = new Vector3(0, -Math.PI / 2, 0);
@@ -102,11 +112,12 @@ const createScene = (canvas) => {
   //Fin des elements de base de la scene
 
   //Elements reactifs de la scene
-  const game = computed(() => useAuth().game);
   game.value.itemsDispo.forEach((e) => {
     placeItemInit(scene, e);
   });
-  if (game.value.coffreRouage.etapeActuelle != game.value.coffreRouage.nbEtapes) {
+  if (
+    game.value.coffreRouage.etapeActuelle != game.value.coffreRouage.nbEtapes
+  ) {
     game.value.coffreRouage.items.forEach((e) => {
       placeEngrOnCoffre(scene, e);
     });
@@ -134,6 +145,8 @@ const createScene = (canvas) => {
       meshName.startsWith("item") ||
       meshName.startsWith("base") ||
       meshName.startsWith("dragEng") ||
+      (meshName === "sortie" &&
+        game.value.portes.etapeActuelle === game.value.portes.nbEtapes) ||
       meshName === "coffreRouage" ||
       meshName === "nombreRomain" ||
       meshName === "tuyauOut" ||
@@ -194,7 +207,10 @@ const createScene = (canvas) => {
           });
         }
       }
+    } else if (currentMesh.name === "sortie" && game.value.dateEnd > 0) {
+      game.value.isFinished = true;
     }
+
     if (position.value !== "centre" && currentMesh.name === "allWalls") {
       console.log("Retour position départ");
       moveCameraInit(camera);
@@ -442,8 +458,8 @@ function placeNavette(scene) {
   });
 }
 
-function movePorteCoffre(scene){
-  scene.getMeshByName('porteCoffre').position = new Vector3(-2.9, 1.2, 4.03);
+function movePorteCoffre(scene) {
+  scene.getMeshByName("porteCoffre").position = new Vector3(-2.9, 1.2, 4.03);
 }
 
 function verifEngInRouage(scene, nomItem) {

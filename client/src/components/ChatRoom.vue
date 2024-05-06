@@ -5,14 +5,13 @@ import useAuth from "@/stores/auth.store";
 import { watchEffect } from "@vue/runtime-core";
 
 const auth = useAuth();
-console.log(auth)
+console.log(auth);
 let callId = auth.game.callId;
-
 
 const messages = ref([]);
 const newMessage = ref("");
 const collapsed = ref(false);
-var isMuted = false; // New variable to track mute state
+const isMuted = ref(false); // New variable to track mute state
 var audioTrack; // Variable to store audio track
 
 //Voice setup
@@ -94,8 +93,6 @@ function initVoiceChat() {
       }
     });
   }
-
-
 
   // Add our ID to the list of PeerJS IDs for this call
   function registerIdWithServer() {
@@ -219,18 +216,9 @@ function initVoiceChat() {
 // Function to toggle mute state
 // eslint-disable-next-line
 function toggleMute() {
-  isMuted = !isMuted; // Toggle mute state
-  audioTrack.enabled = !isMuted; // Enable/disable audio track
-  if (isMuted) {
-    document.getElementById("muteButton").innerHTML = "Unmute";
-  } else {
-    document.getElementById("muteButton").innerHTML = "Mute";
-  }
+  isMuted.value = !isMuted.value; // Toggle mute state
+  audioTrack.enabled = !isMuted.value; // Enable/disable audio track
 }
-
-onMounted(() => {
-  document.getElementById("muteButton").addEventListener("click", toggleMute);
-});
 
 //End of voice setup
 
@@ -261,13 +249,8 @@ socket.on("chat/message", function (data) {
 const joinedChat = ref(false);
 watchEffect(() => {
   if (auth.game.users && !joinedChat.value) {
-    const usersNames = auth.game.users
-      .map((u) => u.name)
-      .filter((u) => u !== auth.user.name);
-    messages.value.push({
-      text: "You can talk with " + usersNames.join(" and ") + ".",
-    });
     joinedChat.value = true;
+    messages.value.push({ text: "Bienvenue sur YetiScape, " + auth.user.name });
   }
 }, [auth.game]);
 
@@ -276,7 +259,10 @@ scrollToBottom();
 
 <template>
   <div class="section-container chat-box" :class="{ collapsed }">
-    <div class="w-100 d-flex flex-column align-items-center flex-grow-1">
+    <div
+      class="w-100 d-flex flex-column align-items-center flex-grow-1"
+      :class="!collapsed && 'overflow-hidden'"
+    >
       <div
         class="d-flex justify-content-between w-100 cursor-pointer"
         @click="collapsed = !collapsed"
@@ -316,12 +302,52 @@ scrollToBottom();
       </div>
     </div>
 
-    <input
-      v-model="newMessage"
-      @keyup.enter="sendMessage"
-      placeholder="Type your message..."
-    />
-    <button id="muteButton">Mute</button>
+    <div class="d-flex align-items-center gap-3">
+      <input
+        v-model="newMessage"
+        @keyup.enter="sendMessage"
+        placeholder="Type your message..."
+      />
+      <svg
+        class="cursor-pointer"
+        @click="toggleMute"
+        height="30"
+        viewBox="0 0 50 50"
+        width="30"
+      >
+        <line
+          v-if="isMuted"
+          fill="none"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-miterlimit="10"
+          data-v-56c7db03=""
+          x1="0"
+          y1="0"
+          stroke-width="3"
+          y2="45"
+          x2="40"
+        ></line>
+        <rect fill="none" height="50" width="50" />
+        <rect fill="none" height="50" width="50" />
+        <path
+          d="M10,33H3  c-1.103,0-2-0.898-2-2V19c0-1.102,0.897-2,2-2h7"
+          fill="none"
+          stroke="currentColor"
+          stroke-linejoin="round"
+          stroke-miterlimit="10"
+          stroke-width="2.08"
+        />
+        <path
+          d="M9.604,32.43  C9.256,32.129,9,31.391,9,30.754V19.247c0-0.637,0.256-1.388,0.604-1.689L22.274,4.926C23.905,3.27,26,3.898,26,6.327v36.988  c0,2.614-1.896,3.604-3.785,1.686L9.604,32.43z"
+          fill="none"
+          stroke="currentColor"
+          stroke-linejoin="round"
+          stroke-miterlimit="10"
+          stroke-width="1.9797"
+        />
+      </svg>
+    </div>
   </div>
 </template>
 

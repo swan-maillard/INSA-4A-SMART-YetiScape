@@ -39,6 +39,7 @@ const createScene = (canvas) => {
   const scene = new Scene(engine);
   const drag = ref(null);
   const popup = usePopup();
+  const game = computed(() => useAuth().game);
 
   const socket = socketio.socket;
   socket.on("game/trappe-opened", (data) => {
@@ -54,15 +55,16 @@ const createScene = (canvas) => {
     });
     popup.send(data.username + " a fait passé un objet par la trappe");
   });
-  socket.on("game/portes-open", () => {
+  socket.on("game/portes-open", (data) => {
     console.log("ok");
+    game.value.dateEnd = data.dateEnd;
     scene.getMeshByName("porteGauche").rotation = new Vector3(
       0,
       -Math.PI / 5,
       0
     );
     setTimeout(() => {
-      popup.send("La porte s'est ouverte !!", "success");
+      popup.send("La porte s'est ouverte !! Encore un dernier petit effort");
     }, 50);
   });
 
@@ -81,7 +83,15 @@ const createScene = (canvas) => {
   var mursSalle = getSalle(scene, 1);
   var trappe = getTrappe(scene);
   var tuyaux = getTuyaux(scene);
-  getPorte(scene);
+  getPorte(scene).then(() => {
+    if (game.value.portes.etapeActuelle === game.value.portes.nbEtapes) {
+      scene.getMeshByName("porteGauche").rotation = new Vector3(
+        0,
+        -Math.PI / 5,
+        0
+      );
+    }
+  });
 
   var pickPlane = MeshBuilder.CreatePlane("pickPlane", { size: 10 });
   pickPlane.isVisible = false;
@@ -93,8 +103,7 @@ const createScene = (canvas) => {
   //Fin scene de base
 
   // Elements reactifs de la scene
-  const game = computed(() => useAuth().game);
-  console.log(game.value);
+
   game.value.itemsDispo.forEach((e) => {
     console.log("je pose au sol", e);
     placeItemInit(scene, e);
@@ -162,6 +171,8 @@ const createScene = (canvas) => {
       meshName.startsWith("tuyau") ||
       meshName.startsWith("base") ||
       meshName === "trappe" ||
+      (meshName === "sortie" &&
+        game.value.portes.etapeActuelle === game.value.portes.nbEtapes) ||
       meshName === "navettePleine"
     );
   };
@@ -218,6 +229,8 @@ const createScene = (canvas) => {
       if (currentMesh.name === "allWalls") {
         moveCameraInit(camera);
       }
+    } else if (currentMesh.name === "sortie" && game.value.dateEnd > 0) {
+      game.value.isFinished = true;
     } else {
       moveCameraInit(camera);
     }

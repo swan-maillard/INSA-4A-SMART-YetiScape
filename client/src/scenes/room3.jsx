@@ -38,6 +38,7 @@ const createScene = (canvas, verif) => {
   const engine = new Engine(canvas);
   const scene = new Scene(engine);
   const popup = usePopup();
+  const game = computed(() => useAuth().game);
 
   const socket = socketio.socket;
   socket.on("game/trappe-item-removed", (data) => {
@@ -49,14 +50,15 @@ const createScene = (canvas, verif) => {
       gemme.dispose();
     }
   });
-  socket.on("game/portes-open", () => {
+  socket.on("game/portes-open", (data) => {
+    game.value.dateEnd = data.dateEnd;
     scene.getMeshByName("porteGauche").rotation = new Vector3(
       0,
       -Math.PI / 5,
       0
     );
     setTimeout(() => {
-      popup.send("La porte s'est ouverte !!", "success");
+      popup.send("La porte s'est ouverte !! Encore un dernier petit effort");
     }, 50);
   });
 
@@ -71,7 +73,15 @@ const createScene = (canvas, verif) => {
 
   //Element de base de la scene
   var mursSalle = getSalle(scene, 3);
-  getPorte(scene);
+  getPorte(scene).then(() => {
+    if (game.value.portes.etapeActuelle === game.value.portes.nbEtapes) {
+      scene.getMeshByName("porteGauche").rotation = new Vector3(
+        0,
+        -Math.PI / 5,
+        0
+      );
+    }
+  });
 
   var textePlane = MeshBuilder.CreatePlane("textePlane", {
     width: 2,
@@ -106,7 +116,6 @@ const createScene = (canvas, verif) => {
   getButtonValdier();
 
   // Elements reactifs de la scene
-  const game = computed(() => useAuth().game);
   console.log(game.value);
   if (game.value.trappe.etapeActuelle != game.value.trappe.nbEtapes) {
     getTrappeGauche(scene);
@@ -147,6 +156,8 @@ const createScene = (canvas, verif) => {
       meshName.startsWith("cercle") ||
       meshName.startsWith("add") ||
       meshName.startsWith("sub") ||
+      (meshName === "sortie" &&
+        game.value.portes.etapeActuelle === game.value.portes.nbEtapes) ||
       meshName === "trappe" ||
       meshName === "objetTrappe" ||
       meshName === "textePlane" ||
@@ -280,6 +291,8 @@ const createScene = (canvas, verif) => {
           })
           .catch(console.log);
       }
+    } else if (currentMesh.name === "sortie" && game.value.dateEnd > 0) {
+      game.value.isFinished = true;
     } else {
       moveCameraInit(camera);
     }

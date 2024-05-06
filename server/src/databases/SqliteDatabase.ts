@@ -18,6 +18,7 @@ export default class SqliteDatabase {
       CREATE TABLE IF NOT EXISTS games (
        id TEXT PRIMARY KEY,
         hasStarted BOOLEAN,
+        isFinished BOOLEAN,
        users TEXT,  -- store as JSON string
        trappe TEXT,
        tuyau TEXT,
@@ -25,7 +26,9 @@ export default class SqliteDatabase {
        rouages TEXT,
        portes TEXT,
        itemsDispo TEXT,
-       callId TEXT
+       callId TEXT,
+        dateStart INTEGER,
+        dateEnd INTEGER
       );
   `);
         await this.db.exec(`

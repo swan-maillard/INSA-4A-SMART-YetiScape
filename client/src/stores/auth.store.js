@@ -36,9 +36,6 @@ const useAuth = defineStore("auth", {
 
     clearSession() {
       localStorage.clear();
-      this.token = null;
-      this.user = null;
-      this.game = null;
     },
   },
 });

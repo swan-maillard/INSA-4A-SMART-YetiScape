@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import User from '../models/user';
-import { getGameById, removeItemFromRoom, updateGame } from '../services/gamesServices';
+import { deleteGame, getGameById, removeItemFromRoom, updateGame } from '../services/gamesServices';
 import { getUserById, updateUser } from '../services/usersServices';
 import Game from '../models/game';
 import { Item } from '../models/item';
@@ -59,6 +59,9 @@ export default {
           users: game.users,
           itemsDispo: game.itemsDispo[user.salle!],
           hasStarted: game.hasStarted,
+          isFinished: game.isFinished,
+          dateStart: game.dateStart,
+          dateEnd: game.dateEnd,
           portes: game.portes,
           ...infos,
         },
@@ -756,10 +759,13 @@ export default {
         if (portes.items.length === gems.length) {
           portes.etapeActuelle = 1;
 
+          game.isFinished = true;
+          game.dateEnd = Date.now();
+
           const { io, socketSessions } = getSocketIo(req);
           for (const [socketId, userSocket] of Object.entries(socketSessions)) {
             if (userSocket.game === game.id) {
-              io.to(socketId).emit('game/portes-open');
+              io.to(socketId).emit('game/portes-open', { dateEnd: game.dateEnd });
             }
           }
         }
@@ -783,6 +789,16 @@ export default {
       }
     } catch (error) {
       console.error('Error during game ' + gameId + ':', error);
+      res.status(500).send({ message: 'Internal server error' });
+    }
+  },
+  deleteGame: async (req: Request, res: Response) => {
+    const { gameId } = req.body.jwt;
+
+    try {
+      await deleteGame(gameId);
+    } catch (error) {
+      console.error('Error deleting game ' + gameId + ':', error);
       res.status(500).send({ message: 'Internal server error' });
     }
   },

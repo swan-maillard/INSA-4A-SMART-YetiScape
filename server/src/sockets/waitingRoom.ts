@@ -13,6 +13,7 @@ export const socketWaitingRoom = (io: Server, socket: Socket, socketSessions: { 
     console.log('Start game: ', game);
 
     game.hasStarted = true;
+    game.dateStart = Date.now();
     await updateGame(game);
 
     for (const [socketId, socketUser] of Object.entries(socketSessions)) {

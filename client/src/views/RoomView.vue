@@ -9,6 +9,7 @@ import { storeToRefs } from "pinia";
 import { useRouter } from "vue-router";
 import useApi from "@/stores/api.store";
 import usePopup from "@/stores/popup.store";
+import { watch } from "vue";
 
 const router = useRouter();
 
@@ -82,12 +83,40 @@ function imgDrop() {
     console.log("Aucun élément sélectionné");
   }
 }
+
+const isFinished = computed(() => game.value.isFinished || false);
+const dateStart = computed(() => game.value.dateStart || null);
+const chronoHours = ref("00");
+const chronoMinutes = ref("00");
+
+const updateElapsedTime = () => {
+  if (!dateStart.value) return;
+
+  const elapsedTime = Math.floor((Date.now() - dateStart.value) / 1000); // Elapsed time in seconds
+  chronoHours.value = formatNumber(Math.floor(elapsedTime / 3600), 2); // Format hours with two digits
+  chronoMinutes.value = formatNumber(Math.floor((elapsedTime % 3600) / 60), 2); // Format minutes with two digits
+};
+
+const formatNumber = (number, width) => {
+  return String(number).padStart(width, "0"); // Pad the number with zeros to ensure two digits
+};
+
+updateElapsedTime();
+setInterval(updateElapsedTime, 1000);
+
+watchEffect(() => {
+  if (game.value.isFinished) {
+    useApi().post("/game/finished");
+    useAuth().clearSession();
+  }
+}, [game]);
 </script>
 
 <template>
   <div v-if="gameLoaded && room" id="GameScreen" class="d-flex flex-raw">
     <div id="jeu" @drop="imgDrop" @dragover.prevent>
       <div
+        v-if="!isFinished"
         class="popup d-flex justify-content-center align-items-center gap-4"
         :class="{
           open: popup.open,
@@ -101,6 +130,28 @@ function imgDrop() {
           alt="yeti"
         />
         <span>{{ popup.text }}</span>
+      </div>
+      <div class="chrono" v-if="dateStart && !isFinished">
+        {{ chronoHours }}:{{ chronoMinutes }}
+      </div>
+      <div
+        class="end d-flex justify-content-center align-items-center flex-column gap-4"
+        v-if="isFinished"
+      >
+        <img
+          src="../assets/avatar_yeti.png"
+          width="100"
+          height="100"
+          alt="yeti"
+        />
+        <span
+          ><b
+            >Vous vous êtes échappés en
+            {{ chronoHours !== "00" ? chronoHours + "h et" : "" }}
+            {{ chronoMinutes }}min !</b
+          ></span
+        >
+        <span>Le Yeti ira se coucher le ventre vide, félicitations !</span>
       </div>
       <canvas id="GameCanva" ref="bjsCanvas" />
     </div>
@@ -123,6 +174,26 @@ function imgDrop() {
   height: 100%;
   position: relative;
   overflow: hidden;
+  border-radius: 20px;
+}
+
+.chrono {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  font-size: 2em;
+  padding: 10px 20px;
+  background-color: rgba(34, 34, 34, 0.9);
+  border-radius: 20px 0 20px 0;
+}
+
+.end {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  font-size: 2em;
+  padding: 20px;
+  background-color: rgba(34, 34, 34, 0.9);
   border-radius: 20px;
 }
 

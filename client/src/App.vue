@@ -36,7 +36,11 @@ watchEffect(() => {
     <div class="snow"></div>
   </div>
   <div class="main-container">
-    <div class="d-flex flex-column justify-content-end" style="gap: 30px">
+    <div
+      v-if="game"
+      class="d-flex flex-column justify-content-end"
+      style="gap: 30px"
+    >
       <UserInventaire v-if="game && game.hasStarted" />
       <ChatRoom v-if="game" />
     </div>

@@ -33,4 +33,6 @@ router.post('/coffre/solve', gameController.solveCoffre); // Room 3
 
 router.post('/porte/put-item', gameController.putItemPorte);
 
+router.post('/finished', gameController.deleteGame);
+
 export default router;

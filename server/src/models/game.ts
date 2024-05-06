@@ -7,6 +7,7 @@ import { Item } from './item';
 export interface GameDatabase extends AbstractDocument {
   id: string;
   hasStarted: boolean;
+  isFinished: boolean;
   users: string;
   trappe: string;
   tuyau: string;
@@ -15,11 +16,14 @@ export interface GameDatabase extends AbstractDocument {
   portes: string;
   itemsDispo: string;
   callId: string;
+  dateStart: number;
+  dateEnd: number;
 }
 
 export default class Game {
   id: string = '-1';
   hasStarted: boolean = false;
+  isFinished: boolean = false;
   users: User[];
   trappe: Enigme;
   tuyau: Enigme;
@@ -28,6 +32,8 @@ export default class Game {
   portes: Enigme;
   itemsDispo: { [key: number]: Item[] };
   callId: string = '';
+  dateStart: number = 0;
+  dateEnd: number = 0;
 
   constructor(user?: User) {
     this.users = user ? [user] : [];
@@ -54,6 +60,7 @@ export const gameConverter = {
     return {
       id: game.id,
       hasStarted: game.hasStarted,
+      isFinished: game.isFinished,
       users: JSON.stringify(game.users.map((user) => user.id)),
       trappe: JSON.stringify(game.trappe),
       tuyau: JSON.stringify(game.tuyau),
@@ -62,6 +69,8 @@ export const gameConverter = {
       portes: JSON.stringify(game.portes),
       itemsDispo: JSON.stringify(game.itemsDispo),
       callId: game.callId,
+      dateStart: game.dateStart,
+      dateEnd: game.dateEnd,
     };
   },
 
@@ -69,6 +78,7 @@ export const gameConverter = {
     const game = new Game();
     game.id = gameDatabase.id;
     game.hasStarted = gameDatabase.hasStarted;
+    game.isFinished = gameDatabase.isFinished;
 
     const users = JSON.parse(gameDatabase.users);
     game.users = (
@@ -86,6 +96,8 @@ export const gameConverter = {
     game.portes = JSON.parse(gameDatabase.portes);
     game.itemsDispo = JSON.parse(gameDatabase.itemsDispo);
     game.callId = gameDatabase.callId;
+    game.dateStart = gameDatabase.dateStart;
+    game.dateEnd = gameDatabase.dateEnd;
     return game;
   },
 };
