@@ -328,6 +328,15 @@ async function getBaseGemme(scene, forme) {
   ).then(() => {
     let base = scene.getMeshByName(nom);
     base.material = mat;
+    base.rotation = new Vector3(- Math.PI/2, 0, 0);
+    base.position = new Vector3(-2, 2, 4.35);
+  });
+}
+function putGemmeInBase(scene, nomItem){
+  getGemme(scene, nomItem.substring(5).toLowerCase()).then(() => {
+    let itemGemme = scene.getMeshByName(nomItem);
+    itemGemme.rotation = new Vector3(- Math.Pi/2, 0, 0);
+    itemGemme.position = new Vector3(-2, 2, 4.35);
   });
 }
 
@@ -557,5 +566,6 @@ export {
   getButtonValdier,
   getGemme,
   getTrappeGauche,
-  getBaseGemme
+  getBaseGemme,
+  putGemmeInBase
 };

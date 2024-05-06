@@ -21,6 +21,7 @@ import {
   getPorte,
   getSalle,
   getTuyau,
+  putGemmeInBase
 } from "./roomsElements";
 import useAuth from "../stores/auth.store";
 import useApi from "../stores/api.store";
@@ -38,6 +39,7 @@ const createScene = (canvas) => {
   const socket = socketio.socket;
   socket.on("game/tuyau-arrived", (data) => {
     useAuth().game.tuyau = data.tuyau;
+    useAuth().game.itemsDispo = data.itemsDispo;
     placeEngNavette(scene);
   });
 
@@ -79,11 +81,7 @@ const createScene = (canvas) => {
   eclairPlane.rotation = new Vector3(0, Math.PI / 2, 0);
   eclairPlane.position = new Vector3(4.7, 2.3, -1);
 
-  getBaseGemme(scene, 'ronde').then (() => {
-    let base = scene.getMeshByName('baseRonde');
-    base.rotation = new Vector3(- Math.PI/2, 0, 0);
-    base.position = new Vector3(-2, 2, 4.35);
-  })
+  getBaseGemme(scene, 'ronde');
   //Fin des elements de base de la scene
 
   //Elements reactifs de la scene
@@ -100,6 +98,9 @@ const createScene = (canvas) => {
   }
   if (game.value.tuyau.etapeActuelle == game.value.tuyau.nbEtapes) {
     placeNavette(scene);
+  }
+  if (game.value.porte.items.includes('gemmeRonde')){
+    putGemmeInBase(scene, 'gemmeRonde');
   }
   //Fin des element réactifs de la scene
 
@@ -144,6 +145,8 @@ const createScene = (canvas) => {
         );
       } else if (currentMesh.name === "tuyauOut") {
         moveCamera(camera, 0, new Vector3(1, 1.6, -1), new Vector3(5, 1.7, -1));
+      } else if(currentMesh.name.startsWith("base")) {
+        moveCamera(camera, 2, new Vector3(2,1.6,1), new Vector3(2,1.6,6))
       }
     } else if (position.value === "coffreRouage") {
       if (currentMesh.name.startsWith("dragEng")) {
@@ -297,6 +300,7 @@ function moveCamera(camera, pos, cameraPos, lockedTarget) {
   if (pos === 1) position.value = "coffreRouage";
   else if (pos === -1) position.value = "tuyaux";
   else if (pos === 0) position.value = "images";
+  else if(pos === 2) position.value="porte";
 
   camera.position = cameraPos;
   camera.setTarget(lockedTarget);
@@ -412,6 +416,18 @@ function verifEngInRouage(scene, nomItem) {
         useAuth().game.coffreRouage = data.game.rouage;
         if (data.status === "ok") {
           placeEngrOnCoffre(scene, nomItem);
+        }
+      })
+      .catch(console.log);
+  } else if (position.value === "porte") {
+    useApi()
+      .post("/game/porte/put-item", { item: nomItem })
+      .then((res) => {
+        const data = res.data;
+        useAuth().user = data.user;
+        useAuth().game.porte = data.game.porte;
+        if (data.status === "ok") {
+          putGemmeInBase(scene, nomItem);
         }
       })
       .catch(console.log);
