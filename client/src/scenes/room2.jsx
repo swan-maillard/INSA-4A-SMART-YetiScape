@@ -58,8 +58,11 @@ const createScene = (canvas) => {
       0
     );
     setTimeout(() => {
-      popup.send("La porte s'est ouverte !! Encore un dernier petit effort");
+      popup.send("La porte s'est ouverte, enfuyez-vous vite !!");
     }, 50);
+    setTimeout(() => {
+      game.value.isFinished = true;
+    }, 3000);
   });
 
   //On ajoute une caméra et une lumière
@@ -160,7 +163,6 @@ const createScene = (canvas) => {
 
   var pointerDown = function (mesh) {
     currentMesh = mesh;
-    console.log("click sur " + currentMesh.name);
     if (currentMesh.name.startsWith("item")) {
       const item = currentMesh.name.split(":")[1];
       useApi()
@@ -204,22 +206,15 @@ const createScene = (canvas) => {
         currentMesh.rotation = new Vector3(Math.PI / 2, 0, 0);
       } else if (currentMesh.name === "engBas") {
         let bon = verifRouage(scene, solution);
-        console.log("verification du puzzle : " + bon);
         if (bon === true) {
           verif(position.value, true).then(() => {
             putGemmeInit(scene);
           });
         }
       }
-    } else if (
-      currentMesh.name === "sortie" &&
-      game.value.portes.etapeActuelle === game.value.portes.nbEtapes
-    ) {
-      useAuth().game.isFinished = true;
     }
 
     if (position.value !== "centre" && currentMesh.name === "allWalls") {
-      console.log("Retour position départ");
       moveCameraInit(camera);
     }
   };
@@ -284,7 +279,6 @@ const createScene = (canvas) => {
   };
 
   var pointerMove = function (pickedMesh) {
-    console.log(pickedMesh?.name);
     if (canInteract(pickedMesh?.name || "")) {
       document.getElementById("GameCanva").style.cursor = "pointer";
     } else {
@@ -343,7 +337,6 @@ const createScene = (canvas) => {
       count++;
     }
     if (count != 1) sol = "faux";
-    console.log("solution : ", sol);
     useApi()
       .post("/game/rouages/solve", { configuration: sol })
       .then((res) => {

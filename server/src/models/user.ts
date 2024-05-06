@@ -1,6 +1,4 @@
 import AbstractDocument from './AbstractDocument';
-import Game from './game';
-import { getGameById } from '../services/gamesServices';
 import { Item } from './item';
 
 export interface UserDatabase extends AbstractDocument {

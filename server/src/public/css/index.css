@@ -1,78 +1,77 @@
 body {
-    margin: 0;
-    font-family: sans-serif;
+  margin: 0;
+  font-family: sans-serif;
 }
 
 form {
-    width: 100%;
-    display: flex;
-    box-sizing: border-box;
-    padding: 0.25rem;
+  width: 100%;
+  display: flex;
+  box-sizing: border-box;
+  padding: 0.25rem;
 }
 
 form input {
-    border: 0;
-    padding: 0.5rem;
-    width: 100%;
-    outline: 0;
-    margin-right: 0.5rem;
-    border-radius: 0.25rem;
-    background: #ccc;
+  border: 0;
+  padding: 0.5rem;
+  width: 100%;
+  outline: 0;
+  margin-right: 0.5rem;
+  border-radius: 0.25rem;
+  background: #ccc;
 }
 
 form button {
-    width: 6rem;
-    color: white;
-    border: none;
-    padding: 0.5rem;
-    cursor: pointer;
-    border-radius: 0.25rem;
-    text-transform: uppercase;
+  width: 6rem;
+  color: white;
+  border: none;
+  padding: 0.5rem;
+  cursor: pointer;
+  border-radius: 0.25rem;
+  text-transform: uppercase;
 }
 
 ul {
-    list-style: none;
+  list-style: none;
 }
 
 .messages {
-    margin: 0;
-    padding: 0;
-    margin-bottom: 3rem;
+  margin: 0;
+  padding: 0;
+  margin-bottom: 3rem;
 }
 
 .messages li {
-    padding: 0.5rem;
+  padding: 0.5rem;
 }
 
 .messages li:nth-child(odd) {
-    background: #eee;
+  background: #eee;
 }
 
-
-.controller{
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
-    display: flex;
-    justify-content: center;
+.controller {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
 }
 
-.enable-btn{
-    background-color: rgb(26, 184, 26);
-    margin: 10px;
-    border: none;
-    color: #fff;
+.enable-btn {
+  background-color: rgb(26, 184, 26);
+  margin: 10px;
+  border: none;
+  color: #fff;
 }
 
-.enable-btn:hover{
-    background-color: rgba(26, 184, 26, 0.75);
+.enable-btn:hover {
+  background-color: rgba(26, 184, 26, 0.75);
 }
-.disable-btn{
-    background-color: rgb(185, 0, 0);
-    margin: 10px;
-    border: none;
-    color: #fff;
+.disable-btn {
+  background-color: rgb(185, 0, 0);
+  margin: 10px;
+  border: none;
+  color: #fff;
 }
-.disable-btn:hover{
-    background-color: rgb(185, 0, 0, 0.75);
+.disable-btn:hover {
+  background-color: rgb(185, 0, 0, 0.75);
 }

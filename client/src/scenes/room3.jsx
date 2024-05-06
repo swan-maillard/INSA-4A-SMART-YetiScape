@@ -56,8 +56,11 @@ const createScene = (canvas, verif) => {
       0
     );
     setTimeout(() => {
-      popup.send("La porte s'est ouverte !! Encore un dernier petit effort");
+      popup.send("La porte s'est ouverte, enfuyez-vous vite !!");
     }, 50);
+    setTimeout(() => {
+      game.value.isFinished = true;
+    }, 3000);
   });
 
   //On ajoute une caméra et une lumière
@@ -114,7 +117,6 @@ const createScene = (canvas, verif) => {
   getButtonValdier();
 
   // Elements reactifs de la scene
-  console.log(game.value);
   if (game.value.trappe.etapeActuelle != game.value.trappe.nbEtapes) {
     getTrappeGauche(scene);
   } else {
@@ -165,7 +167,6 @@ const createScene = (canvas, verif) => {
 
   var pointerDown = function (mesh) {
     currentMesh = mesh;
-    console.log("click sur " + currentMesh.name);
     if (currentMesh.name.startsWith("item")) {
       const item = currentMesh.name.split(":")[1];
       useApi()
@@ -241,7 +242,6 @@ const createScene = (canvas, verif) => {
             useAuth().game.itemsDispo = data.game.itemsDispo;
             useAuth().game.coffre = data.game.coffre;
             if (data.status === "ok") {
-              console.log("Vous avez ouvert le coffre !");
               openCoffre();
               game.value.itemsDispo.forEach((e) => {
                 placeCoffre(e);
@@ -256,7 +256,6 @@ const createScene = (canvas, verif) => {
                 "Le coffre s'ouvre dans un clic et laisse apparaître 2 gemmes brillantes !"
               );
             } else if (data.status === "no") {
-              console.log("Mauvais code ...");
               reinitCode();
               usePopup().send("Rien ne se passe...", "error");
             }
@@ -289,12 +288,6 @@ const createScene = (canvas, verif) => {
           })
           .catch(console.log);
       }
-    } else if (
-      currentMesh.name === "sortie" &&
-      game.value.portes.etapeActuelle === game.value.portes.nbEtapes
-    ) {
-      console.log("FIIN");
-      useAuth().game.isFinished = true;
     } else {
       moveCameraInit(camera);
     }
@@ -337,7 +330,11 @@ const createScene = (canvas, verif) => {
           Math.PI / 4,
           0
         );
-        scene.getMeshByName("gemmeCarre").position = new Vector3(-4.3, 0.2, 2.8);
+        scene.getMeshByName("gemmeCarre").position = new Vector3(
+          -4.3,
+          0.2,
+          2.8
+        );
         scene.getMeshByName("gemmeCarre").name = "item:gemmeCarre";
       });
     }

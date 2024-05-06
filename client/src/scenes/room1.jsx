@@ -48,7 +48,6 @@ const createScene = (canvas) => {
     popup.send(data.username + " a ouvert la trappe");
   });
   socket.on("game/trappe-item-added", (data) => {
-    console.log("Item placé", data);
     useAuth().game.trappe = data.trappe;
     data.trappe.items.forEach((element) => {
       putItemFromTrappe(scene, element);
@@ -56,7 +55,6 @@ const createScene = (canvas) => {
     popup.send(data.username + " a fait passé un objet par la trappe");
   });
   socket.on("game/portes-open", (data) => {
-    console.log("ok");
     game.value.dateEnd = data.dateEnd;
     scene.getMeshByName("porteGauche").rotation = new Vector3(
       0,
@@ -64,8 +62,11 @@ const createScene = (canvas) => {
       0
     );
     setTimeout(() => {
-      popup.send("La porte s'est ouverte !! Encore un dernier petit effort");
+      popup.send("La porte s'est ouverte, enfuyez-vous vite !!");
     }, 50);
+    setTimeout(() => {
+      game.value.isFinished = true;
+    }, 3000);
   });
 
   getBaseGemme(scene, "triangle");
@@ -108,7 +109,6 @@ const createScene = (canvas) => {
   // Elements reactifs de la scene
 
   game.value.itemsDispo.forEach((e) => {
-    console.log("je pose au sol", e);
     placeItemInit(scene, e);
   });
   if (game.value.tuyau.etapeActuelle != game.value.tuyau.nbEtapes) {
@@ -226,17 +226,11 @@ const createScene = (canvas) => {
       } else if (currentMesh.name === "navettePleine") {
         currentMesh.position.addInPlace(new Vector3(0.5, 0, -0.1));
         drag.value = getWallPosition();
-        console.log("Click sur navette pleine " + drag.value);
       }
     } else if (position.value === "trappe") {
       if (currentMesh.name === "allWalls") {
         moveCameraInit(camera);
       }
-    } else if (
-      currentMesh.name === "sortie" &&
-      game.value.portes.etapeActuelle === game.value.portes.nbEtapes
-    ) {
-      useAuth().game.isFinished = true;
     } else {
       moveCameraInit(camera);
     }
@@ -335,7 +329,6 @@ function placeItemInit(scene, elem) {
   if (elem == "engrenageMoyen") {
     placeEngInit(scene);
   } else if (elem === "cle") {
-    console.log("je put une cle");
     placeCleInit(scene);
   }
 }

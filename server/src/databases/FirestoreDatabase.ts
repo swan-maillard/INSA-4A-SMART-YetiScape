@@ -55,7 +55,9 @@ export default class FirestoreDatabase {
   }
 
   async create<T extends AbstractDocument>(collectionName: string, data: T) {
-    data.id = new Date().getTime().toString();
+    const timestamp = Date.now().toString(36).substr(-3).toUpperCase(); // Convert current timestamp to base36 string
+    const randomString = Math.random().toString(36).substr(2, 3).toUpperCase(); // Generate random string (remove '0.' and take first 5 characters)
+    data.id = `${timestamp}${randomString}`;
     await setDoc(doc(this.db, collectionName, data.id), data);
     return data.id;
   }

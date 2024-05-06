@@ -32,7 +32,7 @@ function sendForm() {
     case 2:
       sendRequest("/games/join", {
         username: form.value.username,
-        gameId: form.value.gameId,
+        gameId: form.value.gameId.toUpperCase(),
       });
       break;
   }
@@ -75,7 +75,7 @@ const handleResponse = (response) => {
       <input
         v-model="form.username"
         required
-        placeholder="Your name"
+        placeholder="Votre nom"
         autofocus
         style="font-size: 1.3em"
       />
@@ -85,7 +85,7 @@ const handleResponse = (response) => {
           :class="{ focus: focus === 1 }"
           @click="focus = 1"
         >
-          <span>New game</span>
+          <span>Nouvelle partie</span>
         </div>
 
         <div
@@ -93,7 +93,7 @@ const handleResponse = (response) => {
           :class="{ focus: focus === 2 }"
           @click="focus = 2"
         >
-          <span>Join a game</span>
+          <span>Rejoindre une partie</span>
           <input
             required
             ref="inputId"
@@ -101,13 +101,13 @@ const handleResponse = (response) => {
             class="dark"
             id="inputId"
             v-model="form.gameId"
-            placeholder="Game ID"
+            placeholder="ID de la partie"
           />
         </div>
       </div>
       <div id="confirmation">
         <button>
-          Start now !
+          Lancez la partie
           <span
             v-if="sending"
             class="button-spinner spinner-border"

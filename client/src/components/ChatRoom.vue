@@ -46,7 +46,6 @@ function initVoiceChat() {
             callId +
             ".json"
         ).then((call) => {
-          console.log(call);
           if (call.peers.length) callPeers();
         });
       });
@@ -55,30 +54,25 @@ function initVoiceChat() {
 
   // Connect to PeerJS and get an ID
   function connectToPeerJS(cb) {
-    display("Connecting to PeerJS...");
     // eslint-disable-next-line
     me = new Peer({ host: "/", secure: true, port: 3000, path: "/peer" });
 
     me.on("call", handleIncomingCall); // Quand on recoit un call
 
     me.on("open", function () {
-      display("Connected.");
-      display("ID: " + me.id);
       cb && cb(null, me);
     });
 
     me.on("error", function (err) {
-      display(err);
+      console.log(err);
       cb && cb(err);
     });
 
     me.on("close", function () {
-      display("Connection closed.");
       unregisterIdWithServer();
     });
 
     me.on("disconnected", function () {
-      display("Disconnected from server.");
       // Handle disconnection here, such as removing peers from the list
       for (let peerId in peers) {
         if (Object.prototype.hasOwnProperty.call(peers, peerId)) {
@@ -93,7 +87,6 @@ function initVoiceChat() {
 
   // Add our ID to the list of PeerJS IDs for this call
   function registerIdWithServer() {
-    display("Registering ID with server...");
     // eslint-disable-next-line
     $.post(
       "https://" +
@@ -131,23 +124,20 @@ function initVoiceChat() {
 
   function callPeer(peerId) {
     // Petmet de call UN peer du call
-    display("Calling " + peerId + "...");
     var peer = getPeer(peerId);
     peer.outgoing = me.call(peerId, myStream);
 
     peer.outgoing.on("error", function (err) {
-      display(err);
+      console.log(err);
     });
 
     peer.outgoing.on("stream", function (stream) {
-      display("Connected to " + peerId + ".");
       addIncomingStream(peer, stream);
     });
   }
 
   // When someone initiates a call via PeerJS
   function handleIncomingCall(incoming) {
-    display("Answering incoming call from " + incoming.peer);
     var peer = getPeer(incoming.peer);
 
     peer.incoming = incoming;
@@ -161,7 +151,6 @@ function initVoiceChat() {
   // Add the new audio stream. Either from an incoming call, or
   // from the response to one of our outgoing calls
   function addIncomingStream(peer, stream) {
-    display("Adding incoming stream from " + peer.id);
     peer.incomingStream = stream;
     playStream(stream);
   }
@@ -175,13 +164,10 @@ function initVoiceChat() {
 
   // Get access to the microphone
   function getLocalAudioStream(cb) {
-    display('Trying to access your microphone. Please click "Allow".');
-
     navigator.getUserMedia(
       { video: false, audio: true },
 
       function success(audioStream) {
-        display("Microphone is open.");
         myStream = audioStream;
         audioTrack = myStream.getAudioTracks()[0]; // Store audio track reference
 
@@ -189,7 +175,7 @@ function initVoiceChat() {
       },
 
       function error(err) {
-        display(
+        console.log(
           "Couldn't connect to microphone. Reload the page to try again."
         );
         if (cb) cb(err);
@@ -204,11 +190,7 @@ function initVoiceChat() {
   }
 
   function unsupported() {
-    display("Your browser doesn't support getUserMedia.");
-  }
-
-  function display(message) {
-    console.log(message);
+    console.log("Your browser doesn't support getUserMedia.");
   }
 }
 
@@ -310,7 +292,7 @@ scrollToBottom();
       <input
         v-model="newMessage"
         @keyup.enter="sendMessage"
-        placeholder="Type your message..."
+        placeholder="Tapez votre message"
       />
       <svg
         class="cursor-pointer"

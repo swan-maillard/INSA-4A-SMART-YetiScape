@@ -19,7 +19,7 @@ const gameLoaded = ref(false);
 useApi()
   .get("/game/salle")
   .then((res) => {
-    if (res.status === 404) router.push("/");
+    if (res.status === 401) router.push("/");
     auth.user = res.data.user;
     auth.game = res.data.game;
   })
@@ -88,6 +88,8 @@ const isFinished = computed(() => game.value.isFinished || false);
 const dateStart = computed(() => game.value.dateStart || null);
 const chronoHours = ref("00");
 const chronoMinutes = ref("00");
+const chronoSeconds = ref("00");
+let chronoInterval = null;
 
 const updateElapsedTime = () => {
   if (!dateStart.value) return;
@@ -95,6 +97,7 @@ const updateElapsedTime = () => {
   const elapsedTime = Math.floor((Date.now() - dateStart.value) / 1000); // Elapsed time in seconds
   chronoHours.value = formatNumber(Math.floor(elapsedTime / 3600), 2); // Format hours with two digits
   chronoMinutes.value = formatNumber(Math.floor((elapsedTime % 3600) / 60), 2); // Format minutes with two digits
+  chronoSeconds.value = formatNumber(Math.floor(elapsedTime % 60), 2); // Format minutes with two digits
 };
 
 const formatNumber = (number, width) => {
@@ -102,11 +105,11 @@ const formatNumber = (number, width) => {
 };
 
 updateElapsedTime();
-setInterval(updateElapsedTime, 1000);
+chronoInterval = setInterval(updateElapsedTime, 500);
 
 watchEffect(() => {
   if (game.value.isFinished) {
-    console.log("Game finished");
+    clearInterval(chronoInterval);
     useApi().post("/game/finished");
     useAuth().clearSession();
   }
@@ -133,7 +136,8 @@ watchEffect(() => {
         <span>{{ popup.text }}</span>
       </div>
       <div class="chrono" v-if="dateStart && !isFinished">
-        {{ chronoHours }}:{{ chronoMinutes }}
+        {{ chronoHours !== "00" ? chronoHours + ":" : ""
+        }}{{ chronoMinutes }}:{{ chronoSeconds }}
       </div>
       <div
         class="end d-flex justify-content-center align-items-center flex-column gap-4"
@@ -148,8 +152,8 @@ watchEffect(() => {
         <span
           ><b
             >Vous vous êtes échappés en
-            {{ chronoHours !== "00" ? chronoHours + "h et" : "" }}
-            {{ chronoMinutes }}min !</b
+            {{ chronoHours !== "00" ? chronoHours + " heure(s) et" : "" }}
+            {{ chronoMinutes }} minute(s) et {{ chronoSeconds }} seconde(s) !</b
           ></span
         >
         <span>Le Yeti ira se coucher le ventre vide, félicitations !</span>
@@ -198,6 +202,10 @@ watchEffect(() => {
   border-radius: 20px;
 }
 
+.end img {
+  animation: joyAnimation 1.5s ease-in-out;
+}
+
 .popup {
   background-color: rgba(34, 34, 34, 0.9);
   position: absolute;
@@ -219,5 +227,19 @@ watchEffect(() => {
 
 .popup.error {
   color: #ff3a3a;
+}
+@keyframes joyAnimation {
+  0% {
+    transform: translateY(0) rotate(0deg);
+  }
+  70% {
+    transform: translateY(0) rotate(360deg);
+  }
+  85% {
+    transform: translateY(-30px) rotate(360deg);
+  }
+  100% {
+    transform: translateY(0) rotate(360deg);
+  }
 }
 </style>

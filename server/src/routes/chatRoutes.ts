@@ -3,9 +3,7 @@ import { Router } from 'express';
 const router = Router();
 const Call = require('../models/call');
 
-
-//TODO: 
-
+//TODO:
 
 // Add PeerJS ID to Call instance when someone opens the page
 router.post('/:id/addpeer/:peerid', function (req, res) {

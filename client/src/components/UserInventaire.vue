@@ -10,7 +10,9 @@ const items = computed(() => user.value.items || []);
 
 <template>
   <div v-if="game.hasStarted" class="section-container inventaire">
-    <span class="fs-5">{{ user.name }}'s Inventory</span>
+    <span class="fs-5"
+      >Inventaire de <b>{{ user.name }}</b></span
+    >
     <hr />
     <div
       class="d-flex flex-column gap-2 align-items-center w-100 overflow-auto"

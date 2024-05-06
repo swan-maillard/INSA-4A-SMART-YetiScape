@@ -10,7 +10,6 @@ const usePopup = defineStore("popup", {
   }),
   actions: {
     send(text, type = null) {
-      console.log("POPUp", text);
       if (this.timeout) {
         clearTimeout(this.timeout);
       }

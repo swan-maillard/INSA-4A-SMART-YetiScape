@@ -26,7 +26,6 @@ useApi()
 const idCopied = ref(false);
 
 watchEffect(() => {
-  console.log(game.value);
   if (game.value && game.value.hasStarted === 1) router.push("/room");
 }, [game]);
 
@@ -111,7 +110,7 @@ function copyGameIdToClipboard() {
           <div class="card-body">
             <h4 class="mb-4">{{ gamer.name }}</h4>
             <hr />
-            <span>Room {{ gamer.salle }}</span>
+            <span>Salle {{ gamer.salle }}</span>
           </div>
         </div>
       </div>
@@ -135,7 +134,7 @@ function copyGameIdToClipboard() {
       v-else
       class="d-flex flex-column justify-content-center align-items-center gap-1"
     >
-      <span> Waiting for other players...</span>
+      <span>En attente des joueurs...</span>
       <img
         class="loading-yeti"
         src="../assets/avatar_yeti.png"

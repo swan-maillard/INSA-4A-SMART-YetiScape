@@ -10,8 +10,6 @@ export const socketWaitingRoom = (io: Server, socket: Socket, socketSessions: { 
     const game = await getGameById(user.game!);
     if (!game) return;
 
-    console.log('Start game: ', game);
-
     game.hasStarted = true;
     game.dateStart = Date.now();
     await updateGame(game);

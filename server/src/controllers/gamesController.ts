@@ -36,13 +36,11 @@ export default {
       user.salle = 1;
 
       //Create the call for this room
-      var Call = require('../models/call.js');
-      var call = Call.create();
+      const Call = require('../models/call.js');
+      const call = Call.create();
 
       game.callId = call.id;
-      console.log(game);
       await updateGame(game);
-
 
       await updateUser(user);
       res.status(200).send({ game, user, token: signUserData({ userId: user.id, gameId: game.id }) });
@@ -121,7 +119,7 @@ export default {
           id: game.id,
           users: game.users,
           hasStarted: game.hasStarted,
-          callId: game.callId
+          callId: game.callId,
         },
       });
     } catch (error) {
