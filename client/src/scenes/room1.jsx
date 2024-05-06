@@ -19,7 +19,8 @@ import {
   getSalle,
   getTrappe,
   getTuyaux,
-  getBaseGemme
+  getBaseGemme,
+  putGemmeInBase
 } from "./roomsElements";
 import useAuth from "../stores/auth.store";
 import useApi from "../stores/api.store";
@@ -48,11 +49,7 @@ const createScene = (canvas) => {
     });
   });
 
-  getBaseGemme(scene, 'triangle').then (() => {
-    let base = scene.getMeshByName('baseTriangle');
-    base.rotation = new Vector3(- Math.PI/2, 0, 0);
-    base.position = new Vector3(-2, 2, 4.35);
-  })
+  getBaseGemme(scene, 'triangle');
 
   //On ajoute une caméra et une lumière
   const camera = new FreeCamera("camera1", new Vector3(0, 1.6, -3), scene);
@@ -87,12 +84,14 @@ const createScene = (canvas) => {
       }
     });
   }
-
   game.value.trappe.items.forEach((element) => {
     putItemFromTrappe(scene, element);
   });
   if (game.value.trappe.etapeActuelle == game.value.trappe.nbEtapes) {
     deleteTrappe(scene);
+  }
+  if (game.value.porte.items.includes('gemmeTriangle')){
+    putGemmeInBase(scene, 'gemmeTriangle');
   }
 
   engine.runRenderLoop(() => {
@@ -143,7 +142,7 @@ const createScene = (canvas) => {
     currentMesh = mesh;
     if (currentMesh.name.startsWith("item")) {
       useApi()
-        .post("/game/pick-item", { item: currentMesh.name.split(":")[1] })
+        .post(currentMesh.name.split(":")[2], { item: currentMesh.name.split(":")[1] })
         .then((res) => {
           const data = res.data;
           if (data.status === "ok") {
@@ -156,9 +155,11 @@ const createScene = (canvas) => {
     }
     if (position.value === "centre") {
       if (currentMesh.name.startsWith("tuyau")) {
-        moveCamera(camera, currentMesh, -1, 1.6, 0.125, -1);
+        moveCamera(camera, -1, new Vector3(-1,1.6,0.125), new Vector3(-2,1.6,0.125))
       } else if (currentMesh.name === "trappe") {
-        moveCamera(camera, currentMesh, 2, 0.2, 1.5, 1);
+        moveCamera(camera, 1, new Vector3(2,0.2,1.5), new Vector3(3,0.2,1.5))
+      }else if(currentMesh.name.startsWith("base")) {
+        moveCamera(camera, 0, new Vector3(2,1.6,1), new Vector3(2,1.6,6))
       }
     } else if (position.value === "tuyau") {
       if (currentMesh.name === "allWalls") {
@@ -172,6 +173,8 @@ const createScene = (canvas) => {
       if (currentMesh.name === "allWalls") {
         moveCameraInit(camera);
       }
+    } else {
+      moveCameraInit(camera)
     }
   };
 
@@ -198,7 +201,15 @@ const createScene = (canvas) => {
     }
   };
 
-  var pointerMove = function () {
+  var pointerMove = function (pickedMesh) {
+    // if (pickedMesh?.name === 'baseTriangle'){
+    //   console.log('OK')
+    //   document.getElementById('GameCanva').style.cursor = 'pointer';
+    // }
+    // else {
+    //   document.getElementById('GameCanva').style.cursor = 'default';
+
+    // }
     if (!drag.value) {
       return;
     }
@@ -224,7 +235,7 @@ const createScene = (canvas) => {
         pointerUp();
         break;
       case PointerEventTypes.POINTERMOVE:
-        pointerMove();
+        pointerMove(pointerInfo.pickInfo.pickedMesh);
         break;
     }
   });
@@ -232,14 +243,14 @@ const createScene = (canvas) => {
   return scene;
 };
 
-function moveCamera(camera, mesh, x, y, z, pos) {
-  if (pos === -1) position.value = "tuyau";
-  else position.value = "trappe";
+function moveCamera(camera, pos, cameraPos, lockedTarget) {
+  if (pos === 1) position.value = "trappe";
+  else if (pos === -1) position.value = "tuyau";
+  else if (pos === 0) position.value = "porte";
 
-  var target = new Vector3(x, y, z);
-  camera.position = target;
-  camera.setTarget(new Vector3(x + pos, y, z));
-  camera.lockedTarget = new Vector3(x + pos, y, z);
+  camera.position = cameraPos;
+  camera.setTarget(lockedTarget);
+  camera.lockedTarget = lockedTarget;
 }
 
 function moveCameraInit(camera) {
@@ -254,7 +265,7 @@ function placeEngInit(scene) {
   getImportedMesh(scene, "engrenageMoyen", "rouille.jpg").then(() => {
     scene.getMeshByName("engrenageMoyen").position = new Vector3(3, 0.15, 3.6);
     scene.getMeshByName("engrenageMoyen").scalingDeterminant = 0.15;
-    scene.getMeshByName("engrenageMoyen").name = "item:engrenageMoyen";
+    scene.getMeshByName("engrenageMoyen").name = "item:engrenageMoyen:/game/pick-item";
   });
 }
 
@@ -272,6 +283,18 @@ function verifItemInNavette(scene, nomItem) {
         useAuth().game.tuyau = data.game.tuyau;
         if (data.status === "ok") {
           putItemInNavette(scene, nomItem);
+        }
+      })
+      .catch(console.log);
+  } else if (position.value === "porte") {
+    useApi()
+      .post("/game/porte/put-item", { item: nomItem })
+      .then((res) => {
+        const data = res.data;
+        useAuth().user = data.user;
+        useAuth().game.porte = data.game.porte;
+        if (data.status === "ok") {
+          putGemmeInBase(scene, nomItem);
         }
       })
       .catch(console.log);
@@ -344,11 +367,9 @@ function putItemFromTrappe(scene, item) {
 function placeItemFromTrappe(scene, item) {
   let itemMesh = scene.getMeshByName(item);
   itemMesh.position = new Vector3(-4.5, 0.1, 1.4);
-  itemMesh.name = "item:" + item;
+  itemMesh.name = "item:" + item + ":/game/trappe/get-item";
   return itemMesh;
 }
-
-// deplacement du pointer : https://playground.babylonjs.com/#7CBW04
 
 export {
   verif,

@@ -20,7 +20,8 @@ import {
   getPorte,
   getSalle,
   getTrappeGauche,
-  getBaseGemme
+  getBaseGemme,
+  putGemmeInBase
 } from "./roomsElements";
 import useAuth from "../stores/auth.store";
 import useApi from "../stores/api.store";
@@ -67,11 +68,7 @@ const createScene = (canvas, verif) => {
   textePlane.material = matTextes;
   textePlane.rotation = new Vector3(0, -Math.PI / 2, 0);
   textePlane.position = new Vector3(-4.7, 1.6, 0);
-  getBaseGemme(scene, 'carre').then (() => {
-    let base = scene.getMeshByName('baseCarre');
-    base.rotation = new Vector3(- Math.PI/2, 0, 0);
-    base.position = new Vector3(-2, 2, 4.35);
-  })
+  getBaseGemme(scene, 'carre')
 
   
   const matBlanc = new StandardMaterial("matBlanc", scene);
@@ -93,23 +90,27 @@ const createScene = (canvas, verif) => {
   }
   getButtonValdier();
 
-    // Elements reactifs de la scene
-    const game = computed(() => useAuth().game);
-    console.log(game.value)
-    if(game.value.trappe.etapeActuelle != game.value.trappe.nbEtapes){
-        getTrappeGauche(scene);
-    }else{
-        var cercle = MeshBuilder.CreateCylinder("objetTrappe",{diameter:0.5, height:0.001}, scene);
-        cercle.position = new Vector3(-4.5,0,1.5);
-    }
-    getCoffreGemmes(scene).then(()=>{
-        if(game.value.coffre.etapeActuelle == game.value.coffre.nbEtapes){
-            openCoffre();
-            game.value.itemsDispo.forEach(e => {
-                placeCoffre(e);
-            });
-        }  
-    });
+  // Elements reactifs de la scene
+  const game = computed(() => useAuth().game);
+  console.log(game.value)
+  if(game.value.trappe.etapeActuelle != game.value.trappe.nbEtapes){
+      getTrappeGauche(scene);
+  }else{
+      var cercle = MeshBuilder.CreateCylinder("objetTrappe",{diameter:0.5, height:0.001}, scene);
+      cercle.position = new Vector3(-4.5,0,1.5);
+  }
+  getCoffreGemmes(scene)
+    .then(()=>{
+    if(game.value.coffre.etapeActuelle == game.value.coffre.nbEtapes){
+        openCoffre();
+        game.value.itemsDispo.forEach(e => {
+            placeCoffre(e);
+        });
+    }  
+  });
+  if (game.value.porte.items.includes('gemmeCarre')){
+    putGemmeInBase(scene, 'gemmeCarre');
+  }
       
 
 
@@ -150,6 +151,8 @@ const createScene = (canvas, verif) => {
             }
             else if(currentMesh.name === 'textePlane') {
                 moveCamera(camera, 0,new Vector3(-3,1.6,0), new Vector3(-5.7,1.6,0))
+            }else if(currentMesh.name.startsWith("base")) {
+              moveCamera(camera, 2, new Vector3(2,1.6,1), new Vector3(2,1.6,6))
             }
         }
         else if(position.value === "coffre"){
@@ -328,6 +331,7 @@ function moveCamera(camera, pos, cameraPos, lockedTarget) {
   if (pos === 1) position.value = "coffre";
   else if (pos === -1) position.value = "trappe";
   else if (pos === 0) position.value = "images";
+  else if(pos === 2) position.value = "porte";
 
   camera.position = cameraPos;
   camera.setTarget(lockedTarget);
@@ -376,16 +380,29 @@ function verif(scene, nomItem) {
 
 function verifItemTrappe(scene, nomItem){
     if(position.value === "trappe"){
-        useApi().post('/game/trappe/put-item', {item: nomItem})
-            .then(res => {
-                const data = res.data;
-                useAuth().user = data.user;
-                useAuth().game.trappe = data.game.trappe;
-                if (data.status === 'ok') {
-                    
-                }
-            })
-            .catch(console.log);
+        useApi()
+          .post('/game/trappe/put-item', {item: nomItem})
+          .then(res => {
+              const data = res.data;
+              useAuth().user = data.user;
+              useAuth().game.trappe = data.game.trappe;
+              if (data.status === 'ok') {
+                  
+              }
+          })
+          .catch(console.log);
+    }else if (position.value === "porte") {
+      useApi()
+        .post("/game/porte/put-item", { item: nomItem })
+        .then((res) => {
+          const data = res.data;
+          useAuth().user = data.user;
+          useAuth().game.porte = data.game.porte;
+          if (data.status === "ok") {
+            putGemmeInBase(scene, nomItem);
+          }
+        })
+        .catch(console.log);
     }
     
 }
