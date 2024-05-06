@@ -86,32 +86,25 @@ const createScene = (canvas, verif) => {
   }
   getButtonValdier();
 
-  // Elements reactifs de la scene
-  const game = computed(() => useAuth().game);
-  if (game.value.trappe.etapeActuelle != game.value.trappe.nbEtapes) {
-    getTrappeGauche(scene);
-  } else {
-    var cercle = MeshBuilder.CreateCylinder(
-      "objetTrappe",
-      { diameter: 0.5, height: 0.001 },
-      scene
-    );
-    cercle.position = new Vector3(-4.5, 0, 1.5);
-    game.value.trappe.items.forEach((element) => {
-      placeItem(scene, element);
-    });
-  }
-  getCoffreGemmes(scene).then(() => {
-    if (game.value.coffre.etapeActuelle == game.value.coffre.nbEtapes) {
-      openCoffre();
-      game.value.itemsDispo.forEach((e) => {
-        placeCoffre(e);
-      });
+    // Elements reactifs de la scene
+    const game = computed(() => useAuth().game);
+    console.log(game.value)
+    if(game.value.trappe.etapeActuelle != game.value.trappe.nbEtapes){
+        getTrappeGauche(scene);
+    }else{
+        var cercle = MeshBuilder.CreateCylinder("objetTrappe",{diameter:0.5, height:0.001}, scene);
+        cercle.position = new Vector3(-4.5,0,1.5);
     }
-  });
+    getCoffreGemmes(scene).then(()=>{
+        if(game.value.coffre.etapeActuelle == game.value.coffre.nbEtapes){
+            openCoffre();
+            game.value.itemsDispo.forEach(e => {
+                placeCoffre(e);
+            });
+        }  
+    });
+      
 
-  //TODO: pour Swan lorsque l'objet a été gemme a été recupéré de l'autre côté, le faire disparaitre, pour cela faire :
-  // scene.getMeshByName("gemmeTriangle").dispose();
 
   engine.runRenderLoop(() => {
     scene.render();
@@ -119,180 +112,139 @@ const createScene = (canvas, verif) => {
 
   var currentMesh;
 
-  var pointerDown = function (mesh) {
-    currentMesh = mesh;
-    console.log("click sur " + currentMesh.name);
-    if (currentMesh.name.startsWith("item")) {
-      useApi()
-        .post("/game/pick-item", { item: currentMesh.name.split(":")[1] })
-        .then((res) => {
-          const data = res.data;
-          if (data.status === "ok") {
-            useAuth().user = data.user;
-            useAuth().game.itemsDispo = data.game.itemsDispo;
-          }
-          currentMesh.dispose();
-        })
-        .catch(console.log);
-    }
-    if (position.value === "centre") {
-      if (currentMesh.name.startsWith("wooden_crate")) {
-        var coffre = scene.getMeshByName("wooden_crate_01_latch");
-        if (coffre.isVisible) {
-          moveCamera(
-            camera,
-            1,
-            new Vector3(0.5, 1.6, 3),
-            new Vector3(5.3, 0, 3)
-          );
-        } else {
-          moveCamera(camera, 1, new Vector3(3, 1.6, 3), new Vector3(5.3, 0, 3));
+    var pointerDown = function (mesh) {
+        currentMesh = mesh;
+        console.log("click sur " + currentMesh.name)
+        if(currentMesh.name.startsWith('item')){
+            useApi().post('/game/pick-item', {item: currentMesh.name.split(':')[1]})
+                .then(res => {
+                    const data = res.data;
+                    if (data.status === 'ok') {
+                        useAuth().user = data.user;
+                        useAuth().game.itemsDispo = data.game.itemsDispo;
+                    }
+                    currentMesh.dispose();
+                })
+                .catch(console.log);
         }
-      } else if (
-        currentMesh.name === "trappe" ||
-        currentMesh.name.startsWith("cercle")
-      ) {
-        moveCamera(
-          camera,
-          -1,
-          new Vector3(-2, 0.2, 1.5),
-          new Vector3(-3, 0.2, 1.5)
-        );
-      } else if (currentMesh.name === "objetTrappe") {
-        moveCamera(
-          camera,
-          -1,
-          new Vector3(-2, 1.6, 1.5),
-          new Vector3(-5, 0, 1.5)
-        );
-      } else if (currentMesh.name === "textePlane") {
-        moveCamera(
-          camera,
-          0,
-          new Vector3(-3, 1.6, 0),
-          new Vector3(-5.7, 1.6, 0)
-        );
-      }
-    } else if (position.value === "coffre") {
-      if (currentMesh.name.startsWith("add")) {
-        addNumberCode();
-      } else if (currentMesh.name.startsWith("sub")) {
-        subNumberCode();
-      } else if (currentMesh.name === "buttonValider") {
-        var codeAssemble = "";
-        code.value.forEach((e) => {
-          codeAssemble += e;
-        });
-        useApi()
-          .post("/game/coffre/solve", { code: codeAssemble })
-          .then((res) => {
-            const data = res.data;
-            useAuth().user = data.user;
-            useAuth().game.itemsDispo = data.game.itemsDispo;
-            useAuth().game.coffre = data.game.coffre;
-            if (data.status === "ok") {
-              console.log("Vous avez ouvert le coffre !");
-              openCoffre();
-              game.value.itemsDispo.forEach((e) => {
-                placeCoffre(e);
-              });
-              moveCamera(
-                camera,
-                1,
-                new Vector3(3, 1.6, 3),
-                new Vector3(5.3, 0, 3)
-              );
-            } else if (data.status === "no") {
-              console.log("Mauvais code ...");
-              reinitCode();
+        if(position.value === "centre"){
+            if(currentMesh.name.startsWith("wooden_crate")){
+                var coffre = scene.getMeshByName("wooden_crate_01_latch")
+                if(coffre.isVisible){
+                    moveCamera(camera, 1,new Vector3(0.5,1.6,3), new Vector3(5.3,0,3) );
+                }else{
+                    moveCamera(camera, 1,new Vector3(3,1.6,3), new Vector3(5.3,0,3) );
+                }
+                
+            }else if(currentMesh.name === "trappe" || currentMesh.name.startsWith("cercle")){
+                moveCamera(camera,-1,new Vector3(-2,0.2,1.5), new Vector3(-3,0.2,1.5))
+            }else if(currentMesh.name === "objetTrappe"){
+                moveCamera(camera,-1,new Vector3(-2,1.6,1.5), new Vector3(-5,0,1.5))
             }
-          })
-          .catch(console.log);
-      } else if (currentMesh.name === "allWalls") {
-        moveCameraInit(camera);
-      }
-    } else if (position.value === "trappe") {
-      if (currentMesh.name === "allWalls") {
-        moveCameraInit(camera);
-      } else if (currentMesh.name.startsWith("cercle")) {
-        changeColorCircle();
-        var configurationAssemble = "";
-        forme.value.forEach((e) => {
-          configurationAssemble += e;
-        });
-        useApi()
-          .post("/game/trappe/solve", { configuration: configurationAssemble })
-          .then((res) => {
-            const data = res.data;
-            useAuth().user = data.user;
-            useAuth().game.trappe = data.game.trappe;
-            if (data.status === "ok") {
-              console.log("Vous avez ouvert la trappe !");
-              openTrappe();
-            } else if (data.status === "no") {
-              console.log("Mauvaise forme ...");
+            else if(currentMesh.name === 'textePlane') {
+                moveCamera(camera, 0,new Vector3(-3,1.6,0), new Vector3(-5.7,1.6,0))
             }
-          })
-          .catch(console.log);
-      }
-    } else {
-      if (currentMesh.name === "allWalls") {
+        }
+        else if(position.value === "coffre"){
+            if(currentMesh.name.startsWith("add")){
+                addNumberCode();
+            }
+            else if(currentMesh.name.startsWith("sub")){
+                subNumberCode();
+            }
+            else if(currentMesh.name === "buttonValider"){
+                var codeAssemble = "";
+                code.value.forEach((e) => {
+                    codeAssemble += e;
+                });
+                useApi().post('/game/coffre/solve', {code: codeAssemble})
+                .then(res => {
+                    const data = res.data;
+                        useAuth().user = data.user;
+                        useAuth().game.itemsDispo = data.game.itemsDispo;
+                        useAuth().game.coffre = data.game.coffre;
+                    if (data.status === 'ok') {
+                        console.log("Vous avez ouvert le coffre !")
+                        openCoffre();
+                        game.value.itemsDispo.forEach(e => {
+                            placeCoffre(e);
+                        });
+                        moveCamera(camera, 1,new Vector3(3,1.6,3), new Vector3(5.3,0,3) );
+                    }else if(data.status === 'no'){
+                        console.log("Mauvais code ...");
+                        reinitCode();
+                    }
+                })
+                .catch(console.log);
+            }else if(currentMesh.name === "allWalls"){
+                moveCameraInit(camera)
+            }
+        }else if(position.value === "trappe"){
+            if(currentMesh.name === "allWalls"){
+                moveCameraInit(camera)
+            }
+            else if(currentMesh.name.startsWith("cercle")){
+                changeColorCircle();
+                var configurationAssemble = "";
+                forme.value.forEach((e) => {
+                    configurationAssemble += e;
+                });
+                useApi().post('/game/trappe/solve', {configuration: configurationAssemble})
+                .then(res => {
+                    const data = res.data;
+                        useAuth().user = data.user;
+                        useAuth().game.trappe = data.game.trappe;
+                    if (data.status === 'ok') {
+                        console.log("Vous avez ouvert la trappe !")
+                        openTrappe();
+                    }else if(data.status === 'no'){
+                        console.log("Mauvaise forme ...");
+                    }
+                })
+                .catch(console.log);
+            }
+        }else{
+            moveCameraInit(camera)
+        }
+        
+    }
+
+    var openCoffre = function(){
+        var cordeCoffre = scene.getMeshByName("wooden_crate_01_latch");
+        cordeCoffre.isVisible = false;
+        var hautCoffre = scene.getMeshByName("wooden_crate_01_lid");
+        hautCoffre.isVisible = false;        
+    }
+
+    var placeCoffre = function(nom){
+        if(nom == "gemmeTriangle"){
+            getGemme(scene, 'triangle').then(() => {
+                scene.getMeshByName('gemmeTriangle').rotation = new Vector3(Math.PI/4, Math.PI/4, 0);
+                scene.getMeshByName('gemmeTriangle').position = new Vector3(-4.3, 0.2, 3);
+                scene.getMeshByName('gemmeTriangle').name = 'item:gemmeTriangle';
+            })
+        }else if(nom == "gemmeCarre"){
+            getGemme(scene, 'carre').then(() => {
+                scene.getMeshByName('gemmeCarre').rotation = new Vector3(Math.PI/4, Math.PI/4, 0);
+                scene.getMeshByName('gemmeCarre').position = new Vector3(-4.3, 0.2, 3);
+                scene.getMeshByName('gemmeCarre').name = 'item:gemmeCarre';
+            })
+        }
+        
+    }
+
+    var openTrappe = function(){
+        var trappe = scene.getMeshByName("trappe");
+        trappe.isVisible = false;
+        for(var i=0; i<15; i++){
+            var cercle = scene.getMeshByName("cercle:"+i);
+            cercle.isVisible = false;
+        }      
+           
+        var cercle = MeshBuilder.CreateCylinder("objetTrappe",{diameter:0.5, height:0.001}, scene);
+        cercle.position = new Vector3(-4.5,0,1.5);
         moveCameraInit(camera);
-      }
     }
-  };
-
-  var openCoffre = function () {
-    var cordeCoffre = scene.getMeshByName("wooden_crate_01_latch");
-    cordeCoffre.isVisible = false;
-    var hautCoffre = scene.getMeshByName("wooden_crate_01_lid");
-    hautCoffre.isVisible = false;
-  };
-
-  var placeCoffre = function (nom) {
-    if (nom == "gemmeTriangle") {
-      getGemme(scene, "triangle").then(() => {
-        scene.getMeshByName("gemmeTriangle").rotation = new Vector3(
-          Math.PI / 4,
-          Math.PI / 4,
-          0
-        );
-        scene.getMeshByName("gemmeTriangle").position = new Vector3(
-          -4.3,
-          0.2,
-          3
-        );
-        scene.getMeshByName("gemmeTriangle").name = "item:gemmeTriangle";
-      });
-    } else if (nom == "gemmeCarre") {
-      getGemme(scene, "carre").then(() => {
-        scene.getMeshByName("gemmeCarre").rotation = new Vector3(
-          Math.PI / 4,
-          Math.PI / 4,
-          0
-        );
-        scene.getMeshByName("gemmeCarre").position = new Vector3(-4.3, 0.2, 3);
-        scene.getMeshByName("gemmeCarre").name = "item:gemmeCarre";
-      });
-    }
-  };
-
-  var openTrappe = function () {
-    var trappe = scene.getMeshByName("trappe");
-    trappe.isVisible = false;
-    for (var i = 0; i < 15; i++) {
-      var cercle = scene.getMeshByName("cercle:" + i);
-      cercle.isVisible = false;
-    }
-
-    var cercle = MeshBuilder.CreateCylinder(
-      "objetTrappe",
-      { diameter: 0.5, height: 0.001 },
-      scene
-    );
-    cercle.position = new Vector3(-4.5, 0, 1.5);
-    moveCameraInit(camera);
-  };
 
   var reinitCode = function () {
     for (var i = 0; i < 4; i++) {
@@ -415,20 +367,20 @@ function verif(scene, nomItem) {
   verifItemTrappe(scene, nomItem);
 }
 
-function verifItemTrappe(scene, nomItem) {
-  if (position.value === "trappe") {
-    useApi()
-      .post("/game/trappe/put-item", { item: nomItem })
-      .then((res) => {
-        const data = res.data;
-        useAuth().user = data.user;
-        useAuth().game.trappe = data.game.trappe;
-        if (data.status === "ok") {
-          placeItem(scene, nomItem);
-        }
-      })
-      .catch(console.log);
-  }
+function verifItemTrappe(scene, nomItem){
+    if(position.value === "trappe"){
+        useApi().post('/game/trappe/put-item', {item: nomItem})
+            .then(res => {
+                const data = res.data;
+                useAuth().user = data.user;
+                useAuth().game.trappe = data.game.trappe;
+                if (data.status === 'ok') {
+                    
+                }
+            })
+            .catch(console.log);
+    }
+    
 }
 
 export { createScene, verif };

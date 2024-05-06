@@ -383,6 +383,7 @@ function placeEngNavette(scene) {
   placeEngMoyen(scene);
   placeNavette(scene);
 }
+
 function placeNavette(scene) {
   getNavette(scene).then(() => {
     let navBase = scene.getMeshByName("navetteVide");
