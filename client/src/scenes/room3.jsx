@@ -291,8 +291,12 @@ const createScene = (canvas, verif) => {
           })
           .catch(console.log);
       }
-    } else if (currentMesh.name === "sortie" && game.value.dateEnd > 0) {
-      game.value.isFinished = true;
+    } else if (
+      currentMesh.name === "sortie" &&
+      game.value.portes.etapeActuelle === game.value.portes.nbEtapes
+    ) {
+      console.log("FIIN");
+      useAuth().game.isFinished = true;
     } else {
       moveCameraInit(camera);
     }

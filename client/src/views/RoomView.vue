@@ -9,7 +9,6 @@ import { storeToRefs } from "pinia";
 import { useRouter } from "vue-router";
 import useApi from "@/stores/api.store";
 import usePopup from "@/stores/popup.store";
-import { watch } from "vue";
 
 const router = useRouter();
 
@@ -20,6 +19,7 @@ const gameLoaded = ref(false);
 useApi()
   .get("/game/salle")
   .then((res) => {
+    if (res.status === 404) router.push("/");
     auth.user = res.data.user;
     auth.game = res.data.game;
   })
@@ -106,6 +106,7 @@ setInterval(updateElapsedTime, 1000);
 
 watchEffect(() => {
   if (game.value.isFinished) {
+    console.log("Game finished");
     useApi().post("/game/finished");
     useAuth().clearSession();
   }

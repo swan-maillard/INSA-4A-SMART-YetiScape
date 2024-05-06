@@ -16,9 +16,12 @@ const { user, game } = storeToRefs(auth);
 useApi()
   .get("/games/waiting-room/" + game.value.id)
   .then((res) => {
+    if (res.status === 404) router.push("/");
     auth.game = res.data.game;
   })
-  .catch(console.log);
+  .catch(() => {
+    router.push("/");
+  });
 
 const idCopied = ref(false);
 

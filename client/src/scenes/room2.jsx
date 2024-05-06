@@ -111,8 +111,8 @@ const createScene = (canvas) => {
   getBaseGemme(scene, "ronde");
 
   var eclairPlane = createTexturePlane(scene, 1.8, 1.8, "yeti");
-  eclairPlane.rotation = new Vector3(0, - Math.PI / 2, 0);
-  eclairPlane.position = new Vector3(- 4.7, 2.3, -3);
+  eclairPlane.rotation = new Vector3(0, -Math.PI / 2, 0);
+  eclairPlane.position = new Vector3(-4.7, 2.3, -3);
   //Fin des elements de base de la scene
 
   //Elements reactifs de la scene
@@ -211,8 +211,11 @@ const createScene = (canvas) => {
           });
         }
       }
-    } else if (currentMesh.name === "sortie" && game.value.dateEnd > 0) {
-      game.value.isFinished = true;
+    } else if (
+      currentMesh.name === "sortie" &&
+      game.value.portes.etapeActuelle === game.value.portes.nbEtapes
+    ) {
+      useAuth().game.isFinished = true;
     }
 
     if (position.value !== "centre" && currentMesh.name === "allWalls") {

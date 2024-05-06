@@ -5,7 +5,6 @@ import useAuth from "@/stores/auth.store";
 import { watchEffect } from "@vue/runtime-core";
 
 const auth = useAuth();
-console.log(auth);
 let callId = null;
 const messages = ref([]);
 const newMessage = ref("");
