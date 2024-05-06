@@ -84,14 +84,15 @@ function imgDrop() {
   }
 }
 
-watchEffect(() => {
-  if (popup.value) {
-    document.addEventListener("mousemove", (e) => {
-      popup.value.top = e.clientY + "px";
-      popup.value.left = e.clientX + "px";
-    });
-  }
-}, [popup]);
+// watchEffect(() => {
+//   if (popup.value && bjsCanvas.value) {
+//     bjsCanvas.value.addEventListener("mousemove", (e) => {
+//       const canvaRect = bjsCanvas.value.getBoundingClientRect();
+//       popup.value.style.top = e.clientY - canvaRect.top + 10 + "px";
+//       popup.value.style.left = e.clientX - canvaRect.left + 10 + "px";
+//     });
+//   }
+// }, [popup]);
 </script>
 
 <template>
@@ -121,12 +122,11 @@ watchEffect(() => {
 }
 
 .popup {
-  background-color: #222;
+  background-color: rgba(34, 34, 34, 0.8);
   position: absolute;
   padding: 30px;
-  border-radius: 20px;
-  border: 2px solid #ddd;
-  box-shadow: 0 0 9px 1px #000000a6;
+  border-radius: 20px 20px 0 0;
+  width: 100%;
 }
 
 img {
