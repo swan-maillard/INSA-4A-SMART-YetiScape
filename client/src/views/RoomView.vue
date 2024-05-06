@@ -97,6 +97,7 @@ function imgDrop() {
   height: 100%;
   width: 100%;
   border-radius: 20px;
+  box-shadow: 0 0 9px 1px #000000a6;
 }
 #GameScreen {
   width: 100%;
