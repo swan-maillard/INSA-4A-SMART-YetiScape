@@ -6,9 +6,8 @@ import {
   MeshBuilder,
   PointerEventTypes,
   Scene,
-  StandardMaterial,
-  Texture,
   Vector3,
+  Animation,
 } from "@babylonjs/core";
 import "@babylonjs/loaders";
 import { computed, ref } from "@vue/runtime-core";
@@ -107,12 +106,12 @@ const createScene = (canvas) => {
   game.value.itemsDispo.forEach((e) => {
     placeItemInit(scene, e);
   });
-  if (
-    game.value.coffreRouage.etapeActuelle != game.value.coffreRouage.nbEtapes
-  ) {
+  if (game.value.coffreRouage.etapeActuelle != game.value.coffreRouage.nbEtapes) {
     game.value.coffreRouage.items.forEach((e) => {
       placeEngrOnCoffre(scene, e);
     });
+  } else {
+    movePorteCoffre(scene);
   }
   if (game.value.tuyau.etapeActuelle == game.value.tuyau.nbEtapes) {
     placeNavette(scene);
@@ -330,6 +329,7 @@ const createScene = (canvas) => {
         useAuth().game.coffreRouage = data.game.rouages;
         if (data.status === "ok") {
           useAuth().game.itemsDispo = data.game.itemsDispo;
+          movePorteCoffre(scene);
           placeItemInit(scene, "gemmeRonde");
           usePopup().send(
             "Les engrenages s'emboîtent parfaitement : le mécanisme s'enclenche et le coffre s'ouvre"
@@ -440,6 +440,10 @@ function placeNavette(scene) {
     navCouvercle.position = new Vector3(-2.6, 0.15, 0);
     navCouvercle.rotation = new Vector3(0, Math.PI / 2, 0);
   });
+}
+
+function movePorteCoffre(scene){
+  scene.getMeshByName('porteCoffre').position = new Vector3(-2.9, 1.2, 4.03);
 }
 
 function verifEngInRouage(scene, nomItem) {
