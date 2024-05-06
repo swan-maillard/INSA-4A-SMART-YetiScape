@@ -92,7 +92,7 @@ const createScene = (canvas) => {
     });
   }
   if (game.value.tuyau.etapeActuelle == game.value.tuyau.nbEtapes) {
-    placeEngNavette(scene);
+    placeNavette(scene);
   }
   //Fin des element réactifs de la scene
 
