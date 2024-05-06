@@ -88,6 +88,9 @@ const createScene = (canvas) => {
   pickPlane.rotation = new Vector3(0, Math.PI / 2, 0);
   pickPlane.position.x = -3.5;
 
+  var eclairPlane = createTexturePlane(scene, 2, 2, "yeti");
+  eclairPlane.rotation = new Vector3(0, Math.PI / 2, 0);
+  eclairPlane.position = new Vector3(4.7, 2.3, -1);
   //var porteArriere = MeshBuilder.CreatePlane('arrierePorte', {width: 2, height:3}, scene);
   //porteArriere.position
   //Fin scene de base
