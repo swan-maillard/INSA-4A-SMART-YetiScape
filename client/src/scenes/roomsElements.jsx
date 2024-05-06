@@ -30,6 +30,8 @@ async function getPorte(scene) {
   resultat.meshes[3].parent = resultat.meshes[1];
   resultat.meshes[1].rotation = new Vector3(0, Math.PI, 0);
   resultat.meshes[1].position.z = 4.2;
+  createTexturePlane(scene, 2, 3, 'sortie');
+  scene.getMeshByName('sortie').position = new Vector3(-0.04, 1.5, 4.25);
 }
 
 function getTuyau(scene) {
@@ -174,9 +176,6 @@ function getSalle(scene, numSalle) {
   }
   allWalls.material = matMur;
   allWalls.name = "allWalls";
-  
-  createTexturePlane(scene, 2, 3, 'sortie');
-  scene.getMeshByName('sortie').position = new Vector3(-0.04, 1.5, 4.25);
 
   return allWalls;
 }
@@ -340,7 +339,7 @@ function putGemmeInBase(scene, nomItem){
   getGemme(scene, nomItem.substring(5).toLowerCase()).then(() => {
     let itemGemme = scene.getMeshByName(nomItem);
     if (nomItem === 'gemmeTriangle')
-      itemGemme.rotation = new Vector3(0, 0,Math.PI/3);
+      itemGemme.rotation = new Vector3(0, 0,- Math.PI/3);
     else 
       itemGemme.rotation = new Vector3(0, 0, 0)
     itemGemme.position = new Vector3(-2, 2, 4.35);
