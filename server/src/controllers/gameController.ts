@@ -725,4 +725,64 @@ export default {
       res.status(500).send({ message: 'Internal server error' });
     }
   },
+  putItemPorte: async (req: Request, res: Response) => {
+    const { userId, gameId } = req.body.jwt;
+
+    try {
+      const user = (await getUserById(userId)) as User;
+      const game = (await getGameById(gameId)) as Game;
+      const salle = user.salle;
+
+      const { item } = req.body;
+
+      if (!item) {
+        return res.status(400).send({ message: '"item" is required' });
+      }
+
+      // On check que l'utilisateur possède l'objet
+      if (!user.items.includes(item)) {
+        return res.status(409).send({ message: "Forbidden, you don't have this item" });
+      }
+
+      const gems: Item[] = ['gemmeTriangle', 'gemmeRonde', 'gemmeCarre'];
+
+      const portes = game.portes;
+
+      if (gems[salle!] === item) {
+        user.items.splice(user.items.indexOf(item), 1);
+        portes.items.push(item);
+
+        if (portes.items.length === gems.length) {
+          portes.etapeActuelle = 1;
+
+          const { io, socketSessions } = getSocketIo(req);
+          for (const [socketId, userSocket] of Object.entries(socketSessions)) {
+            if (userSocket.game === game.id) {
+              io.to(socketId).emit('game/portes-open');
+            }
+          }
+        }
+
+        game.portes = portes;
+
+        await updateUser(user);
+        await updateGame(game);
+
+        res.status(200).send({
+          status: 'ok',
+          user,
+          game: {
+            portes: game.portes,
+          },
+        });
+      } else {
+        res.status(200).send({
+          status: 'no',
+        });
+      }
+    } catch (error) {
+      console.error('Error during game ' + gameId + ':', error);
+      res.status(500).send({ message: 'Internal server error' });
+    }
+  },
 };
