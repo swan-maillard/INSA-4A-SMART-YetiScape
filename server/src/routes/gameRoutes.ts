@@ -31,4 +31,6 @@ router.post('/rouages/solve', gameController.solveRouages); // Room 2
 router.get('/coffre', gameController.getCoffre); // Room 3
 router.post('/coffre/solve', gameController.solveCoffre); // Room 3
 
+router.post('/porte/put-item', gameController.putItemPorte);
+
 export default router;
