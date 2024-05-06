@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import socketio from "@/services/socketio";
 import useAuth from "@/stores/auth.store";
 import { watchEffect } from "@vue/runtime-core";
@@ -10,7 +10,8 @@ let callId = auth.game.callId;
 const messages = ref([]);
 const newMessage = ref("");
 const collapsed = ref(false);
-//var isMuted = false; // New variable to track mute state
+var isMuted = false; // New variable to track mute state
+var audioTrack; // Variable to store audio track
 
 //Voice setup
 navigator.getUserMedia =
@@ -89,6 +90,7 @@ function initVoiceChat() {
   }
 
   /*
+
   // Remove our ID from the call's list of IDs
   function unregisterIdWithServer() {
     // eslint-disable-next-line
@@ -159,6 +161,8 @@ function initVoiceChat() {
       function success(audioStream) {
         display("Microphone is open.");
         myStream = audioStream;
+        audioTrack = myStream.getAudioTracks()[0]; // Store audio track reference
+
         if (cb) cb(null, myStream);
       },
 
@@ -186,24 +190,19 @@ function initVoiceChat() {
   }
 }
 
-/*
+
  // Function to toggle mute state
  // eslint-disable-next-line
-  function toggleMute() {
-    if (isMuted) {
-      myStream.getAudioTracks()[0].enabled = true; // Unmute
-      isMuted = false;
-    } else {
-      myStream.getAudioTracks()[0].enabled = false; // Mute
-      isMuted = true;
-    }
+function toggleMute() {
+    isMuted = !isMuted; // Toggle mute state
+    audioTrack.enabled = !isMuted; // Enable/disable audio track
   }
 
 
 onMounted(() => {
   document.getElementById("muteButton").addEventListener("click", toggleMute);
 })
-*/
+
 
 //End of voice setup
 
@@ -292,7 +291,7 @@ scrollToBottom();
       @keyup.enter="sendMessage"
       placeholder="Type your message..."
     />
-    <!-- <button>Mute/Unmute</button> -->
+     <button id="muteButton">Mute/Unmute</button>
   </div>
 </template>
 

@@ -396,7 +396,7 @@ function verifItemTrappe(scene, nomItem){
           .catch(console.log);
     }else if (position.value === "porte") {
       useApi()
-        .post("/game/portes/put-item", { item: nomItem })
+        .post("/game/porte/put-item", { item: nomItem })
         .then((res) => {
           const data = res.data;
             if (data.status === "ok") {
