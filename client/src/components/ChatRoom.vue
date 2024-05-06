@@ -196,6 +196,14 @@ function initVoiceChat() {
 function toggleMute() {
     isMuted = !isMuted; // Toggle mute state
     audioTrack.enabled = !isMuted; // Enable/disable audio track
+    if (isMuted)
+    {
+      document.getElementById("muteButton").innerHTML = "Unmute"
+    }
+    else
+    {
+      document.getElementById("muteButton").innerHTML = "Mute"
+    }
   }
 
 
@@ -291,7 +299,7 @@ scrollToBottom();
       @keyup.enter="sendMessage"
       placeholder="Type your message..."
     />
-     <button id="muteButton">Mute/Unmute</button>
+     <button id="muteButton">Mute</button>
   </div>
 </template>
 
