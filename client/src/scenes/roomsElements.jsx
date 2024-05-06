@@ -350,6 +350,10 @@ async function getCoffreRouage(scene) {
   const textureRouille = new Texture("./textures/copper.jpg", scene);
   const matRouille = new StandardMaterial("matRouille");
   matRouille.diffuseTexture = textureRouille;
+  let porte = MeshBuilder.CreatePlane('porteCoffre', {width:0.8, height:0.32}, scene);
+  porte.position = new Vector3(-2.4, 1.2, 4.03);
+  //porte.rotation = new Vector3(0, Math.PI/2, 0);
+  porte.material = matRouille;
   var cyl = [];
   cyl[0] = MeshBuilder.CreateCylinder(
     "cyl0|",

@@ -5,7 +5,9 @@ import useAuth from "@/stores/auth.store";
 import { watchEffect } from "@vue/runtime-core";
 
 const auth = useAuth();
+console.log(auth)
 let callId = auth.game.callId;
+
 
 const messages = ref([]);
 const newMessage = ref("");
@@ -73,7 +75,27 @@ function initVoiceChat() {
       display(err);
       cb && cb(err);
     });
+
+    me.on("close", function () {
+      display("Connection closed.");
+      unregisterIdWithServer();
+    });
+
+    me.on("disconnected", function () {
+      display("Disconnected from server.");
+      // Handle disconnection here, such as removing peers from the list
+      for (let peerId in peers) {
+        if (Object.prototype.hasOwnProperty.call(peers, peerId)) {
+          if (peers[peerId].id === me.id) {
+            delete peers[peerId];
+            break;
+          }
+        }
+      }
+    });
   }
+
+
 
   // Add our ID to the list of PeerJS IDs for this call
   function registerIdWithServer() {
@@ -89,14 +111,18 @@ function initVoiceChat() {
     );
   }
 
-  /*
-
   // Remove our ID from the call's list of IDs
   function unregisterIdWithServer() {
     // eslint-disable-next-line
-    $.post("/" + callId + "/removepeer/" + me.id);
+    $.post(
+      "https://" +
+        window.location.hostname +
+        ":3000/chat/" +
+        callId +
+        "/removepeer/" +
+        me.id
+    );
   }
-  */
 
   // Call each of the peer IDs using PeerJS
   function callPeers() {
