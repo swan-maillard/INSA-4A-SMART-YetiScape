@@ -6,6 +6,7 @@ import { Item } from './item';
 
 export interface GameDatabase extends AbstractDocument {
   id: string;
+  hasStarted: boolean;
   users: string;
   trappe: string;
   tuyau: string;
@@ -17,6 +18,7 @@ export interface GameDatabase extends AbstractDocument {
 
 export default class Game {
   id: string = '-1';
+  hasStarted: boolean = false;
   users: User[];
   trappe: Enigme;
   tuyau: Enigme;
@@ -49,6 +51,7 @@ export const gameConverter = {
   toDatabase: (game: Game): GameDatabase => {
     return {
       id: game.id,
+      hasStarted: game.hasStarted,
       users: JSON.stringify(game.users.map((user) => user.id)),
       trappe: JSON.stringify(game.trappe),
       tuyau: JSON.stringify(game.tuyau),
@@ -62,6 +65,7 @@ export const gameConverter = {
   fromDatabase: async (gameDatabase: GameDatabase) => {
     const game = new Game();
     game.id = gameDatabase.id;
+    game.hasStarted = gameDatabase.hasStarted;
 
     const users = JSON.parse(gameDatabase.users);
     game.users = (

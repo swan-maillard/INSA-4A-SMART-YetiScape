@@ -1,28 +1,37 @@
 <script setup>
 import ChatRoom from "@/components/ChatRoom.vue";
 import useAuth from "@/stores/auth.store";
-import { computed, watchEffect } from "vue";
+import { watchEffect } from "vue";
 import socketio from "@/services/socketio";
+import { storeToRefs } from "pinia";
+import { ref } from "@vue/runtime-core";
+import UserInventaire from "@/components/UserInventaire.vue";
 
 const auth = useAuth();
 auth.initData();
 
-const game = computed(() => auth.game);
+const { user, game } = storeToRefs(auth);
+
+const joinedSocket = ref(false);
 
 watchEffect(() => {
-  if (game.value) {
-    socketio.socket.emit("join-game", { username: auth.user.name });
+  if (user.value && !joinedSocket.value) {
+    joinedSocket.value = true;
+    socketio.socket.emit("join-game", { username: user.value.name });
+  } else if (!user.value) {
+    joinedSocket.value = false;
   }
-}, [game]);
+}, [user.value]);
 </script>
 
 <template>
   <div class="noise" />
   <div class="main-container">
-    <ChatRoom v-if="game" />
-    <div class="section-container">
-      <RouterView />
+    <div class="d-flex flex-column justify-content-end" style="gap: 30px">
+      <UserInventaire v-if="game && game.hasStarted" />
+      <ChatRoom v-if="game" />
     </div>
+    <RouterView />
   </div>
 </template>
 
@@ -40,7 +49,8 @@ html,
   height: 100%;
   width: 100%;
   margin: 0;
-  background-image: url("https://www.textures.com/system/gallery/photos/Ground/Snow/120168/Snow0158_9_350.jpg");
+  background-color: #ddd;
+  //background-image: url("https://www.textures.com/system/gallery/photos/Ground/Snow/120168/Snow0158_9_350.jpg");
   overflow: hidden;
   display: flex;
   justify-content: center;
@@ -71,7 +81,7 @@ html,
   width: 100%;
   height: 100%;
   color: #ddd;
-  padding: 40px;
+  padding: 60px;
   display: flex;
   gap: 40px;
 }
@@ -80,7 +90,7 @@ html,
   border-radius: 20px;
   flex-grow: 1;
   height: 100%;
-  box-shadow: 0 0 10px 4px #000000a6;
+  box-shadow: 0 0 9px 1px #000000a6;
   background-color: #151515;
   padding: 15px;
   transition: 1s;

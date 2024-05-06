@@ -1,6 +1,6 @@
 import { Server, Socket } from 'socket.io';
 import User from '../models/user';
-import { getGameById } from '../services/gamesServices';
+import { getGameById, updateGame } from '../services/gamesServices';
 
 export const socketWaitingRoom = (io: Server, socket: Socket, socketSessions: { [key: string]: User }) => {
   socket.on('waiting-room/start-game', async () => {
@@ -11,6 +11,9 @@ export const socketWaitingRoom = (io: Server, socket: Socket, socketSessions: { 
     if (!game) return;
 
     console.log('Start game: ', game);
+
+    game.hasStarted = true;
+    await updateGame(game);
 
     for (const [socketId, socketUser] of Object.entries(socketSessions)) {
       if (socketUser.game === user.game) {

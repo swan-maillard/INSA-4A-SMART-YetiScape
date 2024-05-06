@@ -4,6 +4,14 @@ import { getGameById, removeItemFromRoom, updateGame } from '../services/gamesSe
 import { getUserById, updateUser } from '../services/usersServices';
 import Game from '../models/game';
 import { Item } from '../models/item';
+import { Server } from 'socket.io';
+
+const getSocketIo = (req: Request) => {
+  return req.app.get('sockets') as {
+    io: Server;
+    socketSessions: { [key: string]: User };
+  };
+};
 
 export default {
   getGame: async (req: Request, res: Response) => {
@@ -13,7 +21,7 @@ export default {
       const user = (await getUserById(userId)) as User;
       const game = (await getGameById(gameId)) as Game;
 
-      res.status(200).send({game, user});
+      res.status(200).send({ game, user });
     } catch (error) {
       console.error('Error getting game ' + gameId + ':', error);
       res.status(500).send({ message: 'Internal server error' });
@@ -40,7 +48,7 @@ export default {
         infos = { ...infos, coffre: game.coffre };
       }
 
-      if (user.salle === 2){
+      if (user.salle === 2) {
         infos = { ...infos, coffreRouage: game.rouages };
       }
 
@@ -49,6 +57,7 @@ export default {
         game: {
           id: game.id,
           itemsDispo: game.itemsDispo[user.salle!],
+          hasStarted: game.hasStarted,
           ...infos,
         },
       });
@@ -198,6 +207,13 @@ export default {
         game.tuyau = tuyau;
         await updateGame(game);
 
+        const { io, socketSessions } = getSocketIo(req);
+        for (const [socketId, userSocket] of Object.entries(socketSessions)) {
+          if (userSocket.game === game.id && userSocket.salle === 2) {
+            io.to(socketId).emit('game/tuyau-arrived', { tuyau });
+          }
+        }
+
         res.status(200).send({
           status: 'ok',
           user,
@@ -334,6 +350,14 @@ export default {
         await updateUser(user);
         await updateGame(game);
 
+        const { io, socketSessions } = getSocketIo(req);
+        for (const [socketId, userSocket] of Object.entries(socketSessions)) {
+          if (userSocket.game === game.id && userSocket.salle === 1) {
+            console.log('Socket emitted to ' + userSocket.name);
+            io.to(socketId).emit('game/trappe-item-added', { trappe });
+          }
+        }
+
         res.status(200).send({
           status: 'ok',
           user,
@@ -383,6 +407,13 @@ export default {
       await updateUser(user);
       await updateGame(game);
 
+      const { io, socketSessions } = getSocketIo(req);
+      for (const [socketId, userSocket] of Object.entries(socketSessions)) {
+        if (userSocket.game === game.id && userSocket.salle === 3) {
+          io.to(socketId).emit('game/trappe-item-removed', { trappe });
+        }
+      }
+
       res.status(200).send({
         status: 'ok',
         user,
@@ -428,6 +459,13 @@ export default {
         game.trappe = trappe;
 
         await updateGame(game);
+
+        const { io, socketSessions } = getSocketIo(req);
+        for (const [socketId, userSocket] of Object.entries(socketSessions)) {
+          if (userSocket.game === game.id && userSocket.salle === 1) {
+            io.to(socketId).emit('game/trappe-opened', { trappe });
+          }
+        }
 
         res.status(200).send({
           status: 'ok',
@@ -694,7 +732,7 @@ export default {
       }
 
       // On check que la position est correcte
-      if (configuration == "GPPM") {
+      if (configuration == 'GPPM') {
         rouages.etapeActuelle = 1;
         game.rouages = rouages;
         game.itemsDispo[user.salle!].push('gemmeRonde');

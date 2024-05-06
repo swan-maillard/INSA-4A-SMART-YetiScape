@@ -17,6 +17,7 @@ export default class SqliteDatabase {
         await this.db.exec(`
       CREATE TABLE IF NOT EXISTS games (
        id TEXT PRIMARY KEY,
+        hasStarted BOOLEAN,
        users TEXT,  -- store as JSON string
        trappe TEXT,
        tuyau TEXT,

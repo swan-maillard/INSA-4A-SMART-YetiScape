@@ -1,18 +1,27 @@
 <script setup>
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import router from "../router";
 import useAuth from "@/stores/auth.store";
 import authStore from "@/stores/auth.store";
 import useApi from "@/stores/api.store";
 
+const auth = authStore();
+auth.clearSession();
+
 const focus = ref(1);
 const sending = ref(false);
-
-authStore().clearSession();
 
 const form = ref({
   username: "",
   gameId: "",
+});
+
+const inputId = ref();
+
+watch(inputId, () => {
+  if (inputId.value) {
+    inputId.value.focus();
+  }
 });
 
 function sendForm() {
@@ -50,54 +59,64 @@ const handleResponse = (response) => {
 </script>
 
 <template>
-  <div class="d-flex justify-content-center align-items-center gap-5">
-    <div style="width: 80px; height: 80px" />
-    <span class="berani" style="font-size: 4em">Yeti Scape</span>
-    <img src="../assets/avatar_yeti.png" width="80" height="80" alt="Logo" />
-  </div>
-  <form ref="" @submit.prevent="sendForm" class="divForm">
-    <input
-      v-model="form.username"
-      required
-      placeholder="Votre nom"
-      style="font-size: 1.3em"
-    />
-    <div class="optionsContainer d-flex">
-      <div
-        class="optionBlock"
-        :class="{ focus: focus === 1 }"
-        @click="focus = 1"
-      >
-        <span>Créer une partie</span>
-      </div>
+  <div class="section-container justify-content-around">
+    <div class="d-flex justify-content-center align-items-center gap-5">
+      <div style="width: 80px; height: 80px" />
+      <span class="berani" style="font-size: 6em">Yeti Scape</span>
+      <img
+        src="../assets/avatar_yeti.png"
+        width="100"
+        height="100"
+        alt="Logo"
+      />
+    </div>
 
-      <div
-        class="optionBlock"
-        :class="{ focus: focus === 2 }"
-        @click="focus = 2"
-      >
-        <span>Rejoindre une partie</span>
-        <input
-          v-if="focus === 2"
-          class="dark"
-          id="inputId"
-          v-model="form.gameId"
-          placeholder="ID de la partie"
-          @click="(evt) => evt.currentTarget.parentElement.click()"
-        />
+    <form ref="" @submit.prevent="sendForm" class="divForm">
+      <input
+        v-model="form.username"
+        required
+        placeholder="Your name"
+        autofocus
+        style="font-size: 1.3em"
+      />
+      <div class="optionsContainer d-flex">
+        <div
+          class="optionBlock"
+          :class="{ focus: focus === 1 }"
+          @click="focus = 1"
+        >
+          <span>New game</span>
+        </div>
+
+        <div
+          class="optionBlock"
+          :class="{ focus: focus === 2 }"
+          @click="focus = 2"
+        >
+          <span>Join a game</span>
+          <input
+            required
+            ref="inputId"
+            v-if="focus === 2"
+            class="dark"
+            id="inputId"
+            v-model="form.gameId"
+            placeholder="Game ID"
+          />
+        </div>
       </div>
-    </div>
-    <div id="confirmation">
-      <button>
-        Lancer la partie
-        <span
-          v-if="sending"
-          class="button-spinner spinner-border"
-          role="status"
-        />
-      </button>
-    </div>
-  </form>
+      <div id="confirmation">
+        <button>
+          Start now !
+          <span
+            v-if="sending"
+            class="button-spinner spinner-border"
+            role="status"
+          />
+        </button>
+      </div>
+    </form>
+  </div>
 </template>
 
 <style scoped>
@@ -138,7 +157,7 @@ const handleResponse = (response) => {
   background-color: #ddd;
   color: #222;
   box-shadow: 0 0 2px 5px rgba(0, 0, 0, 0.22);
-  animation: scale-rotate infinite 2s alternate-reverse ease-in-out;
+  animation: scale-rotate infinite 1.5s alternate-reverse ease-in-out;
 }
 
 @keyframes scale-rotate {
@@ -146,7 +165,7 @@ const handleResponse = (response) => {
     transform: scale(1);
   }
   to {
-    transform: scale(1.05) rotate(0.5deg);
+    transform: scale(1.08) rotate(0.8deg);
   }
 }
 </style>

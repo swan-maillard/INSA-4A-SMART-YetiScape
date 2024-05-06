@@ -1,5 +1,4 @@
 import { defineStore } from "pinia";
-import useApi from "./api.store";
 
 // Définition du store auth
 const useAuth = defineStore("auth", {
@@ -7,28 +6,32 @@ const useAuth = defineStore("auth", {
     token: null,
     user: null,
     game: null,
+    elementGrabbed: null,
   }),
   actions: {
     initData() {
       this.token = localStorage.getItem("token");
-
-      if (this.token) {
-        useApi().get('/game/salle').then(res => {
-          this.saveSession(this.token, res.data.user, res.data.game);
-        })
-      }
-      
+      this.user = JSON.parse(localStorage.getItem("user"))
+        ? JSON.parse(localStorage.getItem("user"))
+        : null;
+      this.game = JSON.parse(localStorage.getItem("game"))
+        ? JSON.parse(localStorage.getItem("game"))
+        : null;
+      this.elementGrabbed = null;
     },
 
     saveSession(token, user, game) {
       localStorage.clear();
       localStorage.setItem("token", token);
+      localStorage.setItem(
+        "user",
+        JSON.stringify({ id: user.id, name: user.name })
+      );
+      localStorage.setItem("game", JSON.stringify({ id: game.id }));
 
       this.token = token;
       this.user = user;
       this.game = game;
-
-      console.log(user, game)
     },
 
     clearSession() {

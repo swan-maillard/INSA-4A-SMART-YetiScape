@@ -2,9 +2,8 @@ import { createWebHistory, createRouter } from "vue-router";
 
 import HomeView from "./views/HomeView.vue";
 import WaitingView from "./views/WaitingView.vue";
-import Room1View from "./views/Room1View.vue";
-import Room2View from "./views/Room2View.vue";
-import Room3View from "./views/Room3View.vue";
+import RoomView from "./views/RoomView.vue";
+import useAuth from "@/stores/auth.store";
 
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
@@ -17,22 +16,30 @@ const router = createRouter({
     {
       path: "/waiting",
       name: "waiting",
+      beforeEnter: (to, from, next) => {
+        const token = useAuth().token;
+        if (token) next();
+        else next("/");
+      },
       component: WaitingView,
     },
     {
-      path: "/room1",
-      name: "room1",
-      component: Room1View,
+      path: "/room",
+      name: "room",
+      beforeEnter: (to, from, next) => {
+        const token = useAuth().token;
+        if (token) next();
+        else next("/");
+      },
+      component: RoomView,
     },
     {
-      path: "/room2",
-      name: "room2",
-      component: Room2View,
-    },
-    {
-      path: "/room3",
-      name: "room3",
-      component: Room3View,
+      path: "/:pathMatch(.*)*",
+      name: "not-found",
+      beforeEnter: (to, from, next) => {
+        next("/");
+      },
+      component: HomeView,
     },
   ],
 });

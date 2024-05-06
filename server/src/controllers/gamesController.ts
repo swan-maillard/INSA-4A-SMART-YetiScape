@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import User from '../models/user';
 import { createGame, deleteGame, getAllGames, getGameById, updateGame } from '../services/gamesServices';
-import { createUser, deleteUserById, getUserByName, updateUser } from '../services/usersServices';
+import { createUser, deleteUserById, getUserById, getUserByName, updateUser } from '../services/usersServices';
 import Game from '../models/game';
 import { signUserData } from '../JWT';
 import { Server } from 'socket.io';
@@ -97,6 +97,25 @@ export default {
       if (user) {
         await deleteUserById(user.id);
       }
+    }
+  },
+
+  getWaitingRoom: async (req: Request, res: Response) => {
+    const gameId = req.params.id;
+
+    try {
+      const game = (await getGameById(gameId)) as Game;
+
+      res.status(200).send({
+        game: {
+          id: game.id,
+          users: game.users,
+          hasStarted: game.hasStarted,
+        },
+      });
+    } catch (error) {
+      console.error('Error in waiting room ' + gameId + ':', error);
+      res.status(500).send({ message: 'Internal server error' });
     }
   },
 

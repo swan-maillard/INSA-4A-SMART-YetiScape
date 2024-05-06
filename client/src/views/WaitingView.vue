@@ -1,55 +1,53 @@
 <script setup>
-import { computed, ref } from "vue";
-import apiStore from "@/stores/api.store";
+import { ref } from "vue";
+import useApi from "@/stores/api.store";
 import socketio from "@/services/socketio";
 import useAuth from "@/stores/auth.store";
 import { useRouter } from "vue-router";
-
-const { user } = useAuth();
+import { storeToRefs } from "pinia";
+import { watchEffect } from "@vue/runtime-core";
 
 const socket = socketio.socket;
-
 const router = useRouter();
+
+const auth = useAuth();
+const { user, game } = storeToRefs(auth);
+
+useApi()
+  .get("/games/waiting-room/" + game.value.id)
+  .then((res) => {
+    auth.game = res.data.game;
+  })
+  .catch(console.log);
 
 const idCopied = ref(false);
 
-let gameId = "ID DE LA ROOM";
-const gamers = ref([]);
-const nbGamers = computed(() => gamers.value.length);
-
-infosGame();
-
-function infosGame() {
-  apiStore()
-    .get("/game")
-    .then((response) => {
-      if (response.status !== 200) return;
-
-      gameId = response.data.game.id;
-      gamers.value = response.data.game.users;
-    })
-    .catch(console.log);
-}
+watchEffect(() => {
+  console.log(game.value);
+  if (game.value && game.value.hasStarted === 1) router.push("/room");
+}, [game]);
 
 function lancerSalle() {
   socket.emit("waiting-room/start-game");
 }
 
 socket.on("waiting-room/new-user", (data) => {
-  gamers.value.push(data);
+  if (
+    game.value.users.length < 3 &&
+    !game.value.users.find((u) => u.id === data.id)
+  ) {
+    game.value.users.push(data);
+  }
 });
+
 socket.on("waiting-room/start-game", () => {
-  router.push("room1");
+  router.push("room");
 });
 
 function copyGameIdToClipboard() {
   const dummy = document.createElement("textarea");
-  // to avoid breaking orgain page when copying more words
-  // cant copy when adding below this code
-  // dummy.style.display = 'none'
   document.body.appendChild(dummy);
-  //Be careful if you use texarea. setAttribute('value', value), which works with "input" does not work with "textarea". – Eduard
-  dummy.value = gameId;
+  dummy.value = game.value.id;
   dummy.select();
   document.execCommand("copy");
   document.body.removeChild(dummy);
@@ -59,9 +57,12 @@ function copyGameIdToClipboard() {
 
 <template>
   <div
-    class="m-3 d-flex flex-column justify-content-between align-items-center w-100 flex-grow-1"
+    v-if="user && game.users"
+    class="section-container justify-content-between align-items-center p-4"
   >
-    <div class="d-flex flex-row justify-content-between w-100">
+    <div
+      class="d-flex flex-row justify-content-between w-100 align-items-center"
+    >
       <div style="flex: 1 1 0">
         <div
           tabindex="0"
@@ -70,7 +71,7 @@ function copyGameIdToClipboard() {
           @click="copyGameIdToClipboard"
           @mousedown="idCopied = true"
         >
-          {{ gameId }}
+          {{ game.id }}
           <img
             src="../assets/icons/copy.svg"
             width="25"
@@ -79,14 +80,16 @@ function copyGameIdToClipboard() {
           />
         </div>
       </div>
-
-      <span class="fs-3 text-center" style="flex: 1 1 0">
-        Welcome, <strong>{{ user.name }}</strong>
-      </span>
-      <div class="m-1 fs-3 text-end" style="flex: 1 1 0">{{ nbGamers }}/3</div>
+      <span class="fs-3"
+        >Hi <strong>{{ user.name }}</strong
+        >!</span
+      >
+      <div class="m-1 fs-3 text-end" style="flex: 1 1 0">
+        {{ game.users.length }}/3
+      </div>
     </div>
     <div class="d-flex flex-row text-center justify-content-center">
-      <div class="mb-4 mb-md-0 m-4" v-for="gamer in gamers" :key="gamer.id">
+      <div class="mb-4 mb-md-0 m-4" v-for="gamer in game.users" :key="gamer.id">
         <div class="card testimonial-card">
           <div class="card-up"></div>
           <div class="avatar mx-auto bg-white">
@@ -105,13 +108,13 @@ function copyGameIdToClipboard() {
           <div class="card-body">
             <h4 class="mb-4">{{ gamer.name }}</h4>
             <hr />
-            <p>Salle {{ gamer.salle }}</p>
+            <span>Room {{ gamer.salle }}</span>
           </div>
         </div>
       </div>
     </div>
     <div
-      v-if="nbGamers === 3"
+      v-if="game.users.length === 3"
       class="d-flex justify-content-center align-items-center w-100 mt-4"
     >
       <button
@@ -124,6 +127,19 @@ function copyGameIdToClipboard() {
       >
         Démarrer la partie
       </button>
+    </div>
+    <div
+      v-else
+      class="d-flex flex-column justify-content-center align-items-center gap-1"
+    >
+      <span> Waiting for other players...</span>
+      <img
+        class="loading-yeti"
+        src="../assets/avatar_yeti.png"
+        width="40"
+        height="40"
+        alt="Yeti"
+      />
     </div>
   </div>
 </template>
@@ -195,5 +211,78 @@ function copyGameIdToClipboard() {
   overflow: hidden;
   border: 3px solid #ddd;
   border-radius: 50%;
+}
+.loading-yeti {
+  animation: loading-yeti infinite 5s linear;
+  position: relative;
+}
+
+@keyframes loading-yeti {
+  0% {
+    transform: scaleX(1) rotate(-5deg); /* Initial direction */
+    left: -200px;
+  }
+  5% {
+    transform: scaleX(1) rotate(5deg); /* Slight rotation to the right */
+  }
+  10% {
+    transform: scaleX(1) rotate(-5deg); /* Back to straight position */
+  }
+  15% {
+    transform: scaleX(1) rotate(5deg); /* Slight rotation to the right */
+  }
+  20% {
+    transform: scaleX(1) rotate(-5deg); /* Back to straight position */
+  }
+  25% {
+    transform: scaleX(1) rotate(5deg); /* Slight rotation to the right */
+  }
+  30% {
+    transform: scaleX(1) rotate(-5deg); /* Back to straight position */
+  }
+  35% {
+    transform: scaleX(1) rotate(5deg); /* Slight rotation to the right */
+  }
+  40% {
+    transform: scaleX(1) rotate(-5deg); /* Back to straight position */
+  }
+  45% {
+    transform: scaleX(1) rotate(5deg); /* Slight rotation to the right */
+  }
+  50% {
+    transform: scaleX(-1) rotate(-5deg); /* Flip and slight rotation to the left */
+    left: 200px;
+  }
+  55% {
+    transform: scaleX(-1) rotate(5deg); /* Back to straight position */
+  }
+  60% {
+    transform: scaleX(-1) rotate(-5deg); /* Slight rotation to the left */
+  }
+  65% {
+    transform: scaleX(-1) rotate(5deg); /* Back to straight position */
+  }
+  70% {
+    transform: scaleX(-1) rotate(-5deg); /* Slight rotation to the left */
+  }
+  75% {
+    transform: scaleX(-1) rotate(5deg); /* Back to straight position */
+  }
+  80% {
+    transform: scaleX(-1) rotate(-5deg); /* Slight rotation to the left */
+  }
+  85% {
+    transform: scaleX(-1) rotate(5deg); /* Back to straight position */
+  }
+  90% {
+    transform: scaleX(-1) rotate(-5deg); /* Slight rotation to the left */
+  }
+  95% {
+    transform: scaleX(-1) rotate(5deg); /* Back to straight position */
+  }
+  100% {
+    transform: scaleX(1) rotate(-5deg); /* Initial direction */
+    left: -200px;
+  }
 }
 </style>
