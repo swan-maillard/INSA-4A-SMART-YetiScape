@@ -27,7 +27,7 @@ export default class Game {
   rouages: Enigme;
   portes: Enigme;
   itemsDispo: { [key: number]: Item[] };
-  callId: string = "";
+  callId: string = '';
 
   constructor(user?: User) {
     this.users = user ? [user] : [];
@@ -36,7 +36,7 @@ export default class Game {
     this.coffre = initEnigme(1);
     this.coffre = initEnigme(1);
     this.rouages = initEnigme(1);
-    this.portes = initEnigme(0);
+    this.portes = initEnigme(1);
     this.itemsDispo = {
       1: ['engrenageMoyen'],
       2: ['engrenageGrand'],
@@ -61,7 +61,7 @@ export const gameConverter = {
       rouages: JSON.stringify(game.rouages),
       portes: JSON.stringify(game.portes),
       itemsDispo: JSON.stringify(game.itemsDispo),
-      callId: game.callId
+      callId: game.callId,
     };
   },
 
@@ -85,7 +85,7 @@ export const gameConverter = {
     game.rouages = JSON.parse(gameDatabase.rouages);
     game.portes = JSON.parse(gameDatabase.portes);
     game.itemsDispo = JSON.parse(gameDatabase.itemsDispo);
-    game.callId = gameDatabase.callId
+    game.callId = gameDatabase.callId;
     return game;
   },
 };
