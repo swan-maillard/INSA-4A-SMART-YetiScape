@@ -1,13 +1,12 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref } from "vue";
 import socketio from "@/services/socketio";
 import useAuth from "@/stores/auth.store";
 import { watchEffect } from "@vue/runtime-core";
 
 const auth = useAuth();
 console.log(auth);
-let callId = auth.game.callId;
-
+let callId = null;
 const messages = ref([]);
 const newMessage = ref("");
 const collapsed = ref(false);
@@ -25,8 +24,6 @@ navigator.getUserMedia =
 var me = {};
 var myStream;
 var peers = {};
-
-initVoiceChat();
 
 function initVoiceChat() {
   init();
@@ -50,6 +47,7 @@ function initVoiceChat() {
             callId +
             ".json"
         ).then((call) => {
+          console.log(call);
           if (call.peers.length) callPeers();
         });
       });
@@ -152,7 +150,9 @@ function initVoiceChat() {
   function handleIncomingCall(incoming) {
     display("Answering incoming call from " + incoming.peer);
     var peer = getPeer(incoming.peer);
+
     peer.incoming = incoming;
+
     incoming.answer(myStream);
     peer.incoming.on("stream", function (stream) {
       addIncomingStream(peer, stream);
@@ -251,6 +251,11 @@ watchEffect(() => {
   if (auth.game.users && !joinedChat.value) {
     joinedChat.value = true;
     messages.value.push({ text: "Bienvenue sur YetiScape, " + auth.user.name });
+  }
+
+  if (auth.game.callId && callId == null) {
+    callId = auth.game.callId;
+    initVoiceChat();
   }
 }, [auth.game]);
 

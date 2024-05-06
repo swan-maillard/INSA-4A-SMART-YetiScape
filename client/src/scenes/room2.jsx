@@ -109,6 +109,10 @@ const createScene = (canvas) => {
   eclairPlane.position = new Vector3(4.7, 2.3, -1);
 
   getBaseGemme(scene, "ronde");
+
+  var eclairPlane = createTexturePlane(scene, 1.8, 1.8, "yeti");
+  eclairPlane.rotation = new Vector3(0, - Math.PI / 2, 0);
+  eclairPlane.position = new Vector3(- 4.7, 2.3, -3);
   //Fin des elements de base de la scene
 
   //Elements reactifs de la scene
@@ -186,8 +190,8 @@ const createScene = (canvas) => {
         moveCamera(
           camera,
           0,
-          new Vector3(-3, 1.6, 0),
-          new Vector3(-5.7, 2.3, 0)
+          new Vector3(-3, 1.6, -0.2),
+          new Vector3(-5.7, 2.3, -0.2)
         );
       } else if (currentMesh.name === "tuyauOut") {
         moveCamera(camera, 0, new Vector3(1, 1.6, -1), new Vector3(5, 1.7, -1));
