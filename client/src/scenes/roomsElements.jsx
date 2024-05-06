@@ -174,6 +174,9 @@ function getSalle(scene, numSalle) {
   }
   allWalls.material = matMur;
   allWalls.name = "allWalls";
+  
+  createTexturePlane(scene, 2, 3, 'sortie');
+  scene.getMeshByName('sortie').position = new Vector3(-0.04, 1.5, 4.25);
 
   return allWalls;
 }
@@ -556,6 +559,19 @@ function getButtonValdier(scene) {
   button.rotation = new Vector3(0, Math.PI / 2, 0);
 }
 
+function createTexturePlane(scene, width, height, nom) {
+  var planTexture = MeshBuilder.CreatePlane(nom, {
+    width: width,
+    height: height,
+  });
+  let texture = new Texture("./img/" + nom + ".png", scene);
+  let mat = new StandardMaterial("matRomain");
+  mat.diffuseTexture = texture;
+  mat.diffuseTexture.hasAlpha = true;
+  planTexture.material = mat;
+  return planTexture;
+}
+
 export {
   getPorte,
   getTuyaux,
@@ -571,5 +587,6 @@ export {
   getGemme,
   getTrappeGauche,
   getBaseGemme,
-  putGemmeInBase
+  putGemmeInBase,
+  createTexturePlane
 };
