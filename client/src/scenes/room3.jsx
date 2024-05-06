@@ -20,6 +20,7 @@ import {
   getPorte,
   getSalle,
   getTrappeGauche,
+  getBaseGemme
 } from "./roomsElements";
 import useAuth from "../stores/auth.store";
 import useApi from "../stores/api.store";
@@ -51,6 +52,7 @@ const createScene = (canvas, verif) => {
 
   new HemisphericLight("light", Vector3.Up(), scene);
 
+  //Element de base de la scene
   var mursSalle = getSalle(scene, 3);
   getPorte(scene);
 
@@ -65,8 +67,13 @@ const createScene = (canvas, verif) => {
   textePlane.material = matTextes;
   textePlane.rotation = new Vector3(0, -Math.PI / 2, 0);
   textePlane.position = new Vector3(-4.7, 1.6, 0);
+  getBaseGemme(scene, 'carre').then (() => {
+    let base = scene.getMeshByName('baseCarre');
+    base.rotation = new Vector3(- Math.PI/2, 0, 0);
+    base.position = new Vector3(-2, 2, 4.35);
+  })
 
-  // Load scene de base
+  
   const matBlanc = new StandardMaterial("matBlanc", scene);
   matBlanc.diffuseColor = Color3.White();
 
