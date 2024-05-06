@@ -76,8 +76,6 @@ const createScene = (canvas) => {
   pickPlane.rotation = new Vector3(0, Math.PI / 2, 0);
   pickPlane.position.x = -3.5;
 
-  createTexturePlane(scene, 2, 3, 'sortie');
-  scene.getMeshByName('sortie').position = new Vector3(-0.04, 1.5, 4.25);
   //var porteArriere = MeshBuilder.CreatePlane('arrierePorte', {width: 2, height:3}, scene);
   //porteArriere.position
   //Fin scene de base
