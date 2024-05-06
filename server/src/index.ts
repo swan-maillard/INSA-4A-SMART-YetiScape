@@ -13,7 +13,6 @@ import User from './models/user';
 import { socketWaitingRoom } from './sockets/waitingRoom';
 import chatRoutes from './routes/chatRoutes';
 
-
 //
 const https = require('https');
 const fs = require('fs');
@@ -60,6 +59,14 @@ io.on('connection', function (socket: Socket) {
     }
   });
 
+  socket.on('disconnect', function () {
+    const user = socketSessions[socket.id];
+    if (!user) return;
+
+    console.log('User disconnected from socket: ', user.name);
+    delete socketSessions[socket.id];
+  });
+
   socketChat(io, socket, socketSessions);
   socketWaitingRoom(io, socket, socketSessions);
 });
@@ -80,4 +87,4 @@ const peerjs_options = {
 const peerServer = ExpressPeerServer(http, peerjs_options);
 app.use('/peer', peerServer);
 
-http.listen(port, "0.0.0.0", () => console.log(`Server is listening on port ${port}`));
+http.listen(port, '0.0.0.0', () => console.log(`Server is listening on port ${port}`));

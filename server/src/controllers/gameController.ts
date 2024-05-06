@@ -56,6 +56,7 @@ export default {
         user,
         game: {
           id: game.id,
+          users: game.users,
           itemsDispo: game.itemsDispo[user.salle!],
           hasStarted: game.hasStarted,
           portes: game.portes,

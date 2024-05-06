@@ -25,6 +25,7 @@ import {
 import useAuth from "../stores/auth.store";
 import useApi from "../stores/api.store";
 import socketio from "@/services/socketio";
+import usePopup from "@/stores/popup.store";
 
 //SAlle 1 :
 // position possible : centre, tuyau (gauche), trappe (gauche)
@@ -218,7 +219,16 @@ const createScene = (canvas) => {
             useAuth().user = data.user;
             useAuth().game.tuyau = data.game.tuyau; //TODO: MAJ inventaire
             deleteNavette(scene);
-            if (data.status === "no") {
+            if (data.status === "ok") {
+              usePopup().send(
+                "La capsule tombe dans le tuyau ! Vous l'entendez s'écraser contre le sol",
+                "success"
+              );
+            } else {
+              usePopup().send(
+                "Quelque chose semble bloquer, la capsule ne passe pas...",
+                "error"
+              );
               getNavette(scene);
             }
           })

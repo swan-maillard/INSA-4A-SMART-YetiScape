@@ -2,6 +2,7 @@
 import { ref } from "vue";
 import socketio from "@/services/socketio";
 import useAuth from "@/stores/auth.store";
+import { watchEffect } from "@vue/runtime-core";
 
 const auth = useAuth();
 let callId = auth.game.callId;
@@ -225,26 +226,22 @@ const scrollToBottom = () => {
   }
 };
 
-const joinChat = () => {
-  socket.emit("chat/user_join");
-};
-
 socket.on("chat/message", function (data) {
   messages.value.push({ username: data.username, text: data.message });
   setTimeout(scrollToBottom, 1);
 });
 
-socket.on("chat/user_join", function (data) {
-  messages.value.push({ text: data + " just joined the chat!" });
-});
+watchEffect(() => {
+  if (auth.game.users) {
+    const usersNames = auth.game.users
+      .map((u) => u.name)
+      .filter((u) => u !== auth.user.name);
+    messages.value.push({
+      text: "You can talk with " + usersNames.join(" and ") + ".",
+    });
+  }
+}, [auth.game]);
 
-socket.on("chat/user_leave", function (data) {
-  messages.value.push({ text: data + " has left the chat!" });
-});
-
-messages.value.push({ text: "You have joined the chat as " + auth.user.name });
-
-setTimeout(joinChat, 500);
 scrollToBottom();
 </script>
 
