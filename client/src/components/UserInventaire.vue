@@ -12,6 +12,7 @@ const itemNames = {
   gemmeCarre: "Saphir",
   gemmeTriangle: "Émeraude",
   gemmeRonde: "Topaze",
+  cle: "Clé",
 };
 </script>
 

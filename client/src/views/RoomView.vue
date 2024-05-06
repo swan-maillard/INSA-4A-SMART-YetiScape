@@ -33,6 +33,7 @@ const bjsCanvas = ref(null);
 const canvaMounted = ref(false);
 const inventaire = computed(() => user.value.items || []);
 const dragElement = ref(null);
+const popup = ref();
 let scene;
 
 const room = ref();
@@ -82,11 +83,22 @@ function imgDrop() {
     console.log("Aucun élément sélectionné");
   }
 }
+
+// watchEffect(() => {
+//   if (popup.value && bjsCanvas.value) {
+//     bjsCanvas.value.addEventListener("mousemove", (e) => {
+//       const canvaRect = bjsCanvas.value.getBoundingClientRect();
+//       popup.value.style.top = e.clientY - canvaRect.top + 10 + "px";
+//       popup.value.style.left = e.clientX - canvaRect.left + 10 + "px";
+//     });
+//   }
+// }, [popup]);
 </script>
 
 <template>
   <div v-if="gameLoaded && room" id="GameScreen" class="d-flex flex-raw">
     <div id="jeu" @drop="imgDrop" @dragover.prevent>
+      <div class="popup" ref="popup">Salut la compagnie</div>
       <canvas id="GameCanva" ref="bjsCanvas" />
     </div>
   </div>
@@ -106,7 +118,17 @@ function imgDrop() {
 #jeu {
   width: 90%;
   height: 100%;
+  position: relative;
 }
+
+.popup {
+  background-color: rgba(34, 34, 34, 0.8);
+  position: absolute;
+  padding: 30px;
+  border-radius: 20px 20px 0 0;
+  width: 100%;
+}
+
 img {
   width: 100%;
   height: 100%;

@@ -20,7 +20,7 @@ import {
   getTrappe,
   getTuyaux,
   getBaseGemme,
-  putGemmeInBase
+  putGemmeInBase,
 } from "./roomsElements";
 import useAuth from "../stores/auth.store";
 import useApi from "../stores/api.store";
@@ -49,10 +49,10 @@ const createScene = (canvas) => {
     });
   });
   socket.on("game/portes-open", () => {
-    console.log('le jeu est reussi !!')
-  })
+    console.log("le jeu est reussi !!");
+  });
 
-  getBaseGemme(scene, 'triangle');
+  getBaseGemme(scene, "triangle");
 
   //On ajoute une caméra et une lumière
   const camera = new FreeCamera("camera1", new Vector3(0, 1.6, -3), scene);
@@ -67,7 +67,10 @@ const createScene = (canvas) => {
   var mursSalle = getSalle(scene, 1);
   var trappe = getTrappe(scene);
   var tuyaux = getTuyaux(scene);
-  getPorte(scene);
+  getPorte(scene).then(()=>{
+    let porteGauche = scene.getMeshByName('porteGauche');
+    porteGauche.rotation = new Vector3(0, - Math.PI/5, 0);
+  })
 
   var pickPlane = MeshBuilder.CreatePlane("pickPlane", { size: 10 });
   pickPlane.isVisible = false;
@@ -77,8 +80,11 @@ const createScene = (canvas) => {
 
   // Elements reactifs de la scene
   const game = computed(() => useAuth().game);
+  game.value.itemsDispo.forEach((e) => {
+    placeItemInit(scene, e);
+  })
   if (game.value.itemsDispo.length > 0) {
-    placeEngInit(scene);
+    
   }
   if (game.value.tuyau.etapeActuelle != game.value.tuyau.nbEtapes) {
     getNavette(scene).then(() => {
@@ -93,8 +99,8 @@ const createScene = (canvas) => {
   if (game.value.trappe.etapeActuelle == game.value.trappe.nbEtapes) {
     deleteTrappe(scene);
   }
-  if (game.value.portes.items.includes('gemmeTriangle')){
-    putGemmeInBase(scene, 'gemmeTriangle');
+  if (game.value.portes.items.includes("gemmeTriangle")) {
+    putGemmeInBase(scene, "gemmeTriangle");
   }
 
   engine.runRenderLoop(() => {
@@ -141,11 +147,24 @@ const createScene = (canvas) => {
     currentMesh.position = new Vector3(0, 0, 0);
   };
 
+  const canInteract = (meshName) => {
+    return (
+      meshName.startsWith("item") ||
+      meshName.startsWith("tuyau") ||
+      meshName.startsWith("base") ||
+      meshName === "trappe" ||
+      meshName === "navettePleine"
+    );
+  };
+
   var pointerDown = function (mesh) {
     currentMesh = mesh;
+
     if (currentMesh.name.startsWith("item")) {
       useApi()
-        .post(currentMesh.name.split(":")[2], { item: currentMesh.name.split(":")[1] })
+        .post(currentMesh.name.split(":")[2], {
+          item: currentMesh.name.split(":")[1],
+        })
         .then((res) => {
           const data = res.data;
           if (data.status === "ok") {
@@ -158,11 +177,21 @@ const createScene = (canvas) => {
     }
     if (position.value === "centre") {
       if (currentMesh.name.startsWith("tuyau")) {
-        moveCamera(camera, -1, new Vector3(-1,1.6,0.125), new Vector3(-2,1.6,0.125))
+        moveCamera(
+          camera,
+          -1,
+          new Vector3(-1, 1.6, 0.125),
+          new Vector3(-2, 1.6, 0.125)
+        );
       } else if (currentMesh.name === "trappe") {
-        moveCamera(camera, 1, new Vector3(2,0.2,1.5), new Vector3(3,0.2,1.5))
-      }else if(currentMesh.name.startsWith("base")) {
-        moveCamera(camera, 0, new Vector3(2,1.6,1), new Vector3(2,1.6,6))
+        moveCamera(
+          camera,
+          1,
+          new Vector3(2, 0.2, 1.5),
+          new Vector3(3, 0.2, 1.5)
+        );
+      } else if (currentMesh.name.startsWith("base")) {
+        moveCamera(camera, 0, new Vector3(2, 1.6, 1), new Vector3(2, 1.6, 6));
       }
     } else if (position.value === "tuyau") {
       if (currentMesh.name === "allWalls") {
@@ -177,7 +206,7 @@ const createScene = (canvas) => {
         moveCameraInit(camera);
       }
     } else {
-      moveCameraInit(camera)
+      moveCameraInit(camera);
     }
   };
 
@@ -205,14 +234,11 @@ const createScene = (canvas) => {
   };
 
   var pointerMove = function (pickedMesh) {
-    // if (pickedMesh?.name === 'baseTriangle'){
-    //   console.log('OK')
-    //   document.getElementById('GameCanva').style.cursor = 'pointer';
-    // }
-    // else {
-    //   document.getElementById('GameCanva').style.cursor = 'default';
-
-    // }
+    if (canInteract(pickedMesh?.name || "")) {
+      document.getElementById("GameCanva").style.cursor = "pointer";
+    } else {
+      document.getElementById("GameCanva").style.cursor = "default";
+    }
     if (!drag.value) {
       return;
     }
@@ -238,7 +264,8 @@ const createScene = (canvas) => {
         pointerUp();
         break;
       case PointerEventTypes.POINTERMOVE:
-        pointerMove(pointerInfo.pickInfo.pickedMesh);
+        const pickResult = scene.pick(scene.pointerX, scene.pointerY);
+        pointerMove(pickResult.pickedMesh);
         break;
     }
   });
@@ -264,11 +291,28 @@ function moveCameraInit(camera) {
   camera.lockedTarget = null;
 }
 
+function placeItemInit(scene, elem) {
+  if (elem == "engrenageMoyen") {
+    placeEngInit(scene);
+  } else if (elem === "cle") {
+    placeCleInit(scene);
+  }
+}
+
+function placeCleInit(scene) {
+  getImportedMesh(scene, "cle").then(() => {
+    scene.getMeshByName("cle").position = new Vector3(-3, 0.15, 2);
+    scene.getMeshByName("cle").scalingDeterminant = 0.15;
+    scene.getMeshByName("cle").name = "item:cle:/game/pick-item";
+  });
+}
+
 function placeEngInit(scene) {
   getImportedMesh(scene, "engrenageMoyen", "rouille.jpg").then(() => {
     scene.getMeshByName("engrenageMoyen").position = new Vector3(3, 0.15, 3.6);
     scene.getMeshByName("engrenageMoyen").scalingDeterminant = 0.15;
-    scene.getMeshByName("engrenageMoyen").name = "item:engrenageMoyen:/game/pick-item";
+    scene.getMeshByName("engrenageMoyen").name =
+      "item:engrenageMoyen:/game/pick-item";
   });
 }
 
@@ -291,7 +335,7 @@ function verifItemInNavette(scene, nomItem) {
       .catch(console.log);
   } else if (position.value === "porte") {
     useApi()
-      .post("/game/portes/put-item", { item: nomItem })
+      .post("/game/porte/put-item", { item: nomItem })
       .then((res) => {
         const data = res.data;
         useAuth().user = data.user;
@@ -313,6 +357,10 @@ function putItemInNavette(scene, nomItem) {
     getGemme(scene, nomItem.substring(5).toLowerCase()).then(() => {
       placeItemInNavette(scene, nomItem);
     });
+  } else if (nomItem == "cle") {
+    getImportedMesh(scene, nomItem).then(() => {
+      placeItemInNavette(scene, nomItem);
+    })
   }
 }
 

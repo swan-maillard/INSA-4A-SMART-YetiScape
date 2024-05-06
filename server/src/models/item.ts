@@ -1,1 +1,1 @@
-export type Item = 'gemmeTriangle' | 'gemmeCarre' | 'gemmeRonde' | 'engrenageGrand' | 'engrenageMoyen';
+export type Item = 'gemmeTriangle' | 'gemmeCarre' | 'gemmeRonde' | 'engrenageGrand' | 'engrenageMoyen' | 'cle';
