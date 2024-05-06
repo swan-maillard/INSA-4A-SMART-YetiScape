@@ -6,7 +6,7 @@ import { watchEffect } from "@vue/runtime-core";
 
 const auth = useAuth();
 console.log(auth)
-let callId = auth.game.callId;
+let callId = null;
 
 
 const messages = ref([]);
@@ -27,7 +27,6 @@ var me = {};
 var myStream;
 var peers = {};
 
-initVoiceChat();
 
 function initVoiceChat() {
   init();
@@ -51,6 +50,7 @@ function initVoiceChat() {
             callId +
             ".json"
         ).then((call) => {
+          console.log(call)
           if (call.peers.length) callPeers();
         });
       });
@@ -155,7 +155,9 @@ function initVoiceChat() {
   function handleIncomingCall(incoming) {
     display("Answering incoming call from " + incoming.peer);
     var peer = getPeer(incoming.peer);
+    
     peer.incoming = incoming;
+
     incoming.answer(myStream);
     peer.incoming.on("stream", function (stream) {
       addIncomingStream(peer, stream);
@@ -261,6 +263,7 @@ socket.on("chat/message", function (data) {
 const joinedChat = ref(false);
 watchEffect(() => {
   if (auth.game.users && !joinedChat.value) {
+
     const usersNames = auth.game.users
       .map((u) => u.name)
       .filter((u) => u !== auth.user.name);
@@ -268,6 +271,12 @@ watchEffect(() => {
       text: "You can talk with " + usersNames.join(" and ") + ".",
     });
     joinedChat.value = true;
+    
+  }
+
+  if(auth.game.callId && callId == null) {
+      callId = auth.game.callId
+      initVoiceChat();
   }
 }, [auth.game]);
 
