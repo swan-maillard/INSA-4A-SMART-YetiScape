@@ -3,13 +3,13 @@ import { ref } from "vue";
 import socketio from "@/services/socketio";
 import useAuth from "@/stores/auth.store";
 
-
 const auth = useAuth();
-let callId = auth.game.callId
+let callId = auth.game.callId;
 
 const messages = ref([]);
 const newMessage = ref("");
 const collapsed = ref(false);
+//var isMuted = false; // New variable to track mute state
 
 //Voice setup
 navigator.getUserMedia =
@@ -23,7 +23,7 @@ var me = {};
 var myStream;
 var peers = {};
 
-initVoiceChat()
+initVoiceChat();
 
 function initVoiceChat() {
   init();
@@ -40,7 +40,13 @@ function initVoiceChat() {
 
         registerIdWithServer(me.id);
         // eslint-disable-next-line
-        $.get("https://" + window.location.hostname + ":3000/chat/" + callId + ".json").then((call) => {
+        $.get(
+          "https://" +
+            window.location.hostname +
+            ":3000/chat/" +
+            callId +
+            ".json"
+        ).then((call) => {
           if (call.peers.length) callPeers();
         });
       });
@@ -71,7 +77,14 @@ function initVoiceChat() {
   function registerIdWithServer() {
     display("Registering ID with server...");
     // eslint-disable-next-line
-    $.post("https://" + window.location.hostname + ":3000/chat/" + callId + "/addpeer/" + me.id);
+    $.post(
+      "https://" +
+        window.location.hostname +
+        ":3000/chat/" +
+        callId +
+        "/addpeer/" +
+        me.id
+    );
   }
 
   /*
@@ -86,7 +99,9 @@ function initVoiceChat() {
   function callPeers() {
     // Permet de call TOUS les peers du call
     // eslint-disable-next-line
-    $.get("https://" + window.location.hostname + ":3000/chat/" + callId + ".json").then((call) => {
+    $.get(
+      "https://" + window.location.hostname + ":3000/chat/" + callId + ".json"
+    ).then((call) => {
       call.peers.forEach(callPeer);
     });
   }
@@ -169,6 +184,25 @@ function initVoiceChat() {
     console.log(message);
   }
 }
+
+/*
+ // Function to toggle mute state
+ // eslint-disable-next-line
+  function toggleMute() {
+    if (isMuted) {
+      myStream.getAudioTracks()[0].enabled = true; // Unmute
+      isMuted = false;
+    } else {
+      myStream.getAudioTracks()[0].enabled = false; // Mute
+      isMuted = true;
+    }
+  }
+
+
+onMounted(() => {
+  document.getElementById("muteButton").addEventListener("click", toggleMute);
+})
+*/
 
 //End of voice setup
 
@@ -261,6 +295,7 @@ scrollToBottom();
       @keyup.enter="sendMessage"
       placeholder="Type your message..."
     />
+    <!-- <button>Mute/Unmute</button> -->
   </div>
 </template>
 
