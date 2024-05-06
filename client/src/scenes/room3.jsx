@@ -43,6 +43,9 @@ const createScene = (canvas, verif) => {
       placeItem(scene, element);
     });
   });
+  socket.on("game/portes-open", () => {
+    console.log('le jeu est reussi !!')
+  })
 
   //On ajoute une caméra et une lumière
   const camera = new FreeCamera("camera1", new Vector3(0, 1.6, -3), scene);
@@ -108,7 +111,7 @@ const createScene = (canvas, verif) => {
         });
     }  
   });
-  if (game.value.porte.items.includes('gemmeCarre')){
+  if (game.value.portes.items.includes('gemmeCarre')){
     putGemmeInBase(scene, 'gemmeCarre');
   }
       
@@ -393,12 +396,12 @@ function verifItemTrappe(scene, nomItem){
           .catch(console.log);
     }else if (position.value === "porte") {
       useApi()
-        .post("/game/porte/put-item", { item: nomItem })
+        .post("/game/portes/put-item", { item: nomItem })
         .then((res) => {
           const data = res.data;
-          useAuth().user = data.user;
-          useAuth().game.porte = data.game.porte;
-          if (data.status === "ok") {
+            if (data.status === "ok") {
+            useAuth().user = data.user;
+            useAuth().game.portes = data.game.portes;
             putGemmeInBase(scene, nomItem);
           }
         })

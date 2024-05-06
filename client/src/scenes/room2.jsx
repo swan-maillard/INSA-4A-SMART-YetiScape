@@ -42,6 +42,9 @@ const createScene = (canvas) => {
     useAuth().game.itemsDispo = data.itemsDispo;
     placeEngNavette(scene);
   });
+  socket.on("game/portes-open", () => {
+    console.log('le jeu est reussi !!')
+  })
 
   //On ajoute une caméra et une lumière
   const camera = new FreeCamera("camera1", new Vector3(0, 1.6, -3), scene);
@@ -99,7 +102,7 @@ const createScene = (canvas) => {
   if (game.value.tuyau.etapeActuelle == game.value.tuyau.nbEtapes) {
     placeNavette(scene);
   }
-  if (game.value.porte.items.includes('gemmeRonde')){
+  if (game.value.portes.items.includes('gemmeRonde')){
     putGemmeInBase(scene, 'gemmeRonde');
   }
   //Fin des element réactifs de la scene
@@ -421,12 +424,12 @@ function verifEngInRouage(scene, nomItem) {
       .catch(console.log);
   } else if (position.value === "porte") {
     useApi()
-      .post("/game/porte/put-item", { item: nomItem })
+      .post("/game/portes/put-item", { item: nomItem })
       .then((res) => {
         const data = res.data;
-        useAuth().user = data.user;
-        useAuth().game.porte = data.game.porte;
         if (data.status === "ok") {
+          useAuth().user = data.user;
+          useAuth().game.portes = data.game.portes;
           putGemmeInBase(scene, nomItem);
         }
       })

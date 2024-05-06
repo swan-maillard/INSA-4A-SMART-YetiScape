@@ -48,6 +48,9 @@ const createScene = (canvas) => {
       putItemFromTrappe(scene, element);
     });
   });
+  socket.on("game/portes-open", () => {
+    console.log('le jeu est reussi !!')
+  })
 
   getBaseGemme(scene, 'triangle');
 
@@ -90,7 +93,7 @@ const createScene = (canvas) => {
   if (game.value.trappe.etapeActuelle == game.value.trappe.nbEtapes) {
     deleteTrappe(scene);
   }
-  if (game.value.porte.items.includes('gemmeTriangle')){
+  if (game.value.portes.items.includes('gemmeTriangle')){
     putGemmeInBase(scene, 'gemmeTriangle');
   }
 
@@ -288,11 +291,11 @@ function verifItemInNavette(scene, nomItem) {
       .catch(console.log);
   } else if (position.value === "porte") {
     useApi()
-      .post("/game/porte/put-item", { item: nomItem })
+      .post("/game/portes/put-item", { item: nomItem })
       .then((res) => {
         const data = res.data;
         useAuth().user = data.user;
-        useAuth().game.porte = data.game.porte;
+        useAuth().game.portes = data.game.portes;
         if (data.status === "ok") {
           putGemmeInBase(scene, nomItem);
         }

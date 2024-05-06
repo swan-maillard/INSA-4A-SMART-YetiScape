@@ -58,6 +58,7 @@ export default {
           id: game.id,
           itemsDispo: game.itemsDispo[user.salle!],
           hasStarted: game.hasStarted,
+          portes: game.portes,
           ...infos,
         },
       });
