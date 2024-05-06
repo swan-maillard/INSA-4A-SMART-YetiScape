@@ -44,9 +44,7 @@ const createScene = (canvas, verif) => {
   socket.on("game/trappe-item-removed", (data) => {
     useAuth().game.trappe = data.trappe;
     var gemme = scene.getMeshByName("item:gemmeTriangle");
-    console.log("gemme: " + gemme);
     if (gemme != null) {
-      console.log("Dispose la gemme");
       gemme.dispose();
     }
   });
@@ -298,38 +296,6 @@ const createScene = (canvas, verif) => {
     }
   };
 
-  var placeCoffre = function (nom) {
-    if (nom == "gemmeTriangle") {
-      getGemme(scene, "triangle").then(() => {
-        scene.getMeshByName("gemmeTriangle").rotation = new Vector3(
-          Math.PI / 4,
-          Math.PI / 4,
-          0
-        );
-        scene.getMeshByName("gemmeTriangle").position = new Vector3(
-          -4.3,
-          0.2,
-          3.2
-        );
-        scene.getMeshByName("gemmeTriangle").name = "item:gemmeTriangle";
-      });
-    } else if (nom == "gemmeCarre") {
-      getGemme(scene, "carre").then(() => {
-        scene.getMeshByName("gemmeCarre").rotation = new Vector3(
-          Math.PI / 4,
-          Math.PI / 4,
-          0
-        );
-        scene.getMeshByName("gemmeCarre").position = new Vector3(
-          -4.3,
-          0.2,
-          2.8
-        );
-        scene.getMeshByName("gemmeCarre").name = "item:gemmeCarre";
-      });
-    }
-  };
-
   var pointerMove = function (pickedMesh) {
     if (canInteract(pickedMesh?.name || "")) {
       document.getElementById("GameCanva").style.cursor = "pointer";
@@ -356,7 +322,7 @@ const createScene = (canvas, verif) => {
         scene.getMeshByName("gemmeTriangle").position = new Vector3(
           -4.3,
           0.2,
-          3
+          3.2
         );
         scene.getMeshByName("gemmeTriangle").name = "item:gemmeTriangle";
       });
@@ -367,7 +333,7 @@ const createScene = (canvas, verif) => {
           Math.PI / 4,
           0
         );
-        scene.getMeshByName("gemmeCarre").position = new Vector3(-4.3, 0.2, 3);
+        scene.getMeshByName("gemmeCarre").position = new Vector3(-4.3, 0.2, 2.8);
         scene.getMeshByName("gemmeCarre").name = "item:gemmeCarre";
       });
     }
@@ -525,6 +491,7 @@ function verifItemTrappe(scene, nomItem) {
         useAuth().user = data.user;
         useAuth().game.trappe = data.game.trappe;
         if (data.status === "ok") {
+          placeItem(scene, nomItem);
           usePopup().send(
             "Vous glissez l'objet suivant sous la trappe : " +
               itemNames[nomItem]
