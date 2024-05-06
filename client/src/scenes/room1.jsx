@@ -50,7 +50,7 @@ const createScene = (canvas) => {
     });
   });
   socket.on("game/portes-open", () => {
-    console.log("le jeu est reussi !!");
+    scene.getMeshByName('porteGauche').rotation = new Vector3(0, - Math.PI/5, 0);
   });
 
   getBaseGemme(scene, "triangle");
@@ -68,10 +68,7 @@ const createScene = (canvas) => {
   var mursSalle = getSalle(scene, 1);
   var trappe = getTrappe(scene);
   var tuyaux = getTuyaux(scene);
-  getPorte(scene).then(()=>{
-    let porteGauche = scene.getMeshByName('porteGauche');
-    porteGauche.rotation = new Vector3(0, - Math.PI/5, 0);
-  })
+  getPorte(scene)
 
   var pickPlane = MeshBuilder.CreatePlane("pickPlane", { size: 10 });
   pickPlane.isVisible = false;
@@ -81,12 +78,10 @@ const createScene = (canvas) => {
 
   // Elements reactifs de la scene
   const game = computed(() => useAuth().game);
+  console.log(game.value)
   game.value.itemsDispo.forEach((e) => {
     placeItemInit(scene, e);
   })
-  if (game.value.itemsDispo.length > 0) {
-    
-  }
   if (game.value.tuyau.etapeActuelle != game.value.tuyau.nbEtapes) {
     getNavette(scene).then(() => {
       if (game.value.tuyau.items.length > 0) {
@@ -305,6 +300,7 @@ function placeItemInit(scene, elem) {
   if (elem == "engrenageMoyen") {
     placeEngInit(scene);
   } else if (elem === "cle") {
+    console.log('je put une cle')
     placeCleInit(scene);
   }
 }
@@ -351,6 +347,7 @@ function verifItemInNavette(scene, nomItem) {
         useAuth().user = data.user;
         useAuth().game.portes = data.game.portes;
         if (data.status === "ok") {
+          console.log('je put la gemme')
           putGemmeInBase(scene, nomItem);
         }
       })

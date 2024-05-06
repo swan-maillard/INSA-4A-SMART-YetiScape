@@ -336,7 +336,10 @@ async function getBaseGemme(scene, forme) {
 function putGemmeInBase(scene, nomItem){
   getGemme(scene, nomItem.substring(5).toLowerCase()).then(() => {
     let itemGemme = scene.getMeshByName(nomItem);
-    itemGemme.rotation = new Vector3(- Math.Pi/2, 0, 0);
+    if (nomItem === 'gemmeTriangle')
+      itemGemme.rotation = new Vector3(0, 0,Math.PI/3);
+    else 
+      itemGemme.rotation = new Vector3(0, 0, 0)
     itemGemme.position = new Vector3(-2, 2, 4.35);
   });
 }

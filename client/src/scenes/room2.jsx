@@ -43,7 +43,7 @@ const createScene = (canvas) => {
     placeEngNavette(scene);
   });
   socket.on("game/portes-open", () => {
-    console.log('le jeu est reussi !!')
+    scene.getMeshByName('porteGauche').rotation = new Vector3(0, - Math.PI/5, 0);
   })
 
   //On ajoute une caméra et une lumière
