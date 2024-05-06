@@ -265,7 +265,7 @@ const createScene = (canvas) => {
               getNavette(scene);
             }
           })
-          .catch();
+          .catch(console.log);
       }
     }
   };

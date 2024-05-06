@@ -76,7 +76,7 @@ function getTuyaux(scene) {
     tuyaux[0].scalingDeterminant = 0.3;
     tuyaux[0].rotation = new Vector3(Math.PI / 2, Math.PI / 2, 0);
     tuyaux[0].position = new Vector3(3.8, 1.7, -1);
-    tuyaux[0].name = "tuyau0";
+    tuyaux[0].name = "tuyau1";
     var mat = new StandardMaterial();
     mat.diffuseColor = mats[0];
     mat.backFaceCulling = false;
