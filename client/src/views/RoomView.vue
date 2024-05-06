@@ -87,6 +87,7 @@ function imgDrop() {
 <template>
   <div v-if="gameLoaded && room" id="GameScreen" class="d-flex flex-raw">
     <div id="jeu" @drop="imgDrop" @dragover.prevent>
+      <div class="popup d-none">Salut la compagnie</div>
       <canvas id="GameCanva" ref="bjsCanvas" />
     </div>
   </div>
@@ -106,7 +107,22 @@ function imgDrop() {
 #jeu {
   width: 90%;
   height: 100%;
+  position: relative;
 }
+
+.popup {
+  background-color: #222;
+  position: absolute;
+  padding: 30px;
+  bottom: 20px;
+  left: 50%;
+  transform: translate(-50%);
+  border-radius: 20px;
+  border: 2px solid #ddd;
+  width: calc(100% - 40px);
+  box-shadow: 0 0 9px 1px #000000a6;
+}
+
 img {
   width: 100%;
   height: 100%;

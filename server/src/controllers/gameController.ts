@@ -749,7 +749,7 @@ export default {
 
       const portes = game.portes;
 
-      if (gems[salle!] === item) {
+      if (gems[salle! - 1] === item) {
         user.items.splice(user.items.indexOf(item), 1);
         portes.items.push(item);
 
