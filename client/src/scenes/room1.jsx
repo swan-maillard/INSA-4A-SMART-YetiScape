@@ -67,7 +67,10 @@ const createScene = (canvas) => {
   var mursSalle = getSalle(scene, 1);
   var trappe = getTrappe(scene);
   var tuyaux = getTuyaux(scene);
-  getPorte(scene);
+  getPorte(scene).then(()=>{
+    let porteGauche = scene.getMeshByName('porteGauche');
+    porteGauche.rotation = new Vector3(0, - Math.PI/5, 0);
+  })
 
   var pickPlane = MeshBuilder.CreatePlane("pickPlane", { size: 10 });
   pickPlane.isVisible = false;
@@ -77,8 +80,11 @@ const createScene = (canvas) => {
 
   // Elements reactifs de la scene
   const game = computed(() => useAuth().game);
+  game.value.itemsDispo.forEach((e) => {
+    placeItemInit(scene, e);
+  })
   if (game.value.itemsDispo.length > 0) {
-    placeEngInit(scene);
+    
   }
   if (game.value.tuyau.etapeActuelle != game.value.tuyau.nbEtapes) {
     getNavette(scene).then(() => {
@@ -285,6 +291,22 @@ function moveCameraInit(camera) {
   camera.lockedTarget = null;
 }
 
+function placeItemInit(scene, elem) {
+  if (elem == "engrenageMoyen") {
+    placeEngInit(scene);
+  } else if (elem === "cle") {
+    placeCleInit(scene);
+  }
+}
+
+function placeCleInit(scene) {
+  getImportedMesh(scene, "cle").then(() => {
+    scene.getMeshByName("cle").position = new Vector3(-3, 0.15, 2);
+    scene.getMeshByName("cle").scalingDeterminant = 0.15;
+    scene.getMeshByName("cle").name = "item:cle:/game/pick-item";
+  });
+}
+
 function placeEngInit(scene) {
   getImportedMesh(scene, "engrenageMoyen", "rouille.jpg").then(() => {
     scene.getMeshByName("engrenageMoyen").position = new Vector3(3, 0.15, 3.6);
@@ -313,7 +335,7 @@ function verifItemInNavette(scene, nomItem) {
       .catch(console.log);
   } else if (position.value === "porte") {
     useApi()
-      .post("/game/portes/put-item", { item: nomItem })
+      .post("/game/porte/put-item", { item: nomItem })
       .then((res) => {
         const data = res.data;
         useAuth().user = data.user;
@@ -335,6 +357,10 @@ function putItemInNavette(scene, nomItem) {
     getGemme(scene, nomItem.substring(5).toLowerCase()).then(() => {
       placeItemInNavette(scene, nomItem);
     });
+  } else if (nomItem == "cle") {
+    getImportedMesh(scene, nomItem).then(() => {
+      placeItemInNavette(scene, nomItem);
+    })
   }
 }
 

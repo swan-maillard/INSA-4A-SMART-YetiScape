@@ -12,23 +12,24 @@ import {
 } from "@babylonjs/core";
 import "@babylonjs/loaders";
 
-function getPorte(scene) {
+async function getPorte(scene) {
   let textureDoor = new Texture("./textures/door.jpg", scene);
   let matDoor = new StandardMaterial("matDoor");
   matDoor.diffuseTexture = textureDoor;
 
-  const result = SceneLoader.ImportMeshAsync(
+  const resultat = await SceneLoader.ImportMeshAsync(
     "",
     "./models/",
     "porte.glb",
     scene
   );
-  result.then((resultat) => {
-    for (var i = 1; i < resultat.meshes.length; i++) {
-      resultat.meshes[i].position.z = 4.2;
-      resultat.meshes[i].material = matDoor;
-    }
-  });
+  for (var i = 1; i < resultat.meshes.length; i++) {
+    resultat.meshes[i].material = matDoor;
+  }
+  resultat.meshes[2].parent = resultat.meshes[1];
+  resultat.meshes[3].parent = resultat.meshes[1];
+  resultat.meshes[1].rotation = new Vector3(0, Math.PI, 0);
+  resultat.meshes[1].position.z = 4.2;
 }
 
 function getTuyau(scene) {
