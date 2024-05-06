@@ -11,6 +11,11 @@ const router = createRouter({
     {
       path: "/",
       name: "home",
+      beforeEnter: (to, from, next) => {
+        const token = useAuth().token;
+        if (token) next("/room");
+        else next();
+      },
       component: HomeView,
     },
     {

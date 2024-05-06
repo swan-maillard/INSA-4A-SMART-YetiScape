@@ -110,7 +110,6 @@ chronoInterval = setInterval(updateElapsedTime, 500);
 watchEffect(() => {
   if (game.value.isFinished) {
     clearInterval(chronoInterval);
-    useApi().post("/game/finished");
     useAuth().clearSession();
   }
 }, [game]);

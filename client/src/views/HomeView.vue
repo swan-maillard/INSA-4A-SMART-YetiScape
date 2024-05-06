@@ -2,11 +2,7 @@
 import { ref, watch } from "vue";
 import router from "../router";
 import useAuth from "@/stores/auth.store";
-import authStore from "@/stores/auth.store";
 import useApi from "@/stores/api.store";
-
-const auth = authStore();
-auth.clearSession();
 
 const focus = ref(1);
 const sending = ref(false);

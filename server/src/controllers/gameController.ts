@@ -766,6 +766,7 @@ export default {
           for (const [socketId, userSocket] of Object.entries(socketSessions)) {
             if (userSocket.game === game.id) {
               io.to(socketId).emit('game/portes-open', { dateEnd: game.dateEnd });
+              await deleteGame(game.id);
             }
           }
         }
@@ -789,16 +790,6 @@ export default {
       }
     } catch (error) {
       console.error('Error during game ' + gameId + ':', error);
-      res.status(500).send({ message: 'Internal server error' });
-    }
-  },
-  deleteGame: async (req: Request, res: Response) => {
-    const { gameId } = req.body.jwt;
-
-    try {
-      await deleteGame(gameId);
-    } catch (error) {
-      console.error('Error deleting game ' + gameId + ':', error);
       res.status(500).send({ message: 'Internal server error' });
     }
   },
