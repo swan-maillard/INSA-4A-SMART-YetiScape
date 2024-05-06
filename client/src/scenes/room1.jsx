@@ -277,7 +277,7 @@ function putItemInNavette(scene, nomItem) {
       placeItemInNavette(scene, nomItem, 0.1);
     });
   } else if (nomItem.startsWith("gemme")) {
-    getGemme(scene, nomItem.substring(5)).then(() => {
+    getGemme(scene, nomItem.substring(5).toLowerCase()).then(() => {
       placeItemInNavette(scene, nomItem);
     });
   }
@@ -328,7 +328,7 @@ function deleteTrappe(scene) {
 //apres reception socket
 function putItemFromTrappe(scene, item) {
   if (item.startsWith("gemme")) {
-    getGemme(scene, item.substring(5)).then(() => {
+    getGemme(scene, item.substring(5).toLowerCase()).then(() => {
       placeItemFromTrappe(scene, item);
     });
   }
@@ -336,7 +336,7 @@ function putItemFromTrappe(scene, item) {
 
 function placeItemFromTrappe(scene, item) {
   let itemMesh = scene.getMeshByName(item);
-  itemMesh.position = new Vector3(4.65, 0.2, 1.5);
+  itemMesh.position = new Vector3(-4.5, 0.1, 1.4);
   itemMesh.name = "item:" + item;
   return itemMesh;
 }
