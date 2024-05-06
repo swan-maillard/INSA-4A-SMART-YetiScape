@@ -2,8 +2,9 @@ import { defineStore } from "pinia";
 import useAuth from "./auth.store";
 import axios from "axios";
 
+
 // URL du serveur auquel faire les appels API
-const API_URL = "http://localhost:3000";
+const API_URL = "https://" + window.location.hostname +":3000";
 
 // Nombre maximum de requêtes à effectuer en cas d'erreur
 const FAULT_TOLERANCE_MAX_REQUESTS = 3;
