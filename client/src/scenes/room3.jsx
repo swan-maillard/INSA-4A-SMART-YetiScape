@@ -39,9 +39,13 @@ const createScene = (canvas, verif) => {
   const socket = socketio.socket;
   socket.on("game/trappe-item-removed", (data) => {
     useAuth().game.trappe = data.trappe;
-    data.trappe.items.forEach((element) => {
-      placeItem(scene, element);
-    });
+    var gemme = scene.getMeshByName("item:gemmeTriangle");
+    console.log("gemme: "+gemme)
+    if(gemme != null){
+      console.log("Dispose la gemme")
+      gemme.dispose();
+    }
+    
   });
   socket.on("game/portes-open", () => {
     scene.getMeshByName('porteGauche').rotation = new Vector3(0, - Math.PI/5, 0);
@@ -101,6 +105,9 @@ const createScene = (canvas, verif) => {
   }else{
       var cercle = MeshBuilder.CreateCylinder("objetTrappe",{diameter:0.5, height:0.001}, scene);
       cercle.position = new Vector3(-4.5,0,1.5);
+      game.value.trappe.items.forEach((e) => {
+        placeItem(scene,e)
+      })
   }
   getCoffreGemmes(scene)
     .then(()=>{
@@ -233,13 +240,13 @@ const createScene = (canvas, verif) => {
         if(nom == "gemmeTriangle"){
             getGemme(scene, 'triangle').then(() => {
                 scene.getMeshByName('gemmeTriangle').rotation = new Vector3(Math.PI/4, Math.PI/4, 0);
-                scene.getMeshByName('gemmeTriangle').position = new Vector3(-4.3, 0.2, 3);
+                scene.getMeshByName('gemmeTriangle').position = new Vector3(-4.3, 0.2, 3.2);
                 scene.getMeshByName('gemmeTriangle').name = 'item:gemmeTriangle';
             })
         }else if(nom == "gemmeCarre"){
             getGemme(scene, 'carre').then(() => {
                 scene.getMeshByName('gemmeCarre').rotation = new Vector3(Math.PI/4, Math.PI/4, 0);
-                scene.getMeshByName('gemmeCarre').position = new Vector3(-4.3, 0.2, 3);
+                scene.getMeshByName('gemmeCarre').position = new Vector3(-4.3, 0.2, 2.8);
                 scene.getMeshByName('gemmeCarre').name = 'item:gemmeCarre';
             })
         }
@@ -357,7 +364,7 @@ const placeItem = (scene, item) => {
         Math.PI / 4,
         0
       );
-      scene.getMeshByName("gemmeTriangle").position = new Vector3(4.75, 0, 1.5);
+      scene.getMeshByName("gemmeTriangle").position = new Vector3(5, 0, 1.5);
       scene.getMeshByName("gemmeTriangle").name = "item:gemmeTriangle";
     });
     return position.value;
@@ -390,7 +397,7 @@ function verifItemTrappe(scene, nomItem){
               useAuth().user = data.user;
               useAuth().game.trappe = data.game.trappe;
               if (data.status === 'ok') {
-                  
+                  placeItem(scene, nomItem)
               }
           })
           .catch(console.log);
