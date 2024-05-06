@@ -14,6 +14,7 @@ export interface GameDatabase extends AbstractDocument {
   rouages: string;
   portes: string;
   itemsDispo: string;
+  callId: string;
 }
 
 export default class Game {
@@ -26,6 +27,7 @@ export default class Game {
   rouages: Enigme;
   portes: Enigme;
   itemsDispo: { [key: number]: Item[] };
+  callId: string = "";
 
   constructor(user?: User) {
     this.users = user ? [user] : [];
@@ -59,6 +61,7 @@ export const gameConverter = {
       rouages: JSON.stringify(game.rouages),
       portes: JSON.stringify(game.portes),
       itemsDispo: JSON.stringify(game.itemsDispo),
+      callId: game.callId
     };
   },
 
@@ -82,7 +85,7 @@ export const gameConverter = {
     game.rouages = JSON.parse(gameDatabase.rouages);
     game.portes = JSON.parse(gameDatabase.portes);
     game.itemsDispo = JSON.parse(gameDatabase.itemsDispo);
-
+    game.callId = gameDatabase.callId
     return game;
   },
 };

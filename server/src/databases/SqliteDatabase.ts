@@ -24,7 +24,8 @@ export default class SqliteDatabase {
        coffre TEXT,
        rouages TEXT,
        portes TEXT,
-       itemsDispo TEXT
+       itemsDispo TEXT,
+       callId TEXT
       );
   `);
         await this.db.exec(`
