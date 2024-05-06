@@ -216,7 +216,7 @@ export default {
         const { io, socketSessions } = getSocketIo(req);
         for (const [socketId, userSocket] of Object.entries(socketSessions)) {
           if (userSocket.game === game.id && userSocket.salle === 2) {
-            io.to(socketId).emit('game/tuyau-arrived', { tuyau, itemsDispo: game.itemsDispo[2] });
+            io.to(socketId).emit('game/tuyau-arrived', { tuyau, itemsDispo: game.itemsDispo[2], username: user.name });
           }
         }
 
@@ -302,7 +302,6 @@ export default {
 
       const trappe = game.trappe;
 
-      // On check que le tuyau peut accueillir un item
       if (trappe.etapeActuelle == 0) {
         return res.status(409).send({ message: 'Forbidden, you have not solved this puzzle' });
       }
@@ -320,7 +319,7 @@ export default {
         for (const [socketId, userSocket] of Object.entries(socketSessions)) {
           if (userSocket.game === game.id && userSocket.salle === 1) {
             console.log('Socket emitted to ' + userSocket.name);
-            io.to(socketId).emit('game/trappe-item-added', { trappe });
+            io.to(socketId).emit('game/trappe-item-added', { trappe, username: user.name });
           }
         }
 
@@ -376,7 +375,7 @@ export default {
       const { io, socketSessions } = getSocketIo(req);
       for (const [socketId, userSocket] of Object.entries(socketSessions)) {
         if (userSocket.game === game.id && userSocket.salle === 3) {
-          io.to(socketId).emit('game/trappe-item-removed', { trappe });
+          io.to(socketId).emit('game/trappe-item-removed', { trappe, username: user.name });
         }
       }
 
@@ -429,7 +428,7 @@ export default {
         const { io, socketSessions } = getSocketIo(req);
         for (const [socketId, userSocket] of Object.entries(socketSessions)) {
           if (userSocket.game === game.id && userSocket.salle === 1) {
-            io.to(socketId).emit('game/trappe-opened', { trappe });
+            io.to(socketId).emit('game/trappe-opened', { trappe, username: user.name });
           }
         }
 
@@ -690,15 +689,15 @@ export default {
         return res.status(409).send({ message: 'Forbidden, this puzzle has already been solved' });
       }
 
-      const gears: Item[] = ['engrenageGrand', 'engrenageMoyen'];
-
-      // On check que les deux engrenages sont posés
-      if (!rouages.items.includes(gears[0]) || !rouages.items.includes(gears[1])) {
-        return res.status(409).send({ message: 'Forbidden, all gears are not in place' });
-      }
-
       // On check que la position est correcte
       if (configuration == 'GPPM') {
+        const gears: Item[] = ['engrenageGrand', 'engrenageMoyen'];
+
+        // On check que les deux engrenages sont posés
+        if (!rouages.items.includes(gears[0]) || !rouages.items.includes(gears[1])) {
+          return res.status(409).send({ message: 'Forbidden, all gears are not in place' });
+        }
+
         rouages.etapeActuelle = 1;
         game.rouages = rouages;
         game.itemsDispo[user.salle!].push('gemmeRonde');

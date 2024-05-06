@@ -190,27 +190,21 @@ function initVoiceChat() {
   }
 }
 
-
- // Function to toggle mute state
- // eslint-disable-next-line
+// Function to toggle mute state
+// eslint-disable-next-line
 function toggleMute() {
-    isMuted = !isMuted; // Toggle mute state
-    audioTrack.enabled = !isMuted; // Enable/disable audio track
-    if (isMuted)
-    {
-      document.getElementById("muteButton").innerHTML = "Unmute"
-    }
-    else
-    {
-      document.getElementById("muteButton").innerHTML = "Mute"
-    }
+  isMuted = !isMuted; // Toggle mute state
+  audioTrack.enabled = !isMuted; // Enable/disable audio track
+  if (isMuted) {
+    document.getElementById("muteButton").innerHTML = "Unmute";
+  } else {
+    document.getElementById("muteButton").innerHTML = "Mute";
   }
-
+}
 
 onMounted(() => {
   document.getElementById("muteButton").addEventListener("click", toggleMute);
-})
-
+});
 
 //End of voice setup
 
@@ -238,14 +232,16 @@ socket.on("chat/message", function (data) {
   setTimeout(scrollToBottom, 1);
 });
 
+const joinedChat = ref(false);
 watchEffect(() => {
-  if (auth.game.users) {
+  if (auth.game.users && !joinedChat.value) {
     const usersNames = auth.game.users
       .map((u) => u.name)
       .filter((u) => u !== auth.user.name);
     messages.value.push({
       text: "You can talk with " + usersNames.join(" and ") + ".",
     });
+    joinedChat.value = true;
   }
 }, [auth.game]);
 
@@ -299,7 +295,7 @@ scrollToBottom();
       @keyup.enter="sendMessage"
       placeholder="Type your message..."
     />
-     <button id="muteButton">Mute</button>
+    <button id="muteButton">Mute</button>
   </div>
 </template>
 

@@ -26,6 +26,7 @@ import useAuth from "../stores/auth.store";
 import useApi from "../stores/api.store";
 import socketio from "@/services/socketio";
 import usePopup from "@/stores/popup.store";
+import { itemNames } from "@/components/items";
 
 //SAlle 1 :
 // position possible : centre, tuyau (gauche), trappe (gauche)
@@ -36,11 +37,13 @@ const createScene = (canvas) => {
   const engine = new Engine(canvas);
   const scene = new Scene(engine);
   const drag = ref(null);
+  const popup = usePopup();
 
   const socket = socketio.socket;
   socket.on("game/trappe-opened", (data) => {
     useAuth().game.trappe = data.trappe;
     deleteTrappe(scene);
+    popup.send(data.username + " a ouvert la trappe");
   });
   socket.on("game/trappe-item-added", (data) => {
     console.log("Item placé", data);
@@ -48,9 +51,18 @@ const createScene = (canvas) => {
     data.trappe.items.forEach((element) => {
       putItemFromTrappe(scene, element);
     });
+    popup.send(data.username + " a fait passé un objet par la trappe");
   });
   socket.on("game/portes-open", () => {
-    scene.getMeshByName('porteGauche').rotation = new Vector3(0, - Math.PI/5, 0);
+    console.log("ok");
+    scene.getMeshByName("porteGauche").rotation = new Vector3(
+      0,
+      -Math.PI / 5,
+      0
+    );
+    setTimeout(() => {
+      popup.send("La porte s'est ouverte !!", "success");
+    }, 50);
   });
 
   getBaseGemme(scene, "triangle");
@@ -68,7 +80,7 @@ const createScene = (canvas) => {
   var mursSalle = getSalle(scene, 1);
   var trappe = getTrappe(scene);
   var tuyaux = getTuyaux(scene);
-  getPorte(scene)
+  getPorte(scene);
 
   var pickPlane = MeshBuilder.CreatePlane("pickPlane", { size: 10 });
   pickPlane.isVisible = false;
@@ -78,10 +90,10 @@ const createScene = (canvas) => {
 
   // Elements reactifs de la scene
   const game = computed(() => useAuth().game);
-  console.log(game.value)
+  console.log(game.value);
   game.value.itemsDispo.forEach((e) => {
     placeItemInit(scene, e);
-  })
+  });
   if (game.value.tuyau.etapeActuelle != game.value.tuyau.nbEtapes) {
     getNavette(scene).then(() => {
       if (game.value.tuyau.items.length > 0) {
@@ -157,13 +169,17 @@ const createScene = (canvas) => {
     currentMesh = mesh;
 
     if (currentMesh.name.startsWith("item")) {
+      const item = currentMesh.name.split(":")[1];
       useApi()
         .post(currentMesh.name.split(":")[2], {
-          item: currentMesh.name.split(":")[1],
+          item,
         })
         .then((res) => {
           const data = res.data;
           if (data.status === "ok") {
+            popup.send(
+              "Vous avez récupéré l'objet suivant : " + itemNames[item]
+            );
             useAuth().user = data.user;
             useAuth().game.itemsDispo = data.game.itemsDispo;
           }
@@ -222,8 +238,7 @@ const createScene = (canvas) => {
             deleteNavette(scene);
             if (data.status === "ok") {
               usePopup().send(
-                "La capsule tombe dans le tuyau ! Vous l'entendez s'écraser contre le sol",
-                "success"
+                "La capsule tombe dans le tuyau ! Vous l'entendez s'écraser contre le sol"
               );
             } else {
               usePopup().send(
@@ -300,7 +315,7 @@ function placeItemInit(scene, elem) {
   if (elem == "engrenageMoyen") {
     placeEngInit(scene);
   } else if (elem === "cle") {
-    console.log('je put une cle')
+    console.log("je put une cle");
     placeCleInit(scene);
   }
 }
@@ -336,6 +351,9 @@ function verifItemInNavette(scene, nomItem) {
         useAuth().game.tuyau = data.game.tuyau;
         if (data.status === "ok") {
           putItemInNavette(scene, nomItem);
+          usePopup().send(
+            itemNames[nomItem] + " correctement inséré dans la capsule"
+          );
         }
       })
       .catch(console.log);
@@ -344,11 +362,18 @@ function verifItemInNavette(scene, nomItem) {
       .post("/game/porte/put-item", { item: nomItem })
       .then((res) => {
         const data = res.data;
-        useAuth().user = data.user;
-        useAuth().game.portes = data.game.portes;
         if (data.status === "ok") {
-          console.log('je put la gemme')
+          useAuth().user = data.user;
+          useAuth().game.portes = data.game.portes;
           putGemmeInBase(scene, nomItem);
+          usePopup().send(
+            "La gemme s'insère parfaitement dans l'encastrement de la porte !"
+          );
+        } else {
+          usePopup().send(
+            "Mais enfin, vous voyez bien que la gemme ne rentre pas.",
+            "error"
+          );
         }
       })
       .catch(console.log);
@@ -367,7 +392,7 @@ function putItemInNavette(scene, nomItem) {
   } else if (nomItem == "cle") {
     getImportedMesh(scene, nomItem).then(() => {
       placeItemInNavette(scene, nomItem);
-    })
+    });
   }
 }
 
