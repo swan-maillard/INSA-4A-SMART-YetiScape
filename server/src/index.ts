@@ -11,11 +11,25 @@ import { socketChat } from './sockets/chat';
 import { getUserByName } from './services/usersServices';
 import User from './models/user';
 import { socketWaitingRoom } from './sockets/waitingRoom';
+import chatRoutes from './routes/chatRoutes';
+
+
+//
+const https = require('https');
+const fs = require('fs');
+const logger = require('morgan');
+const path = require('path');
+
+const options = {
+  key: fs.readFileSync(path.join(__dirname, './cert/key.pem')),
+  cert: fs.readFileSync(path.join(__dirname, './cert/cert.pem')),
+};
 
 // Boot express
 const app: Application = express();
+const http = https.createServer(options, app);
 
-const http = createServer(app);
+app.use(logger('dev'));
 
 // Use the CORS middleware with options
 app.use(cors());
@@ -30,7 +44,7 @@ const socketSessions: { [key: string]: User } = {};
 
 const io = new Server(http, {
   cors: {
-    origin: 'http://localhost:8080',
+    origin: '*',
     methods: ['GET', 'POST'],
   },
 });
@@ -56,5 +70,14 @@ app.set('sockets', { io, socketSessions });
 app.use('/users', usersRoutes);
 app.use('/games', gamesRoutes);
 app.use('/game', checkAuthAccessGame, gameRoutes);
+app.use('/chat', chatRoutes);
 
-http.listen(port, () => console.log(`Server is listening on port ${port}`));
+//Inject the peerJS middleware on the /chat route
+const ExpressPeerServer = require('peer').ExpressPeerServer;
+const peerjs_options = {
+  debug: true,
+};
+const peerServer = ExpressPeerServer(http, peerjs_options);
+app.use('/peer', peerServer);
+
+http.listen(port, "0.0.0.0", () => console.log(`Server is listening on port ${port}`));

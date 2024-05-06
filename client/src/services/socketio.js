@@ -5,7 +5,7 @@ class SocketIo {
   constructor() {}
 
   setupSocketConnection() {
-    this.socket = io("http://localhost:3000");
+    this.socket = io( "https://" + window.location.hostname +":3000");
   }
 }
 
