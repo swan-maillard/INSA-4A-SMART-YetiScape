@@ -119,7 +119,7 @@ function imgDrop() {
   height: 100%;
 }
 #jeu {
-  width: 90%;
+  width: 100%;
   height: 100%;
   position: relative;
   overflow: hidden;
