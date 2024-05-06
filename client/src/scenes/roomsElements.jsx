@@ -30,6 +30,8 @@ async function getPorte(scene) {
   resultat.meshes[3].parent = resultat.meshes[1];
   resultat.meshes[1].rotation = new Vector3(0, Math.PI, 0);
   resultat.meshes[1].position.z = 4.2;
+  createTexturePlane(scene, 2, 3, 'sortie');
+  scene.getMeshByName('sortie').position = new Vector3(-0.04, 1.5, 4.25);
 }
 
 function getTuyau(scene) {
@@ -337,7 +339,7 @@ function putGemmeInBase(scene, nomItem){
   getGemme(scene, nomItem.substring(5).toLowerCase()).then(() => {
     let itemGemme = scene.getMeshByName(nomItem);
     if (nomItem === 'gemmeTriangle')
-      itemGemme.rotation = new Vector3(0, 0,Math.PI/3);
+      itemGemme.rotation = new Vector3(0, 0,- Math.PI/3);
     else 
       itemGemme.rotation = new Vector3(0, 0, 0)
     itemGemme.position = new Vector3(-2, 2, 4.35);
@@ -348,6 +350,10 @@ async function getCoffreRouage(scene) {
   const textureRouille = new Texture("./textures/copper.jpg", scene);
   const matRouille = new StandardMaterial("matRouille");
   matRouille.diffuseTexture = textureRouille;
+  let porte = MeshBuilder.CreatePlane('porteCoffre', {width:0.8, height:0.32}, scene);
+  porte.position = new Vector3(-2.4, 1.2, 4.03);
+  //porte.rotation = new Vector3(0, Math.PI/2, 0);
+  porte.material = matRouille;
   var cyl = [];
   cyl[0] = MeshBuilder.CreateCylinder(
     "cyl0|",
@@ -556,6 +562,19 @@ function getButtonValdier(scene) {
   button.rotation = new Vector3(0, Math.PI / 2, 0);
 }
 
+function createTexturePlane(scene, width, height, nom) {
+  var planTexture = MeshBuilder.CreatePlane(nom, {
+    width: width,
+    height: height,
+  });
+  let texture = new Texture("./img/" + nom + ".png", scene);
+  let mat = new StandardMaterial("matRomain");
+  mat.diffuseTexture = texture;
+  mat.diffuseTexture.hasAlpha = true;
+  planTexture.material = mat;
+  return planTexture;
+}
+
 export {
   getPorte,
   getTuyaux,
@@ -571,5 +590,6 @@ export {
   getGemme,
   getTrappeGauche,
   getBaseGemme,
-  putGemmeInBase
+  putGemmeInBase,
+  createTexturePlane
 };

@@ -4,16 +4,21 @@ import { defineStore } from "pinia";
 const usePopup = defineStore("popup", {
   state: () => ({
     open: false,
-    text: "",
+    text: "Test",
     type: null,
+    timeout: null,
   }),
   actions: {
     send(text, type = null) {
+      console.log("POPUp", text);
+      if (this.timeout) {
+        clearTimeout(this.timeout);
+      }
       this.text = text;
       this.type = type;
       this.open = true;
 
-      setTimeout(this.close, 5000);
+      this.timeout = setTimeout(this.close, 5000);
     },
     close() {
       this.open = false;

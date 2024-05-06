@@ -6,9 +6,8 @@ import {
   MeshBuilder,
   PointerEventTypes,
   Scene,
-  StandardMaterial,
-  Texture,
   Vector3,
+  Animation,
 } from "@babylonjs/core";
 import "@babylonjs/loaders";
 import { computed, ref } from "@vue/runtime-core";
@@ -21,11 +20,14 @@ import {
   getPorte,
   getSalle,
   getTuyau,
-  putGemmeInBase
+  putGemmeInBase,
+  createTexturePlane,
 } from "./roomsElements";
 import useAuth from "../stores/auth.store";
 import useApi from "../stores/api.store";
 import socketio from "@/services/socketio";
+import usePopup from "@/stores/popup.store";
+import { itemNames } from "@/components/items";
 
 //Salle 2 :
 //Position possible : centre, murDroite, tuyau, coffreRouage
@@ -35,16 +37,28 @@ const createScene = (canvas) => {
   //base pour creer la scene
   const engine = new Engine(canvas);
   const scene = new Scene(engine);
+  const popup = usePopup();
 
   const socket = socketio.socket;
   socket.on("game/tuyau-arrived", (data) => {
     useAuth().game.tuyau = data.tuyau;
     useAuth().game.itemsDispo = data.itemsDispo;
     placeEngNavette(scene);
+    popup.send(
+      "Une capsule est tombée du tuyau, ça semble venir de chez " +
+        data.username
+    );
   });
   socket.on("game/portes-open", () => {
-    scene.getMeshByName('porteGauche').rotation = new Vector3(0, - Math.PI/5, 0);
-  })
+    scene.getMeshByName("porteGauche").rotation = new Vector3(
+      0,
+      -Math.PI / 5,
+      0
+    );
+    setTimeout(() => {
+      popup.send("La porte s'est ouverte !!", "success");
+    }, 50);
+  });
 
   //On ajoute une caméra et une lumière
   const camera = new FreeCamera("camera1", new Vector3(0, 1.6, -3), scene);
@@ -84,7 +98,7 @@ const createScene = (canvas) => {
   eclairPlane.rotation = new Vector3(0, Math.PI / 2, 0);
   eclairPlane.position = new Vector3(4.7, 2.3, -1);
 
-  getBaseGemme(scene, 'ronde');
+  getBaseGemme(scene, "ronde");
   //Fin des elements de base de la scene
 
   //Elements reactifs de la scene
@@ -92,18 +106,18 @@ const createScene = (canvas) => {
   game.value.itemsDispo.forEach((e) => {
     placeItemInit(scene, e);
   });
-  if (
-    game.value.coffreRouage.etapeActuelle != game.value.coffreRouage.nbEtapes
-  ) {
+  if (game.value.coffreRouage.etapeActuelle != game.value.coffreRouage.nbEtapes) {
     game.value.coffreRouage.items.forEach((e) => {
       placeEngrOnCoffre(scene, e);
     });
+  } else {
+    movePorteCoffre(scene);
   }
   if (game.value.tuyau.etapeActuelle == game.value.tuyau.nbEtapes) {
     placeNavette(scene);
   }
-  if (game.value.portes.items.includes('gemmeRonde')){
-    putGemmeInBase(scene, 'gemmeRonde');
+  if (game.value.portes.items.includes("gemmeRonde")) {
+    putGemmeInBase(scene, "gemmeRonde");
   }
   //Fin des element réactifs de la scene
 
@@ -115,10 +129,23 @@ const createScene = (canvas) => {
   var currentMesh;
   var drag = false;
 
+  const canInteract = (meshName) => {
+    return (
+      meshName.startsWith("item") ||
+      meshName.startsWith("base") ||
+      meshName.startsWith("dragEng") ||
+      meshName === "coffreRouage" ||
+      meshName === "nombreRomain" ||
+      meshName === "tuyauOut" ||
+      meshName === "engBas"
+    );
+  };
+
   var pointerDown = function (mesh) {
     currentMesh = mesh;
     console.log("click sur " + currentMesh.name);
     if (currentMesh.name.startsWith("item")) {
+      const item = currentMesh.name.split(":")[1];
       useApi()
         .post("/game/pick-item", { item: currentMesh.name.split(":")[1] })
         .then((res) => {
@@ -126,6 +153,9 @@ const createScene = (canvas) => {
           if (data.status === "ok") {
             useAuth().user = data.user;
             useAuth().game.itemsDispo = data.game.itemsDispo;
+            popup.send(
+              "Vous avez récupéré l'objet suivant : " + itemNames[item]
+            );
           }
           currentMesh.dispose();
         })
@@ -148,8 +178,8 @@ const createScene = (canvas) => {
         );
       } else if (currentMesh.name === "tuyauOut") {
         moveCamera(camera, 0, new Vector3(1, 1.6, -1), new Vector3(5, 1.7, -1));
-      } else if(currentMesh.name.startsWith("base")) {
-        moveCamera(camera, 2, new Vector3(2,1.6,1), new Vector3(2,1.6,6))
+      } else if (currentMesh.name.startsWith("base")) {
+        moveCamera(camera, 2, new Vector3(2, 1.6, 1), new Vector3(2, 1.6, 6));
       }
     } else if (position.value === "coffreRouage") {
       if (currentMesh.name.startsWith("dragEng")) {
@@ -230,7 +260,14 @@ const createScene = (canvas) => {
     }
   };
 
-  var pointerMove = function () {
+  var pointerMove = function (pickedMesh) {
+    console.log(pickedMesh?.name);
+    if (canInteract(pickedMesh?.name || "")) {
+      document.getElementById("GameCanva").style.cursor = "pointer";
+    } else {
+      document.getElementById("GameCanva").style.cursor = "default";
+    }
+
     if (!drag) {
       return;
     }
@@ -264,7 +301,8 @@ const createScene = (canvas) => {
         pointerUp(pointerInfo.pickInfo.pickedMesh);
         break;
       case PointerEventTypes.POINTERMOVE:
-        pointerMove();
+        const pickResult = scene.pick(scene.pointerX, scene.pointerY);
+        pointerMove(pickResult.pickedMesh);
         break;
     }
   });
@@ -291,7 +329,16 @@ const createScene = (canvas) => {
         useAuth().game.coffreRouage = data.game.rouages;
         if (data.status === "ok") {
           useAuth().game.itemsDispo = data.game.itemsDispo;
+          movePorteCoffre(scene);
           placeItemInit(scene, "gemmeRonde");
+          usePopup().send(
+            "Les engrenages s'emboîtent parfaitement : le mécanisme s'enclenche et le coffre s'ouvre"
+          );
+        } else {
+          usePopup().send(
+            "Les engrenages commencent à tourner... Avant de se bloquer",
+            "error"
+          );
         }
       })
       .catch(console.log);
@@ -303,7 +350,7 @@ function moveCamera(camera, pos, cameraPos, lockedTarget) {
   if (pos === 1) position.value = "coffreRouage";
   else if (pos === -1) position.value = "tuyaux";
   else if (pos === 0) position.value = "images";
-  else if(pos === 2) position.value="porte";
+  else if (pos === 2) position.value = "porte";
 
   camera.position = cameraPos;
   camera.setTarget(lockedTarget);
@@ -338,19 +385,6 @@ const placeEngrOnCoffre = (scene, item) => {
     });
   }
 };
-
-function createTexturePlane(scene, width, height, nom) {
-  var planTexture = MeshBuilder.CreatePlane(nom, {
-    width: width,
-    height: height,
-  });
-  let texture = new Texture("./img/" + nom + ".png", scene);
-  let mat = new StandardMaterial("matRomain");
-  mat.diffuseTexture = texture;
-  mat.diffuseTexture.hasAlpha = true;
-  planTexture.material = mat;
-  return planTexture;
-}
 
 function placeItemInit(scene, nomItem) {
   if (nomItem == "engrenageGrand") {
@@ -408,6 +442,10 @@ function placeNavette(scene) {
   });
 }
 
+function movePorteCoffre(scene){
+  scene.getMeshByName('porteCoffre').position = new Vector3(-2.9, 1.2, 4.03);
+}
+
 function verifEngInRouage(scene, nomItem) {
   if (position.value === "coffreRouage") {
     useApi()
@@ -430,6 +468,14 @@ function verifEngInRouage(scene, nomItem) {
           useAuth().user = data.user;
           useAuth().game.portes = data.game.portes;
           putGemmeInBase(scene, nomItem);
+          usePopup().send(
+            "La gemme s'insère parfaitement dans l'encastrement de la porte !"
+          );
+        } else {
+          usePopup().send(
+            "Mais enfin, vous voyez bien que la gemme ne rentre pas.",
+            "error"
+          );
         }
       })
       .catch(console.log);

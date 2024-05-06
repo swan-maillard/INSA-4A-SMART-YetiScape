@@ -82,16 +82,6 @@ function imgDrop() {
     console.log("Aucun élément sélectionné");
   }
 }
-
-// watchEffect(() => {
-//   if (popup.value && bjsCanvas.value) {
-//     bjsCanvas.value.addEventListener("mousemove", (e) => {
-//       const canvaRect = bjsCanvas.value.getBoundingClientRect();
-//       popup.value.style.top = e.clientY - canvaRect.top + 10 + "px";
-//       popup.value.style.left = e.clientX - canvaRect.left + 10 + "px";
-//     });
-//   }
-// }, [popup]);
 </script>
 
 <template>
@@ -102,7 +92,6 @@ function imgDrop() {
         :class="{
           open: popup.open,
           error: popup.type === 'error',
-          success: popup.type === 'success',
         }"
       >
         <img
@@ -138,13 +127,14 @@ function imgDrop() {
 }
 
 .popup {
-  background-color: rgba(34, 34, 34, 0.8);
+  background-color: rgba(34, 34, 34, 0.9);
   position: absolute;
   padding: 20px 30px;
   border-radius: 20px 20px 0 0;
   width: 100%;
   transform: translateY(-100%);
   transition: 0.5s ease-in-out;
+  color: #25e95f;
 }
 
 .popup.open {
@@ -157,9 +147,5 @@ function imgDrop() {
 
 .popup.error {
   color: #ff3a3a;
-}
-
-.popup.success {
-  color: #25e95f;
 }
 </style>

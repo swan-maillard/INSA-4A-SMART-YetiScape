@@ -258,14 +258,16 @@ socket.on("chat/message", function (data) {
   setTimeout(scrollToBottom, 1);
 });
 
+const joinedChat = ref(false);
 watchEffect(() => {
-  if (auth.game.users) {
+  if (auth.game.users && !joinedChat.value) {
     const usersNames = auth.game.users
       .map((u) => u.name)
       .filter((u) => u !== auth.user.name);
     messages.value.push({
       text: "You can talk with " + usersNames.join(" and ") + ".",
     });
+    joinedChat.value = true;
   }
 }, [auth.game]);
 

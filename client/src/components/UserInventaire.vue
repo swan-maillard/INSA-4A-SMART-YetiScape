@@ -2,22 +2,14 @@
 import useAuth from "@/stores/auth.store";
 import { computed } from "@vue/runtime-core";
 import { storeToRefs } from "pinia";
+import { itemNames } from "./items";
 
-const { user, elementGrabbed } = storeToRefs(useAuth());
+const { user, game, elementGrabbed } = storeToRefs(useAuth());
 const items = computed(() => user.value.items || []);
-
-const itemNames = {
-  engrenageGrand: "Grand Engrenage",
-  engrenageMoyen: "Engrenage",
-  gemmeCarre: "Saphir",
-  gemmeTriangle: "Émeraude",
-  gemmeRonde: "Topaze",
-  cle: "Clé",
-};
 </script>
 
 <template>
-  <div class="section-container inventaire">
+  <div v-if="game.hasStarted" class="section-container inventaire">
     <span class="fs-5">{{ user.name }}'s Inventory</span>
     <hr />
     <div
