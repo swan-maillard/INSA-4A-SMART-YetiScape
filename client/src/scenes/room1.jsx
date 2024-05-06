@@ -19,6 +19,7 @@ import {
   getSalle,
   getTrappe,
   getTuyaux,
+  getBaseGemme
 } from "./roomsElements";
 import useAuth from "../stores/auth.store";
 import useApi from "../stores/api.store";
@@ -46,6 +47,12 @@ const createScene = (canvas) => {
       putItemFromTrappe(scene, element);
     });
   });
+
+  getBaseGemme(scene, 'triangle').then (() => {
+    let base = scene.getMeshByName('baseTriangle');
+    base.rotation = new Vector3(- Math.PI/2, 0, 0);
+    base.position = new Vector3(-2, 2, 4.35);
+  })
 
   //On ajoute une caméra et une lumière
   const camera = new FreeCamera("camera1", new Vector3(0, 1.6, -3), scene);

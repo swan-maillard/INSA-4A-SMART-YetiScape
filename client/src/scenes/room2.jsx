@@ -13,6 +13,7 @@ import {
 import "@babylonjs/loaders";
 import { computed, ref } from "@vue/runtime-core";
 import {
+  getBaseGemme,
   getCoffreRouage,
   getGemme,
   getImportedMesh,
@@ -77,6 +78,12 @@ const createScene = (canvas) => {
   var eclairPlane = createTexturePlane(scene, 4, 3, "eclair");
   eclairPlane.rotation = new Vector3(0, Math.PI / 2, 0);
   eclairPlane.position = new Vector3(4.7, 2.3, -1);
+
+  getBaseGemme(scene, 'ronde').then (() => {
+    let base = scene.getMeshByName('baseRonde');
+    base.rotation = new Vector3(- Math.PI/2, 0, 0);
+    base.position = new Vector3(-2, 2, 4.35);
+  })
   //Fin des elements de base de la scene
 
   //Elements reactifs de la scene

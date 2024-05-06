@@ -306,6 +306,31 @@ async function getGemme(scene, forme) {
   });
 }
 
+async function getBaseGemme(scene, forme) {
+  let mat = new StandardMaterial();
+  let nom;
+  if (forme == "triangle") {
+    nom = "baseTriangle";
+    mat.diffuseColor = Color3.Green();
+  } else if (forme == "carre") {
+    nom = "baseCarre";
+    mat.diffuseColor = Color3.Red();
+  } else {
+    nom = "baseRonde";
+    mat.diffuseColor = Color3.Blue();
+  }
+
+  return await SceneLoader.ImportMeshAsync(
+    nom,
+    "./models/",
+    "gemmes.glb",
+    scene
+  ).then(() => {
+    let base = scene.getMeshByName(nom);
+    base.material = mat;
+  });
+}
+
 async function getCoffreRouage(scene) {
   const textureRouille = new Texture("./textures/copper.jpg", scene);
   const matRouille = new StandardMaterial("matRouille");
@@ -532,4 +557,5 @@ export {
   getButtonValdier,
   getGemme,
   getTrappeGauche,
+  getBaseGemme
 };
