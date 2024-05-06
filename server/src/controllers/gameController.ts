@@ -203,14 +203,18 @@ export default {
 
       // We check that it's the right hole and that it's the right item
       if (trou == 5 && tuyau.etapeActuelle === 1 && tuyau.items[0] === 'engrenageMoyen') {
+        const item = tuyau.items[0];
+
         tuyau.etapeActuelle = 2;
+        tuyau.items = [];
+        game.itemsDispo[2].push(item);
         game.tuyau = tuyau;
         await updateGame(game);
 
         const { io, socketSessions } = getSocketIo(req);
         for (const [socketId, userSocket] of Object.entries(socketSessions)) {
           if (userSocket.game === game.id && userSocket.salle === 2) {
-            io.to(socketId).emit('game/tuyau-arrived', { tuyau });
+            io.to(socketId).emit('game/tuyau-arrived', { tuyau, itemsDispo: game.itemsDispo[2] });
           }
         }
 
@@ -241,46 +245,6 @@ export default {
           },
         });
       }
-    } catch (error) {
-      console.error('Error during game ' + gameId + ':', error);
-      res.status(500).send({ message: 'Internal server error' });
-    }
-  },
-
-  getItemTuyau: async (req: Request, res: Response) => {
-    const { userId, gameId } = req.body.jwt;
-
-    try {
-      const user = (await getUserById(userId)) as User;
-      const game = (await getGameById(gameId)) as Game;
-      const salle = user.salle;
-
-      if (salle !== 2) {
-        return res.status(401).send({ message: 'Unauthorized' });
-      }
-
-      const tuyau = game.tuyau;
-
-      // On check que le joueur peut récupérer un item
-      if (tuyau.etapeActuelle !== 2 || tuyau.items.length !== 1) {
-        return res.status(409).send({ message: "Forbidden, you can't access any item" });
-      }
-
-      const item = tuyau.items[0];
-      tuyau.items = [];
-      game.tuyau = tuyau;
-      user.items.push(item);
-
-      await updateUser(user);
-      await updateGame(game);
-
-      res.status(200).send({
-        status: 'ok',
-        user,
-        game: {
-          tuyau: tuyau,
-        },
-      });
     } catch (error) {
       console.error('Error during game ' + gameId + ':', error);
       res.status(500).send({ message: 'Internal server error' });
