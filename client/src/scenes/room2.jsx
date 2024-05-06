@@ -22,6 +22,7 @@ import {
   getSalle,
   getTuyau,
   putGemmeInBase,
+  createTexturePlane,
 } from "./roomsElements";
 import useAuth from "../stores/auth.store";
 import useApi from "../stores/api.store";
@@ -384,19 +385,6 @@ const placeEngrOnCoffre = (scene, item) => {
     });
   }
 };
-
-function createTexturePlane(scene, width, height, nom) {
-  var planTexture = MeshBuilder.CreatePlane(nom, {
-    width: width,
-    height: height,
-  });
-  let texture = new Texture("./img/" + nom + ".png", scene);
-  let mat = new StandardMaterial("matRomain");
-  mat.diffuseTexture = texture;
-  mat.diffuseTexture.hasAlpha = true;
-  planTexture.material = mat;
-  return planTexture;
-}
 
 function placeItemInit(scene, nomItem) {
   if (nomItem == "engrenageGrand") {

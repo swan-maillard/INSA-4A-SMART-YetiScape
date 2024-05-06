@@ -21,6 +21,7 @@ import {
   getTuyaux,
   getBaseGemme,
   putGemmeInBase,
+  createTexturePlane,
 } from "./roomsElements";
 import useAuth from "../stores/auth.store";
 import useApi from "../stores/api.store";
@@ -86,12 +87,16 @@ const createScene = (canvas) => {
   pickPlane.isVisible = false;
   pickPlane.rotation = new Vector3(0, Math.PI / 2, 0);
   pickPlane.position.x = -3.5;
+
+  //var porteArriere = MeshBuilder.CreatePlane('arrierePorte', {width: 2, height:3}, scene);
+  //porteArriere.position
   //Fin scene de base
 
   // Elements reactifs de la scene
   const game = computed(() => useAuth().game);
   console.log(game.value);
   game.value.itemsDispo.forEach((e) => {
+    console.log("je pose au sol", e);
     placeItemInit(scene, e);
   });
   if (game.value.tuyau.etapeActuelle != game.value.tuyau.nbEtapes) {
@@ -129,11 +134,9 @@ const createScene = (canvas) => {
   };
 
   var getTuyauxPicked = function () {
-    pickPlane.isPickable = false;
     let tuyauTouche = -1;
     for (var i = 0; i < 8; i++) {
       var tuyauPick = scene.getMeshByName("tuyau" + i);
-      tuyauPick.isPickable = true;
       var pickinfo = scene.pick(
         scene.pointerX,
         scene.pointerY,
@@ -145,9 +148,7 @@ const createScene = (canvas) => {
         tuyauTouche = i;
         break;
       }
-      tuyauPick.isPickable = false;
     }
-    pickPlane.isPickable = true;
     return tuyauTouche;
   };
 
@@ -322,8 +323,9 @@ function placeItemInit(scene, elem) {
 
 function placeCleInit(scene) {
   getImportedMesh(scene, "cle").then(() => {
-    scene.getMeshByName("cle").position = new Vector3(-3, 0.15, 2);
-    scene.getMeshByName("cle").scalingDeterminant = 0.15;
+    //scene.getMeshByName("cle").position = new Vector3(-3, 0.15, 2);
+    scene.getMeshByName("cle").position = new Vector3(-2, 0.17, 1);
+    scene.getMeshByName("cle").scalingDeterminant = 2;
     scene.getMeshByName("cle").name = "item:cle:/game/pick-item";
   });
 }
@@ -391,14 +393,14 @@ function putItemInNavette(scene, nomItem) {
     });
   } else if (nomItem == "cle") {
     getImportedMesh(scene, nomItem).then(() => {
-      placeItemInNavette(scene, nomItem);
+      placeItemInNavette(scene, nomItem, 1.6);
     });
   }
 }
 
 function placeItemInNavette(scene, item, scale = 1) {
   let itemMesh = scene.getMeshByName(item);
-  itemMesh.position = new Vector3(4, 1.4, 1.3);
+  itemMesh.position = new Vector3(4, 1.4, 1.27);
   itemMesh.rotation = new Vector3(0, 0, Math.PI / 4);
   itemMesh.scalingDeterminant = scale;
   let tubeVide = scene.getMeshByName("navetteVide");
@@ -412,7 +414,6 @@ function placeItemInNavette(scene, item, scale = 1) {
     false,
     true
   );
-  navettePleine.setPivotPoint(new Vector3(4.3, 1.4, 1.3));
   navettePleine.name = "navettePleine";
   return itemMesh;
 }
