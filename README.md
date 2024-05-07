@@ -20,7 +20,7 @@ Dans les profondeurs glacées de  la Russie trois explorateurs
 avant qu'il ne soit trop tard.
 
 ## Description 
-Escape Game multijoueur en ligne sur le web, nécessite la coopération des joueurs afin de résoudre l'escape
+Escape Game multijoueur en ligne sur le web, nécessitant la coopération des joueurs afin de résoudre l'escape
 ## Project Goal
 Monter en compétences dans les différentes technologies liés au web : JS, BabylonJS, NodeJs, WebRTC
 
