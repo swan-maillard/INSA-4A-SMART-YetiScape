@@ -12,14 +12,23 @@ Students:
 - **MAILLARD Swan**
 
 ### Abstract
+Dans les profondeurs glacées de  la Russie trois explorateurs
+ se retrouvent face à un ennemi légendaire.
+ Capturés par un Yéti impitoyable,
+ ils doivent collaborer pour
+ échapper aux griffes de la bête 
+avant qu'il ne soit trop tard.
 
 ## Description 
-
+Escape Game multijoueur en ligne sur le web, nécessite la coopération des joueurs afin de résoudre l'escape
 ## Project Goal
+Monter en compétences dans les différentes technologies liés au web : JS, BabylonJS, NodeJs, WebRTC
 
 ## Requirements
+Node Js 
 
 ## Material
+Aucun
 
 ## Note for Students
 
