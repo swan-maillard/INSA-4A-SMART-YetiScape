@@ -39,8 +39,8 @@
 ### Backend Installation
 1. Clone the repository:
    ```bash
-   git clone https://github.com/swan-maillard/INSA-4A-SMART-EscapeGame.git
-   cd INSA-4A-SMART-EscapeGame/server
+   git clone https://github.com/swan-maillard/INSA-4A-SMART-YetiScape.git
+   cd INSA-4A-SMART-YetiScape/server
    ```
 2. Install the dependencies:
    ```bash
